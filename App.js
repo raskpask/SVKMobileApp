@@ -1,26 +1,36 @@
 import * as React from 'react';
+import { Button, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
+import HomeStackScreen from './src/stackScreens/homeStackScreen';
+import CalendarStackScreen from './src/stackScreens/calendarStackScreen';
 
-import HomeScreen from './src/components/homeScreen';
-import CalendarScreen from './src/components/calendarScreen';
-import Footer from './src/components/footer';
-import navigationRef from './src/navigation/rootNavigation';
-
-
-const Stack = createStackNavigator();
-
-function App() {
+const Tab = createBottomTabNavigator();
+export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home" ref={navigationRef}>
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Calendar" component={CalendarScreen} />
-      </Stack.Navigator>
-      <Footer/>
+      <Tab.Navigator>
+        <Tab.Screen 
+          name="Home" 
+          component={HomeStackScreen} 
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <Icon name="home" color={color} size={size} />
+            ),
+          }}
+          />
+        <Tab.Screen 
+        name="Calendar" 
+        component={CalendarStackScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="calendar" color={color} size={size} />
+          ),
+        }}
+        />
+      </Tab.Navigator>
     </NavigationContainer>
   );
 }
-
-export default App;
