@@ -4,10 +4,8 @@ import { WebView } from 'react-native-webview';
 class WebPage extends Component {
     constructor(props) {
         super(props);
-        console.log(this.props.html)
     }
     render() {
-        console.log(this.props.html)
         let source
         let userAgent
 
