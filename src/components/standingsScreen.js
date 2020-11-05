@@ -1,20 +1,14 @@
 import React, { Component } from 'react';
-import WebPage from './webPage';
 import axios from 'react-native-axios';
 import { Table, Row, Rows } from 'react-native-table-component';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Image } from 'react-native';
 
 class StandingsScreen extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            tableHead: ['Name', 'Ponints', 'Wins', 'Lost'],
-            tableData: [
-                ['1', '2', '3', '4'],
-                ['a', 'b', 'c', 'd'],
-                ['1', '2', '3', '456\n789'],
-                ['a', 'b', 'c', 'd']
-            ],
+            tableHead: ['Team', 'Points', 'Total games', 'Wins', 'Lost','Sets won','Sets lost'],
+            tableData: [],
             standings: "<div>Loading...</div>"
         }
     }
@@ -24,9 +18,11 @@ class StandingsScreen extends Component {
             .then(function (response) {
                 teams = this.extractStandings(response.data)
             }.bind(this));
-
-        this.setState({ standings: teams })
-        console.log(this.state.standings[0].lost03)
+        let data = []
+        for(let i = 0; i<teams.length;i++){
+            data.push([<Image source={{ uri: teams[i].logoUrl }} style={{ width: 50, height: 40, resizeMode: 'contain'}} />,  teams[i].points, teams[i].matchesPlayed,teams[i].wonMatches,teams[i].lostMatches,teams[i].setsWon,teams[i].setsLost])
+        }
+        this.setState({tableData: data})
 
     }
     extractStandings(response) {
@@ -69,7 +65,7 @@ class StandingsScreen extends Component {
     render() {
         return (
             <View style={styles.container}>
-                <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
+                <Table borderStyle={{ borderWidth: 1, borderColor: '#c8e1ff', margin: 0 }}>
                     <Row data={this.state.tableHead} style={styles.head} textStyle={styles.text} />
                     <Rows data={this.state.tableData} textStyle={styles.text} />
                 </Table>
@@ -78,7 +74,7 @@ class StandingsScreen extends Component {
     }
 }
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 16, paddingTop: 30, backgroundColor: '#fff' },
+    container: { flex: 1, padding: 0, paddingTop: 0, backgroundColor: '#fff' },
     head: { height: 40, backgroundColor: '#f1f8ff' },
     text: { margin: 6 }
 });
