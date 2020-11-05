@@ -1,15 +1,19 @@
 import React, { Component } from 'react';
 import axios from 'react-native-axios';
-import { Table, Row, Rows } from 'react-native-table-component';
-import { StyleSheet, View, Image } from 'react-native';
+import { Table, Row, Rows, TableWrapper } from 'react-native-table-component';
+import { StyleSheet, View, Image, TouchableOpacity, Button, ScrollView } from 'react-native';
+import { Dialog } from 'react-native-simple-dialogs';
 
 class StandingsScreen extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            tableHead: ['Team', 'Points', 'Total games', 'Wins', 'Lost','Sets won','Sets lost'],
+            tableHead: ['Team', 'Points', 'Total games', 'Wins', 'Lost', 'Sets won', 'Sets lost'],
             tableData: [],
-            standings: "<div>Loading...</div>"
+            teamVisible: false,
+            team: [],
+            teamRanking: 0,
+            popupTeamData: []
         }
     }
     async componentDidMount() {
@@ -19,11 +23,45 @@ class StandingsScreen extends Component {
                 teams = this.extractStandings(response.data)
             }.bind(this));
         let data = []
-        for(let i = 0; i<teams.length;i++){
-            data.push([<Image source={{ uri: teams[i].logoUrl }} style={{ width: 50, height: 40, resizeMode: 'contain'}} />,  teams[i].points, teams[i].matchesPlayed,teams[i].wonMatches,teams[i].lostMatches,teams[i].setsWon,teams[i].setsLost])
+        for (let i = 0; i < teams.length; i++) {
+            data.push([
+                <TouchableOpacity onPress={() => this.setTeamPopup(teams[i], i + 1)}>
+                    <Image source={{ uri: teams[i].logoUrl }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
+                </TouchableOpacity >,
+                teams[i].points,
+                teams[i].matchesPlayed,
+                teams[i].wonMatches,
+                teams[i].lostMatches,
+                teams[i].setsWon,
+                teams[i].setsLost]
+            )
         }
-        this.setState({tableData: data})
+        this.setState({ tableData: data })
 
+    }
+    setTeamPopup(team, ranking) {
+        let popupTeamData = [
+            ['Points', team.points + 'p'],
+            ['Matches played', team.matchesPlayed],
+            ['Matches won', team.wonMatches],
+            ['Matches lost', team.lostMatches],
+            // ['Sets played', parseInt(team.setsWon) + parseInt(team.setsLost)],
+            ['Sets Won', team.setsWon],
+            ['Sets lost', team.setsLost],
+            ['Set quota', team.setQuota],
+            // ['Rallies played', parseInt(team.pointsLost) + parseInt(team.pointsWon)],
+            ['Rallies won', team.pointsWon],
+            ['Rallies lost', team.pointsLost],
+            ['Point quota', team.pointQuota],
+            ['3-0 wins', team.wins30],
+            ['3-1 wins', team.wins31],
+            ['3-2 wins', team.wins32],
+            ['2-3 losses', team.lost23],
+            ['1-3 losses', team.lost13],
+            ['0-3 losses', team.lost03],
+        ]
+
+        this.setState({ team: team, teamRanking: ranking, teamVisible: true, popupTeamData: popupTeamData })
     }
     extractStandings(response) {
         let teams = []
@@ -69,6 +107,31 @@ class StandingsScreen extends Component {
                     <Row data={this.state.tableHead} style={styles.head} textStyle={styles.text} />
                     <Rows data={this.state.tableData} textStyle={styles.text} />
                 </Table>
+                <Dialog
+                    visible={this.state.teamVisible}
+                    title={this.state.team.name}
+                    onTouchOutside={() => this.setState({ teamVisible: false })} >
+                    <View >
+                        <ScrollView style={styles.dataWrapper}>
+                            <Table
+                                borderStyle={{ borderWidth: 1, borderColor: '#c8e1ff', margin: 0 }}
+                            >
+                                <TableWrapper>
+                                    <Rows data={this.state.popupTeamData} textStyle={styles.text} />
+                                </TableWrapper>
+                            </Table>
+                            <View style={{ marginTop: 20 }}>
+                                <Button
+                                    style={{ marginTop: 20 }}
+                                    onPress={() => this.setState({ teamVisible: false })}
+                                    title="close"
+                                    color="#5450ff"
+                                    accessibilityLabel="Learn more about this purple button"
+                                />
+                            </View>
+                        </ScrollView>
+                    </View>
+                </Dialog>
             </View>
         )
     }
@@ -76,6 +139,7 @@ class StandingsScreen extends Component {
 const styles = StyleSheet.create({
     container: { flex: 1, padding: 0, paddingTop: 0, backgroundColor: '#fff' },
     head: { height: 40, backgroundColor: '#f1f8ff' },
-    text: { margin: 6 }
+    text: { margin: 6 },
+    dataWrapper: { marginTop: -1 },
 });
 export default StandingsScreen;
