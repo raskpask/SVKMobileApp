@@ -136,7 +136,7 @@ class Calendar extends Component {
         return (
             <TouchableOpacity
                 style={{ marginRight: 10, marginTop: 17 }}
-                onPress={() => Alert.alert("Match mot ÖVK", item.name)}
+                onPress={() => this.props.navigation.navigate('Match statistics',{gameLink: item.tempMatch.statsLink})}
             >
                 <Card>
                     <View style={{
