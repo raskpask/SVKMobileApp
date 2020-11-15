@@ -1,78 +1,178 @@
 import React, { Component } from 'react';
-import { View, Text, Button, Image } from 'react-native';
+import { View, Text, ScrollView, Button, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import axios from 'react-native-axios';
+import { Card } from 'react-native-elements'
+import { Table, Row, Rows, TableWrapper } from 'react-native-table-component';
 
 class GameStats extends Component {
     constructor(props) {
         super(props);
+        this.state = {
+            tableheader: ['','SET','Points','Serve','Reception','Attack','Block'],
+            tableHead: ['Nr', 'Name', '1', '2', '3', '4', '5', 'Tot', 'BP', 'V-L', 'Tot', 'Miss', 'Ace', 'Tot', 'Miss', 'Pos %', 'Perf %', 'Tot', 'Miss', 'Block', 'Perf', 'Perf %', 'Eff %', 'Points'],
+            widthMain: [30, 140, 25, 25, 25, 25, 25, 35, 35, 35, 35, 45, 40, 35, 45, 55, 55, 35, 45, 55, 40, 55, 45, 55],
+            widthHeader: [170,125,140,120,190,255,55],
+            playersHome: [['', 'Loading...']],
+            playersGuest: [['', 'Loading...']],
+            tableData: [['', 'Loading...']],
+        }
     }
     async componentDidMount() {
-        await axios.get('http://svbf-web.dataproject.com/MatchStatistics.aspx?mID=10306&ID=174&CID=234&PID=266&type=LegList')
+        await axios.get(this.props.route.params.tempMatch.statsLink)
             .then(function (response) {
                 this.extractGameStats(response.data)
             }.bind(this));
     }
     extractGameStats(data) {
         let playersHome = []
-        let playesGuest = []
-        let playerHomeStringList = data.split('MatchDetails_PlayerNumber')
-        let playerGuestStringList = data.split('<input id="RG_GuestTeam_ClientState" name="RG_GuestTeam_ClientState"')[1].split('<span id="PlayerNumber">')
-        console.log("START!!!!!")
-        playersHome.push(this.extractPlayer(playerHomeStringList[1]))
-        for (let i = 2; i < playerHomeStringList.length; i++) {
+        let playersGuest = []
+        let playerHomeStringList = data.split('</colgroup>')[1].split('MatchDetails_PlayerNumber')
+        let playerGuestStringList = data.split('</colgroup>')[2].split('MatchDetails_PlayerNumber')
+        for (let i = 1; i < playerHomeStringList.length; i++) {
+            playersHome.push(this.extractPlayer(playerHomeStringList[i]))
         }
+        for (let i = 1; i < playerGuestStringList.length; i++) {
+            playersGuest.push(this.extractPlayer(playerGuestStringList[i]))
+        }
+        // console.log(playersHome)
+        this.setState({ playersHome: playersHome, playersGuest: playersGuest })
+        this.setState({ tableData: playersHome })
     }
     extractPlayer(playerString) {
+        // const playerName = playerString.split('"PlayerName"')[1].split('b>')[1].split('<')[0]
         const spikeKills = playerString.split('SpikeWin')[1].split('>')[1].split('<')[0]
         const spikesInBlock = playerString.split('SpikeHP')[1].split('>')[1].split('<')[0]
         const spikeErrors = playerString.split('SpikeErr')[1].split('>')[1].split('<')[0]
         const totalSpikes = playerString.split('SpikeTot')[1].split('>')[1].split('<')[0]
-        const efficiency = (parseInt(spikeKills) - (parseInt(spikeErrors) + parseInt(spikesInBlock))) / parseInt(totalSpikes) * 100
+        const efficiency = totalSpikes == '-' ? '.' : Math.round((parseInt(spikeKills == '-' ? 0 : spikeKills) - (parseInt(spikeErrors == '-' ? 0 : spikeErrors) + parseInt(spikesInBlock == '-' ? 0 : spikesInBlock))) / parseInt(totalSpikes == '-' ? 0 : totalSpikes) * 100)
+        const playerNumber = playerString.split('PlayerNumber')[1] ? playerString.split('PlayerNumber')[1].split('>')[1].split('<')[0] : ''
+        // const playerData = {
+        //     playerNumber: playerNumber,
+        //     playerName: playerString.split('"PlayerName"')[1].split('b>')[1].split('<')[0],
 
-        const playerData = {
-            playerNumber: playerString.split('PlayerNumber')[1].split('>')[1].split('<')[0],
-            playerName: playerString.split('PlayerName')[1].split('>')[1].split('<')[0],
+        //     startingPosSet1: playerString.split('Set1')[1].split('>')[1].split('<')[0],
+        //     startingPosSet2: playerString.split('Set2')[1].split('>')[1].split('<')[0],
+        //     startingPosSet3: playerString.split('Set3')[1].split('>')[1].split('<')[0],
+        //     startingPosSet4: playerString.split('Set4')[1].split('>')[1].split('<')[0],
+        //     startingPosSet5: playerString.split('Set5')[1].split('>')[1].split('<')[0],
 
-            startingPosSet1: playerString.split('Set1')[1].split('>')[1].split('<')[0],
-            startingPosSet2: playerString.split('Set2')[1].split('>')[1].split('<')[0],
-            startingPosSet3: playerString.split('Set3')[1].split('>')[1].split('<')[0],
-            startingPosSet4: playerString.split('Set4')[1].split('>')[1].split('<')[0],
-            startingPosSet5: playerString.split('Set5')[1].split('>')[1].split('<')[0],
+        //     totalPoints: playerString.split('"PointsTot"')[1].split('>')[1].split('<')[0],
+        //     breakPoints: playerString.split('"Points"')[1].split('>')[1].split('<')[0],
+        //     winLossPoints: playerString.split('L_VP')[1].split('>')[1].split('<')[0],
 
-            totalPoints: playerString.split('"PointsTot"')[1].split('>')[1].split('<')[0],
-            breakPoints: playerString.split('"Points"')[1].split('>')[1].split('<')[0],
-            winLossPoints: playerString.split('L_VP')[1].split('>')[1].split('<')[0],
+        //     totalServes: playerString.split('ServeTot')[1].split('>')[1].split('<')[0],
+        //     errorsServe: playerString.split('ServeErr')[1].split('>')[1].split('<')[0],
+        //     aceServe: playerString.split('ServeAce')[1].split('>')[1].split('<')[0],
 
-            totalServes: playerString.split('ServeTot')[1].split('>')[1].split('<')[0],
-            errorsServe: playerString.split('ServeErr')[1].split('>')[1].split('<')[0],
-            aceServe: playerString.split('ServeAce')[1].split('>')[1].split('<')[0],
+        //     totalReceptions: playerString.split('RecTot')[1].split('>')[1].split('<')[0],
+        //     errorReceptions: playerString.split('RecErr')[1].split('>')[1].split('<')[0],
+        //     positiveReceptions: playerString.split('RecPos')[1].split('>')[1].split('<')[0],
+        //     perfectReceptions: playerString.split('RecPerf')[1].split('>')[1].split('<')[0],
 
-            totalReceptions: playerString.split('RecTot')[1].split('>')[1].split('<')[0],
-            errorReceptions: playerString.split('RecErr')[1].split('>')[1].split('<')[0],
-            positiveReceptions: playerString.split('RecPos')[1].split('>')[1].split('<')[0],
-            perfectReceptions: playerString.split('RecPerf')[1].split('>')[1].split('<')[0],
+        //     totalSpikes: totalSpikes,
+        //     spikeErrors: spikeErrors,
+        //     spikesInBlock: spikesInBlock,
+        //     spikeKills: spikeKills,
+        //     killProcentage: playerString.split('SpikePos')[1].split('>')[1].split('<')[0],
+        //     efficiency: efficiency + ' %',
 
-            totalSpikes: totalSpikes,
-            spikeErrors: spikeErrors,
-            spikesInBlock: spikesInBlock,
-            spikeKills: spikeKills,
-            killProcentage: playerString.split('SpikePos')[1].split('>')[1].split('<')[0],
-            efficiency: efficiency,
+        //     blockPoints: playerString.split('BlockWin')[1].split('>')[1].split('<')[0],
+        // }
+        // console.log(playerData)
+        const playerData = [
+            playerNumber,
+            playerString.split('"PlayerName"')[1].split('b>')[1].split('<')[0],
+            playerString.split('Set1')[1].split('>')[1].split('<')[0],
+            playerString.split('Set2')[1].split('>')[1].split('<')[0],
+            playerString.split('Set3')[1].split('>')[1].split('<')[0],
+            playerString.split('Set4')[1].split('>')[1].split('<')[0],
+            playerString.split('Set5')[1].split('>')[1].split('<')[0],
 
-            blockPoints: playerString.split('BlockWin')[1].split('>')[1].split('<')[0],
+            playerString.split('"PointsTot"')[1].split('>')[1].split('<')[0],
+            playerString.split('"Points"')[1].split('>')[1].split('<')[0],
+            playerString.split('L_VP')[1].split('>')[1].split('<')[0],
+
+            playerString.split('ServeTot')[1].split('>')[1].split('<')[0],
+            playerString.split('ServeErr')[1].split('>')[1].split('<')[0],
+            playerString.split('ServeAce')[1].split('>')[1].split('<')[0],
+
+            playerString.split('RecTot')[1].split('>')[1].split('<')[0],
+            playerString.split('RecErr')[1].split('>')[1].split('<')[0],
+            playerString.split('RecPos')[1].split('>')[1].split('<')[0],
+            playerString.split('RecPerf')[1].split('>')[1].split('<')[0],
+
+            totalSpikes,
+            spikeErrors,
+            spikesInBlock,
+            spikeKills,
+            playerString.split('SpikePos')[1].split('>')[1].split('<')[0],
+            efficiency + ' %',
+
+            playerString.split('BlockWin')[1].split('>')[1].split('<')[0]
+        ]
+        return playerData
+    }
+    pickTeam(team) {
+        if (team == 'home') {
+            this.setState({ tableData: this.state.playersHome })
+        } else {
+            this.setState({ tableData: this.state.playersGuest })
         }
-        console.log(playerData)
     }
     render() {
         return (
-            <View>
-                <Text>This is the homepage</Text>
-                <Button
-                    title="Go to Stats"
-                    onPress={() => this.props.navigation.navigate('Calendar')}
-                />
-            </View>
+            <View style={styles.container}>
+                <ScrollView horizontal={true}>
+                    <View>
+                        <Table borderStyle={{ borderWidth: 1, borderColor: '#C1C0B9' }}>
+                            <Row data={this.state.tableheader} widthArr={this.state.widthHeader} style={styles.header} textStyle={styles.header}/>
+                            <Row data={this.state.tableHead} widthArr={this.state.widthMain} style={styles.header} textStyle={styles.text} />
+                        </Table>
+                        <ScrollView style={styles.dataWrapper}>
+                            <Table borderStyle={{ borderWidth: 1, borderColor: '#C1C0B9' }}>
+                                {
+                                    this.state.tableData.map((rowData, index) => (
+                                        <Row
+                                            key={index}
+                                            data={rowData}
+                                            widthArr={this.state.widthMain}
+                                            style={[styles.row, index % 2 && { backgroundColor: '#F7F6E7' }]}
+                                            textStyle={styles.text}
+                                        />
+                                    ))
+                                }
+                            </Table>
+                        </ScrollView>
+                    </View>
+                </ScrollView>
+                <View style={{ padding: 10 }}>
+                        <View style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                        }}>
+                            <TouchableOpacity
+                                onPress={() => this.pickTeam('home')}
+                            >
+                                <Image source={{ uri: this.props.route.params.tempMatch.homeLogo }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
+                                {/* <Text>{this.props.route.params.tempMatch.homeTeam}</Text> */}
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => this.pickTeam('away')}
+                            >
+                                {/* <Text>{this.props.route.params.tempMatch.guestTeam}</Text> */}
+                                <Image source={{ uri: this.props.route.params.tempMatch.guestLogo }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
+                            </TouchableOpacity>
+                        </View>
+                </View>
+            </View >
         )
     }
 }
+const styles = StyleSheet.create({
+    container: { flex: 1, padding: 0, paddingTop: 0, backgroundColor: '#fff' },
+    head: { height: 40, backgroundColor: '#f1f8ff' },
+    text: { margin: 6 },
+    dataWrapper: { marginTop: -1 },
+});
 export default GameStats;

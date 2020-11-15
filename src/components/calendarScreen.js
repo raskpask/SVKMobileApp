@@ -37,6 +37,9 @@ class Calendar extends Component {
         let statsLink = ''
         for (let i = 1; i < statsLinkStringList.length - 1; i++) {
             statsLink += statsLinkStringList[i].split(';')[1]
+            if (i != statsLinkStringList.length - 1) {
+                statsLink += '&';
+            }
         }
         const streamingLink = matchString.split('<a href="')[1]?.split('" target="_blank"')[0] ? matchString.split('<a href="')[1].split('" target="_blank"')[0] : ""
         const matchData = {
@@ -133,10 +136,11 @@ class Calendar extends Component {
 
     }
     renderItem(item) {
+
         return (
             <TouchableOpacity
                 style={{ marginRight: 10, marginTop: 17 }}
-                onPress={() => this.props.navigation.navigate('Match statistics',{gameLink: item.tempMatch.statsLink})}
+                onPress={() => this.props.navigation.navigate('Match statistics', { tempMatch: item.tempMatch })}
             >
                 <Card>
                     <View style={{
@@ -173,7 +177,7 @@ class Calendar extends Component {
                 <Agenda
                     items={this.state.items}
                     ref={(agenda) => { this.agenda = agenda; }}
-                    selected = {'2020-09-26'}
+                    selected={'2020-09-26'}
                     renderItem={this.renderItem.bind(this)}
                     renderEmptyDate={this.renderEmptyDate.bind(this)}
                     rowHasChanged={this.rowHasChanged.bind(this)}
