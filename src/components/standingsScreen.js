@@ -68,14 +68,14 @@ class StandingsScreen extends Component {
         // console.log(response.split('<a href="/CompetitionTeamDetails.aspx?TeamID=')[10])
         const teamsString = response.split('<a href="/CompetitionTeamDetails.aspx?TeamID=')
         for (let i = 1; i < teamsString.length; i++) {
-            // console.log(this.extractTeam(teamsString[i]))
-            teams.push(this.extractTeam(teamsString[i]))
+            // console.log(this.extrcatTeam(teamsString[i]))
+            teams.push(this.extrcatTeam(teamsString[i]))
         }
         return teams
         // let teamsString = response.split('<a href="/CompetitionTeamDetails.aspx?TeamID=1279&ID=174" id="TeamDetails_Link">')[1].split('<div id="RG_Standing_Main"')[0]
-        // teams.push(this.extractTeam(teamsString.split('<a href="/CompetitionTeamDetails.aspx?TeamID=1279&ID=174" id="TeamDetails_Link">')[0].split('</td><td class="RadGrid_AdditionalColumn_hide_md" align="center">')[0]))
+        // teams.push(this.extrcatTeam(teamsString.split('<a href="/CompetitionTeamDetails.aspx?TeamID=1279&ID=174" id="TeamDetails_Link">')[0].split('</td><td class="RadGrid_AdditionalColumn_hide_md" align="center">')[0]))
     }
-    extractTeam(teamInfo) {
+    extrcatTeam(teamInfo) {
         //Logo address, name, pontis, played, wins,lost, setWin,setLost PointsWin, pointsLost, 3-0,3-1,3-2,2-3,1-3,0-1, SetQuota, PointQuota
         const team = {
             logoUrl: teamInfo.split('&quot;')[1].split('&quot;')[0],

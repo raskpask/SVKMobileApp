@@ -3,6 +3,8 @@ import { Alert, View, Text, TouchableOpacity, StyleSheet, Image } from 'react-na
 import { Card } from 'react-native-elements'
 import { Agenda } from 'react-native-calendars';
 import axios from 'react-native-axios';
+import AsyncStorage from '@react-native-community/async-storage';
+
 
 class Calendar extends Component {
     constructor(props) {
@@ -15,13 +17,27 @@ class Calendar extends Component {
         };
     }
     async componentDidMount() {
-        await axios.get('http://svbf-web.dataproject.com/CompetitionMatches.aspx?ID=174&PID=266')
+        // await axios.get('http://svbf-web.dataproject.com/CompetitionMatches.aspx?ID=174&PID=266')
+        //     .then(function (response) {
+        //         // this.convertMacthesToCalendarItems(this.extractMatches(response.data))
+        //         this.setState({ matches: this.extractMatches(response.data) })
+        //         this.loadItems()
+        //     }.bind(this));
+        AsyncStorage.getItem('SCHEDULE', (err, result) => {
+            this.setState({ matches: JSON.parse(result) })
+            this.loadItems()
+        });
+        axios.get('http://svbf-web.dataproject.com/CompetitionMatches.aspx?ID=174&PID=266')
             .then(function (response) {
+                const matches = this.extractMatches(response.data)
+                AsyncStorage.setItem(
+                    'SCHEDULE',
+                    JSON.stringify(matches),
+                );
+                this.setState({ matches: matches })
                 // this.convertMacthesToCalendarItems(this.extractMatches(response.data))
-                this.setState({ matches: this.extractMatches(response.data) })
-                this.loadItems()
+                // this.setState({ matches: this.extractMatches(response.data) })
             }.bind(this));
-        // console.log(this.state.matches)
     }
     extractMatches(data) {
         let matches = []
@@ -42,6 +58,11 @@ class Calendar extends Component {
             }
         }
         const streamingLink = matchString.split('<a href="')[1]?.split('" target="_blank"')[0] ? matchString.split('<a href="')[1].split('" target="_blank"')[0] : ""
+        const homeLogo = matchString.split('Home" class="Calendar_DIV_TeamLogo DIV_TeamLogo_Box" style="background-image:url(&quot;')[1].split('&quot;')[0]
+        const guestLogo = matchString.split('Guest" class="Calendar_DIV_TeamLogo DIV_TeamLogo_Box" style="background-image:url(&quot;')[1].split('&quot;')[0]
+        const homeTeam = this.getTeamFromLogo(homeLogo.split('_')[1].split('.')[0])
+        const guestTeam = this.getTeamFromLogo(guestLogo.split('_')[1].split('.')[0])
+        console.log(homeLogo)
         const matchData = {
             homeWonSet: matchString.split('WonSetHome" value="')[1].split('"')[0],
             guestWonSet: matchString.split('WonSetGuest" value="')[1].split('"')[0],
@@ -52,10 +73,10 @@ class Calendar extends Component {
             time: matchString.split('DataOra"')[1].split('>')[1].split(' - ')[1].split('<')[0],
             arena: matchString.split('Palasport">')[1].split('</span>')[0],
 
-            homeTeam: matchString.split('<div class="t-col t-col-5" style="text-align: left;">')[1].split('<span')[1].split('>')[1].split('<')[0],
-            homeLogo: matchString.split('Home" class="Calendar_DIV_TeamLogo DIV_TeamLogo_Box" style="background-image:url(&quot;')[1].split('&quot;')[0],
-            guestTeam: matchString.split('<div class="t-col t-col-5" style="text-align: right;">')[1].split('<span')[1].split('>')[1].split('<')[0],
-            guestLogo: matchString.split('Guest" class="Calendar_DIV_TeamLogo DIV_TeamLogo_Box" style="background-image:url(&quot;')[1].split('&quot;')[0],
+            homeTeam: homeTeam,
+            homeLogo: homeLogo,
+            guestTeam: guestTeam,
+            guestLogo: guestLogo,
 
             ref1: matchString.split('Arbitro1">')[1].split('</span>')[0],
             ref2: matchString.split('Arbitro2">')[1].split('</span>')[0],
@@ -170,6 +191,45 @@ class Calendar extends Component {
     timeToString(time) {
         const date = new Date(time);
         return date.toISOString().split('T')[0];
+    }
+    getTeamFromLogo(logoID) {
+        switch (logoID) {
+            case '1278':
+                return 'Falkenberg'
+                break;
+            case '1279':
+                return 'Floby VK'
+                break;
+            case '1280':
+                return 'Habo WK'
+                break;
+            case '1281':
+                return 'Hylte/Halmstad'
+                break;
+            case '1282':
+                return 'Lunds VK'
+                break;
+            case '1283':
+                return 'Örkelljung VK'
+                break;
+            case '1284':
+                return 'RIG Falköping'
+                break;
+            case '1285':
+                return 'Södertälje VK'
+                break;
+            case '1286':
+                return 'Sollentuna VK'
+                break;
+            case '1287':
+                return 'Uppsala VBS'
+                break;
+            case '1288':
+                return 'Vingåkers VK'
+                break;
+            default:
+                return ''
+        }
     }
     render() {
         return (

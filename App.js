@@ -36,7 +36,7 @@ export default function App() {
           component={StandingsStackScreen}
           options={{
             tabBarIcon: ({ color, size }) => (
-              <Icon name="calendar" color={color} size={size} />
+              <Icon name="podium" color={color} size={size} />
             ),
           }}
         />
