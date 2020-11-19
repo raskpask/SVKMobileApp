@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { View, Text, ScrollView, Button, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import CheckBox from '@react-native-community/checkbox';
 import axios from 'react-native-axios';
 import { Table, Row, Rows, TableWrapper } from 'react-native-table-component';
 
@@ -19,7 +20,15 @@ class GameStats extends Component {
             playersHome: [['', 'Loading...']],
             playersGuest: [['', 'Loading...']],
             tableData: [['', 'Loading...']],
-            activeTeam: this.props.route.params.tempMatch.homeTeam
+            activeTeam: this.props.route.params.tempMatch.homeTeam,
+
+            filterName: true,
+            filterSets: true,
+            filterPoints: true,
+            filterServe: true,
+            filterReception: true,
+            filterAttack: true,
+            filterBlock: true
         }
     }
     async componentDidMount() {
@@ -50,7 +59,6 @@ class GameStats extends Component {
                 totalGuest = this.extractPlayer(playerGuestStringList[i])
             }
         }
-        // console.log(totalHome)
         this.setState({ tableData: playersHome, totalRow: totalHome })
         this.setState({ playersHome: playersHome, playersGuest: playersGuest, totalGuest: totalGuest, totalHome: totalHome })
     }
@@ -100,7 +108,7 @@ class GameStats extends Component {
         if (team == 'home') {
             this.setState({ tableData: this.state.playersHome, totalRow: this.state.totalHome, activeTeam: this.props.route.params.tempMatch.homeTeam })
         } else {
-            this.setState({ tableData: this.state.playersGuest, totalRow: this.state.totalGuest,activeTeam: this.props.route.params.tempMatch.guestTeam })
+            this.setState({ tableData: this.state.playersGuest, totalRow: this.state.totalGuest, activeTeam: this.props.route.params.tempMatch.guestTeam })
         }
     }
     render() {
@@ -140,12 +148,55 @@ class GameStats extends Component {
                         justifyContent: 'space-between',
                         alignItems: 'center',
                     }}>
+                        <CheckBox
+                            value={this.state.filterName}
+                            onValueChange={(newValue) => this.setState({ filterName: newValue })}
+                        />
+                        <Text style={{ margin: 0, paddin: 0 }}>Name</Text>
+                        <CheckBox
+                            value={this.state.filterSets}
+                            onValueChange={(newValue) => this.setState({ filterSets: newValue })}
+                        />
+                        <Text style={{ margin: 0, paddin: 0 }}>Set</Text>
+                        <CheckBox
+                            value={this.state.filterPoints}
+                            onValueChange={(newValue) => this.setState({ filterPoints: newValue })}
+                        />
+                        <Text style={{ margin: 0, paddin: 0 }}>Pts</Text>
+                        <CheckBox
+                            value={this.state.filterServe}
+                            onValueChange={(newValue) => this.setState({ filterServe: newValue })}
+                        />
+                        <Text style={{ margin: 0, paddin: 0 }}>Ser</Text>
+                        <CheckBox
+                            value={this.state.filterReception}
+                            onValueChange={(newValue) => this.setState({ filterReception: newValue })}
+                        />
+                        <Text style={{ margin: 0, paddin: 0 }}>Rec</Text>
+                        <CheckBox
+                            value={this.state.filterAttack}
+                            onValueChange={(newValue) => this.setState({filterAttack:newValue})}
+                        />
+                        <Text style={{ margin: 0, paddin: 0 }}>Att</Text>
+                        <CheckBox
+                            value={this.state.filterBlock}
+                            onValueChange={(newValue) => this.setState({filterBlock:newValue})}
+                        />
+                        <Text style={{ margin: 0, paddin: 0 }}>Blo</Text>
+                    </View>
+                </View>
+                <View style={{ padding: 10 }}>
+                    <View style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                    }}>
                         <TouchableOpacity
                             onPress={() => this.pickTeam('home')}
                         >
                             <Image source={{ uri: this.props.route.params.tempMatch.homeLogo }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
                         </TouchableOpacity>
-                        <Text style={{fontSize:30}}>{this.state.activeTeam}</Text>
+                        <Text style={{ fontSize: 30 }}>{this.state.activeTeam}</Text>
                         <TouchableOpacity
                             onPress={() => this.pickTeam('away')}
                         >

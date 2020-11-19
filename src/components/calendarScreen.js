@@ -13,7 +13,7 @@ class Calendar extends Component {
         this.state = {
             items: {},
             showAlert: false,
-            matches: []
+            matches: [[]]
         };
     }
     async componentDidMount() {
@@ -42,7 +42,6 @@ class Calendar extends Component {
     extractMatches(data) {
         let matches = []
         let matchesStringList = data.split('$HF_WonSetHome')
-        // console.log(matchesStringList[1])
         for (let i = 1; i < matchesStringList.length; i++) {
             matches.push(this.extractMatch(matchesStringList[i]))
         }
@@ -62,7 +61,6 @@ class Calendar extends Component {
         const guestLogo = matchString.split('Guest" class="Calendar_DIV_TeamLogo DIV_TeamLogo_Box" style="background-image:url(&quot;')[1].split('&quot;')[0]
         const homeTeam = this.getTeamFromLogo(homeLogo.split('_')[1].split('.')[0])
         const guestTeam = this.getTeamFromLogo(guestLogo.split('_')[1].split('.')[0])
-        console.log(homeLogo)
         const matchData = {
             homeWonSet: matchString.split('WonSetHome" value="')[1].split('"')[0],
             guestWonSet: matchString.split('WonSetGuest" value="')[1].split('"')[0],

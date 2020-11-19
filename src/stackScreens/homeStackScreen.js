@@ -11,11 +11,12 @@ const HomeStack = createStackNavigator();
 class HomeStackScreen extends Component {
     render() {
         return (
-            <HomeStack.Navigator>
-                <HomeStack.Screen name="Home" component={HomeScreen} />
-                <HomeStack.Screen name="Calendar" component={CalendarScreen} />
-                <HomeStack.Screen name="Standings" component={StandingsScreen} />
-            </HomeStack.Navigator>
+            <HomeScreen/>
+            // <HomeStack.Navigator>
+            //     <HomeStack.Screen name="Home" component={HomeScreen} />
+            //     <HomeStack.Screen name="Calendar" component={CalendarScreen} />
+            //     <HomeStack.Screen name="Standings" component={StandingsScreen} />
+            // </HomeStack.Navigator>
         )
     }
 }
