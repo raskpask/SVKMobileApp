@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import { Alert, View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from 'react-native';
 import { Card } from 'react-native-elements'
-import { Agenda } from 'react-native-calendars';
 import axios from 'react-native-axios';
 import AsyncStorage from '@react-native-community/async-storage';
 
@@ -229,10 +228,39 @@ class Calendar extends Component {
                 return ''
         }
     }
+    renderCards() {
+        return (
+            <ScrollView>
+                {this.state.matches.map((match, i) => {
+                    return (
+                        <TouchableOpacity
+                            key={i}
+                            onPress={() => this.props.navigation.navigate('Match statistics', { tempMatch: match })}
+                        >
+                            <Card>
+                                <View style={{
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                }}>
+                                    <Text style={{ maxWidth: 80, textAlign: 'center'}}>{match.date} {match.time}</Text>
+                                    <Image source={{ uri: match.homeLogo }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
+                                    {/* <Text>{match.homeTeam}</Text> */}
+                                    <Text>{match.homeWonSet} - {match.guestWonSet}</Text>
+                                    {/* <Text>{match.guestTeam}</Text> */}
+                                    <Image source={{ uri: match.guestLogo }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
+                                </View>
+                            </Card>
+                        </TouchableOpacity>
+                    )
+                })}
+            </ScrollView>
+        )
+    }
     render() {
         return (
             <View style={{ flex: 1 }}>
-                <Agenda
+                {/* <Agenda
                     items={this.state.items}
                     ref={(agenda) => { this.agenda = agenda; }}
                     selected={'2020-09-26'}
@@ -241,10 +269,8 @@ class Calendar extends Component {
                     rowHasChanged={this.rowHasChanged.bind(this)}
                     onRefresh={() => console.log('refreshing...')}
                     firstDay={1}
-                // pastScrollRange={50}
-                // futureScrollRange={100}
-                // renderItem={this.renderItem}
-                />
+                /> */}
+                {this.renderCards()}
             </View>
         )
     }

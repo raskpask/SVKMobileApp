@@ -152,37 +152,37 @@ class GameStats extends Component {
                             value={this.state.filterName}
                             onValueChange={(newValue) => this.setState({ filterName: newValue })}
                         />
-                        <Text style={{ margin: 0, paddin: 0 }}>Name</Text>
+                        <Text style={{ margin: 0, padding: 0 }}>Name</Text>
                         <CheckBox
                             value={this.state.filterSets}
                             onValueChange={(newValue) => this.setState({ filterSets: newValue })}
                         />
-                        <Text style={{ margin: 0, paddin: 0 }}>Set</Text>
+                        <Text style={{ margin: 0, padding: 0 }}>Set</Text>
                         <CheckBox
                             value={this.state.filterPoints}
                             onValueChange={(newValue) => this.setState({ filterPoints: newValue })}
                         />
-                        <Text style={{ margin: 0, paddin: 0 }}>Pts</Text>
+                        <Text style={{ margin: 0, padding: 0 }}>Pts</Text>
                         <CheckBox
                             value={this.state.filterServe}
                             onValueChange={(newValue) => this.setState({ filterServe: newValue })}
                         />
-                        <Text style={{ margin: 0, paddin: 0 }}>Ser</Text>
+                        <Text style={{ margin: 0, padding: 0 }}>Ser</Text>
                         <CheckBox
                             value={this.state.filterReception}
                             onValueChange={(newValue) => this.setState({ filterReception: newValue })}
                         />
-                        <Text style={{ margin: 0, paddin: 0 }}>Rec</Text>
+                        <Text style={{ margin: 0, padding: 0 }}>Rec</Text>
                         <CheckBox
                             value={this.state.filterAttack}
                             onValueChange={(newValue) => this.setState({filterAttack:newValue})}
                         />
-                        <Text style={{ margin: 0, paddin: 0 }}>Att</Text>
+                        <Text style={{ margin: 0, padding: 0 }}>Att</Text>
                         <CheckBox
                             value={this.state.filterBlock}
                             onValueChange={(newValue) => this.setState({filterBlock:newValue})}
                         />
-                        <Text style={{ margin: 0, paddin: 0 }}>Blo</Text>
+                        <Text style={{ margin: 0, padding: 0 }}>Blo</Text>
                     </View>
                 </View>
                 <View style={{ padding: 10 }}>

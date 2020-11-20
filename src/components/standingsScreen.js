@@ -4,6 +4,8 @@ import { Table, Row, Rows, TableWrapper } from 'react-native-table-component';
 import { StyleSheet, View, Image, TouchableOpacity, Button, ScrollView } from 'react-native';
 import { Dialog } from 'react-native-simple-dialogs';
 
+import pageStyles from '../style/basicStyle';
+
 class StandingsScreen extends Component {
     constructor(props) {
         super(props);
@@ -103,7 +105,7 @@ class StandingsScreen extends Component {
     render() {
         return (
             <View style={styles.container}>
-                <Table borderStyle={{ borderWidth: 1, borderColor: '#c8e1ff', margin: 0 }}>
+                <Table borderStyle={pageStyles.borderStyle}>
                     <Row data={this.state.tableHead} style={styles.head} textStyle={styles.text} />
                     <Rows data={this.state.tableData} textStyle={styles.text} />
                 </Table>
