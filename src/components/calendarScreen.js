@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, Button, TouchableOpacityBase } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, Button, RefreshControl } from 'react-native';
 import { Card } from 'react-native-elements'
 import { Picker } from '@react-native-picker/picker';
 import axios from 'react-native-axios';
@@ -15,17 +15,22 @@ class Calendar extends Component {
             showAlert: false,
             matches: [[]],
             listOfTeams: ['All Teams', 'Sollentuna VK', 'Falkenberg', 'Habo WK', 'Lunds VK', 'Örkelljung VK', 'RIG Falköping', 'Södertälje VK', 'Uppsala VBS', 'Vingåkers VK'],
-            chosenTeam: 'All Teams'
+            chosenTeam: 'All Teams',
+            refreshButtonColor: buttonColor,
+            refreshing: false
         };
     }
     scrollToIndex(index) {
         this.myScroll.scrollTo({ x: 0, y: 89.125 * index, animated: true })
     }
-    async componentDidMount() {
+    componentDidMount() {
         AsyncStorage.getItem('SCHEDULE', (err, result) => {
             this.setState({ matches: JSON.parse(result) })
         });
+        this.getMatches()
 
+    }
+    async getMatches() {
         axios.get('http://svbf-web.dataproject.com/CompetitionMatches.aspx?ID=174&PID=266')
             .then(function (response) {
                 const matches = this.extractMatches(response.data)
@@ -33,7 +38,6 @@ class Calendar extends Component {
                     'SCHEDULE',
                     JSON.stringify(matches),
                 );
-                // this.setState({ matches: matches })
             }.bind(this));
     }
     extractMatches(data) {
@@ -121,7 +125,7 @@ class Calendar extends Component {
     getTodayScrollIndex() {
         let index = 0
         for (const [i, match] of this.state.matches.entries()) {
-            if (Date.now() < Date.parse(match.date)) {
+            if (Date.parse(new Date().toJSON().slice(0, 10)) <= Date.parse(match.date)) {
                 index = i
                 break;
             }
@@ -144,45 +148,63 @@ class Calendar extends Component {
             }
         });
     }
+    async refreshPage() {
+        this.setState({ refreshing: true })
+        await this.getMatches()
+        this.renderSpecificTeam()
+        this.setState({ refreshing: false })
+
+    }
     renderCards() {
         return (
             <ScrollView
+                refreshControl={
+                    <RefreshControl
+                        onRefresh={() => this.refreshPage()}
+                        refreshing={this.state.refreshing}
+                    />
+                }
                 ref={(ref) => this.myScroll = ref}
             >
-                {this.state.matches.map((match, i) => {
-                    return (
-                        <TouchableOpacity
-                            key={i}
-                            onPress={() => this.props.navigation.navigate('Match statistics', { tempMatch: match })}
-                        >
-                            <Card>
-                                <View
-                                    style={{
-                                        flexDirection: 'row',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                    }}>
-                                    <Text style={{ maxWidth: 80, textAlign: 'center' }}>{match.date} {match.time}</Text>
-                                    <Image source={{ uri: match.homeLogo }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
-                                    {/* <Text>{match.homeTeam}</Text> */}
+                {
+                    this.state.matches.map((match, i) => {
+                        let isdisabled = false
+                        if (match.homeWonSet == '0' && match.guestWonSet == '0')
+                            isdisabled = true
+                        return (
+                            <TouchableOpacity
+                                disabled={isdisabled}
+                                key={i}
+                                onPress={() => this.props.navigation.navigate('Match statistics', { tempMatch: match })}
+                            >
+                                <Card>
                                     <View
                                         style={{
-                                            flexDirection: 'column',
-
+                                            flexDirection: 'row',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
                                         }}>
-                                        <Text style={{ textAlign: 'center',fontWeight:"bold" }}>{match.homeWonSet} - {match.guestWonSet} </Text>
-                                        <Text style={{ maxWidth: 60,textAlign: 'center', fontSize: 10}}>{match.arena}</Text>
-                                    </View>
+                                        <Text style={{ maxWidth: 80, textAlign: 'center' }}>{match.date} {match.time}</Text>
+                                        <Image source={{ uri: match.homeLogo }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
+                                        {/* <Text>{match.homeTeam}</Text> */}
+                                        <View
+                                            style={{
+                                                flexDirection: 'column',
 
-                                    {/* <Text>{match.guestTeam}</Text> */}
-                                    <Image source={{ uri: match.guestLogo }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
-                                </View>
-                            </Card>
-                        </TouchableOpacity>
-                    )
-                })
+                                            }}>
+                                            <Text style={{ textAlign: 'center', fontWeight: "bold" }}>{match.homeWonSet} - {match.guestWonSet} </Text>
+                                            <Text style={{ maxWidth: 60, textAlign: 'center', fontSize: 10 }}>{match.arena}</Text>
+                                        </View>
+
+                                        {/* <Text>{match.guestTeam}</Text> */}
+                                        <Image source={{ uri: match.guestLogo }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
+                                    </View>
+                                </Card>
+                            </TouchableOpacity>
+                        )
+                    })
                 }
-            </ScrollView >
+            </ ScrollView >
         )
     }
     renderTop() {
@@ -217,6 +239,7 @@ class Calendar extends Component {
                     <Button
                         onPress={() => this.scrollToIndex(this.getTodayScrollIndex())}
                         title="Go to today"
+                        color={buttonColor}
                     />
                 </View>
             </View>
@@ -247,4 +270,9 @@ const styles = StyleSheet.create({
         paddingTop: 30
     }
 });
+
+
+// Standard color of page
+const buttonColor = '#0095ff'
+
 export default Calendar;
