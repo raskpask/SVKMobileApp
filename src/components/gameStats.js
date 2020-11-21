@@ -1,34 +1,34 @@
 import React, { Component } from 'react';
-import { View, Text, ScrollView, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 import axios from 'react-native-axios';
-import { Table, Row, Rows, TableWrapper } from 'react-native-table-component';
+import { Table, Row, Col, Rows, TableWrapper } from 'react-native-table-component';
 
 import pageStyles from '../style/basicStyle';
+
+const colWidth = 130
 
 class GameStats extends Component {
     constructor(props) {
         super(props);
         this.state = {
             tableheader: ['', 'SET', 'Points', 'Serve', 'Reception', 'Attack', 'Block'],
-            tableHead: ['Nr', 'Name', '1', '2', '3', '4', '5', 'Tot', 'BP', 'V-L', 'Tot', 'Miss', 'Ace', 'Tot', 'Miss', 'Pos %', 'Perf %', 'Tot', 'Miss', 'Block', 'Perf', 'Perf %', 'Eff %', 'Points'],
-            widthMain: [30, 200, 25, 25, 25, 25, 25, 35, 35, 35, 45, 45, 40, 45, 45, 55, 55, 45, 45, 55, 40, 55, 55, 55],
-            widthHeader: [230, 125, 105, 130, 200, 295, 55],
+            tableHead: ['Nr', '1', '2', '3', '4', '5', 'Tot', 'BP', 'V-L', 'Tot', 'Miss', 'Ace', 'Tot', 'Miss', 'Pos %', 'Perf %', 'Tot', 'Miss', 'Block', 'Perf', 'Perf %', 'Eff %', 'Points'],
+            widthMainHead: [30, 25, 25, 25, 25, 25, 35, 35, 35, 45, 45, 40, 45, 45, 55, 55, 45, 45, 55, 40, 55, 60, 55],
+            widthMain: [30, 25, 25, 25, 25, 25, 35, 35, 35, 45, 45, 40, 45, 45, 55, 55, 45, 45, 55, 40, 55, 60, 55],
+            widthHeader: [30, 125, 105, 130, 200, 295, 55],
+
             totalRow: [],
             totalHome: [],
             totalGuest: [],
-            playersHome: [['', 'Loading...']],
-            playersGuest: [['', 'Loading...']],
-            tableData: [['', 'Loading...']],
+            playersHome: [[]],
+            playersGuest: [[]],
+            tableData: [[]],
             activeTeam: this.props.route.params.tempMatch.homeTeam,
 
-            filterName: true,
-            filterSets: true,
-            filterPoints: true,
-            filterServe: true,
-            filterReception: true,
-            filterAttack: true,
-            filterBlock: true
+            numberActiveTeam: ['Loading...'],
+            nameHomeTeam: [[]],
+            nameGuestTeam: [[]],
         }
     }
     async componentDidMount() {
@@ -38,15 +38,19 @@ class GameStats extends Component {
             }.bind(this));
     }
     extractGameStats(data) {
+        let nameHomeTeam = []
+        let nameGuestTeam = []
         let playersHome = []
         let playersGuest = []
         let totalHome = []
         let totalGuest = []
         let playerHomeStringList = data.split('</colgroup>')[1].split('MatchDetails_PlayerNumber')
         let playerGuestStringList = data.split('</colgroup>')[2].split('MatchDetails_PlayerNumber')
+
         for (let i = 1; i < playerHomeStringList.length; i++) {
             if (i != playerHomeStringList.length - 1) {
                 playersHome.push(this.extractPlayer(playerHomeStringList[i]))
+                nameHomeTeam.push(this.extractNameAndNumber(playerHomeStringList[i]))
             } else {
                 totalHome = this.extractPlayer(playerHomeStringList[i])
             }
@@ -55,12 +59,21 @@ class GameStats extends Component {
         for (let i = 1; i < playerGuestStringList.length; i++) {
             if (i != playerGuestStringList.length - 1) {
                 playersGuest.push(this.extractPlayer(playerGuestStringList[i]))
+                nameGuestTeam.push(this.extractNameAndNumber(playerGuestStringList[i]))
             } else {
                 totalGuest = this.extractPlayer(playerGuestStringList[i])
             }
         }
-        this.setState({ tableData: playersHome, totalRow: totalHome })
-        this.setState({ playersHome: playersHome, playersGuest: playersGuest, totalGuest: totalGuest, totalHome: totalHome })
+        nameHomeTeam.push(['Total'])
+        nameGuestTeam.push(['Total'])
+        // console.log(playersHome)
+        if (this.state.activeTeam == this.props.route.params.tempMatch.homeTeam)
+            this.setState({ tableData: playersHome, totalRow: totalHome, numberActiveTeam: nameHomeTeam })
+        else
+            this.setState({ tableData: playersGuest, totalRow: totalGuest, numberActiveTeam: nameGuestTeam })
+
+        this.setState({ playersHome: playersHome, playersGuest: playersGuest, totalGuest: totalGuest, totalHome: totalHome, nameHomeTeam: nameHomeTeam, nameGuestTeam: nameGuestTeam })
+
     }
     extractPlayer(playerString) {
         const spikeKills = playerString.split('SpikeWin')[1].split('>')[1].split('<')[0]
@@ -68,11 +81,12 @@ class GameStats extends Component {
         const spikeErrors = playerString.split('SpikeErr')[1].split('>')[1].split('<')[0]
         const totalSpikes = playerString.split('SpikeTot')[1].split('>')[1].split('<')[0]
         const efficiency = totalSpikes == '-' ? '.' : Math.round((parseInt(spikeKills == '-' ? 0 : spikeKills) - (parseInt(spikeErrors == '-' ? 0 : spikeErrors) + parseInt(spikesInBlock == '-' ? 0 : spikesInBlock))) / parseInt(totalSpikes == '-' ? 0 : totalSpikes) * 100)
+
         const playerNumber = playerString.split('PlayerNumber')[1] ? playerString.split('PlayerNumber')[1].split('>')[1].split('<')[0] : ''
 
         const playerData = [
             playerNumber,
-            playerString.split('"PlayerName"')[1].split('b>')[1].split('<')[0],
+            // playerString.split('"PlayerName"')[1].split('b>')[1].split('<')[0],
             playerString.split('Set1')[1].split('>')[1].split('<')[0],
             playerString.split('Set2')[1].split('>')[1].split('<')[0],
             playerString.split('Set3')[1].split('>')[1].split('<')[0],
@@ -104,51 +118,82 @@ class GameStats extends Component {
 
         return playerData
     }
+    extractNameAndNumber(playerString) {
+        let playerName = playerString.split('"PlayerName"')[1].split('b>')[1].split('<')[0]
+        if (playerName.length > 15) {
+            const listOfNames = playerName.split(' ')
+            if (listOfNames.length > 2) {
+                if (listOfNames[2] == '(L)') {
+                    playerName = listOfNames[1].charAt(0) + '. ' + listOfNames[0] + ' ' + listOfNames[2]
+                } else {
+                    playerName = listOfNames[2].charAt(0) + '. ' + listOfNames[0]
+                }
+            } else {
+                playerName = listOfNames[1].charAt(0) + '. ' + listOfNames[0]
+            }
+        }
+        return ([
+            playerName
+        ])
+
+    }
     pickTeam(team) {
         if (team == 'home') {
-            this.setState({ tableData: this.state.playersHome, totalRow: this.state.totalHome, activeTeam: this.props.route.params.tempMatch.homeTeam })
+            this.setState({ tableData: this.state.playersHome, totalRow: this.state.totalHome, activeTeam: this.props.route.params.tempMatch.homeTeam, numberActiveTeam: this.state.nameHomeTeam })
         } else {
-            this.setState({ tableData: this.state.playersGuest, totalRow: this.state.totalGuest, activeTeam: this.props.route.params.tempMatch.guestTeam })
+            this.setState({ tableData: this.state.playersGuest, totalRow: this.state.totalGuest, activeTeam: this.props.route.params.tempMatch.guestTeam, numberActiveTeam: this.state.nameGuestTeam })
         }
     }
     render() {
         return (
             <View style={styles.container}>
-                <ScrollView horizontal={true}>
+                <ScrollView horizontal={false}>
                     <View>
-                        <Table borderStyle={pageStyles.tableHeaderBorder}>
-                            <Row data={this.state.tableheader} widthArr={this.state.widthHeader} textStyle={styles.header} />
+                        {/* <Table borderStyle={pageStyles.tableHeaderBorder}>
                         </Table>
+
                         <Table borderStyle={pageStyles.tableHeadBorder}>
-                            <Row data={this.state.tableHead} widthArr={this.state.widthMain} textStyle={pageStyles.tableText} />
-                        </Table>
-                        <ScrollView style={styles.dataWrapper}>
-                            <Table borderStyle={pageStyles.borderStyle}>
-                                {
-                                    this.state.tableData.map((rowData, index) => (
-                                        <Row
-                                            key={index}
-                                            data={rowData}
-                                            widthArr={this.state.widthMain}
-                                            style={[styles.row, index % 2 && pageStyles.tableBackgroundColor]}
-                                            textStyle={pageStyles.tableText}
-                                        />
-                                    ))
-                                }
+                        </Table> */}
+                        <TableWrapper style={{ flexDirection: 'row' }}>
+                            <Table borderStyle={{ borderWidth: 1, borderColor: '#f1f8ff' }} >
+                                <Row data={['']} widthArr={[colWidth]} textStyle={styles.header} />
+                                <Row data={['Name']} widthArr={[colWidth]} textStyle={pageStyles.tableText} />
+                                <Col
+                                    data={this.state.numberActiveTeam}
+                                    width={colWidth}
+                                    textStyle={pageStyles.tableText}
+                                />
                             </Table>
-                            <Table borderStyle={pageStyles.tableHeadBorder}>
-                                <Row data={this.state.totalRow} widthArr={this.state.widthMain} textStyle={pageStyles.totalRow} />
-                            </Table>
-                        </ScrollView>
+                            <ScrollView style={styles.dataWrapper, { flexDirection: 'row' }} horizontal={true}>
+                                <Table borderStyle={pageStyles.borderStyle}>
+                                    <Row data={this.state.tableheader} widthArr={this.state.widthHeader} textStyle={styles.header} />
+                                    <Row data={this.state.tableHead} widthArr={this.state.widthMainHead} textStyle={pageStyles.tableText} />
+                                    {
+                                        this.state.tableData.map((rowData, index) => (
+                                            <Row
+                                                key={index}
+                                                data={rowData}
+                                                widthArr={this.state.widthMain}
+                                                style={[styles.row, index % 2 && pageStyles.tableBackgroundColor]}
+                                                textStyle={pageStyles.tableText}
+                                            />
+                                        ))
+                                    }
+                                    <Row data={this.state.totalRow} widthArr={this.state.widthMain} textStyle={pageStyles.totalRow} />
+                                </Table>
+                                {/* <Table borderStyle={pageStyles.tableHeadBorder}> */}
+                                {/* </Table> */}
+                            </ScrollView>
+                        </TableWrapper>
                     </View>
                 </ScrollView>
-                <View style={{ padding: 10 }}>
-                    <View style={{
+                {/* <View style={{ padding: 10 }}> */}
+                {/* <View style={{
                         flexDirection: 'row',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                    }}>
-                        <CheckBox
+                    }}> */}
+                {/* <CheckBox
                             value={this.state.filterName}
                             onValueChange={(newValue) => this.setState({ filterName: newValue })}
                         />
@@ -182,9 +227,9 @@ class GameStats extends Component {
                             value={this.state.filterBlock}
                             onValueChange={(newValue) => this.setState({filterBlock:newValue})}
                         />
-                        <Text style={{ margin: 0, padding: 0 }}>Blo</Text>
-                    </View>
-                </View>
+                        <Text style={{ margin: 0, padding: 0 }}>Blo</Text> */}
+                {/* </View>
+                </View> */}
                 <View style={{ padding: 10 }}>
                     <View style={{
                         flexDirection: 'row',
@@ -213,6 +258,7 @@ const styles = StyleSheet.create({
     head: { height: 40, backgroundColor: '#f1f8ff' },
     text: { margin: 6 },
     dataWrapper: { marginTop: -1 },
-    header: { fontSize: 20, textAlign: 'center' }
+    header: { fontSize: 20, textAlign: 'center' },
+    wrapper: { flexDirection: 'row' },
 });
 export default GameStats;

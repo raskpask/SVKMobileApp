@@ -1,0 +1,16 @@
+To do list:
+Kalender:
+    Omgångar på kalendern
+    Men och kvinnor kalendern
+    Lägg till länk med livescore och skapa sida för det
+    Skapa länk till video för matcherna.
+    Add set result
+
+Stats:
+    Namn följer med
+
+Standings:
+    Men and women
+    
+Total stats:
+    Skapa en flik för alla

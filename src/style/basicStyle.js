@@ -12,7 +12,7 @@ const pageStyles = StyleSheet.create({
     totalRow:{fontWeight:"bold", textAlign: 'center',fontSize: 16},
     tableText: { margin: 6, textAlign: 'center' },
     standardBlue: {color:'#f1f8ff'},
-    
+
 });
 
 export default pageStyles;

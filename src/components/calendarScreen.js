@@ -38,6 +38,7 @@ class Calendar extends Component {
                     'SCHEDULE',
                     JSON.stringify(matches),
                 );
+                this.setState({ matches: matches })
             }.bind(this));
     }
     extractMatches(data) {
