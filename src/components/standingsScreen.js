@@ -3,6 +3,7 @@ import axios from 'react-native-axios';
 import { Table, Row, Rows, TableWrapper } from 'react-native-table-component';
 import { StyleSheet, View, Image, TouchableOpacity, Button, ScrollView } from 'react-native';
 import { Dialog } from 'react-native-simple-dialogs';
+import { Picker } from '@react-native-picker/picker';
 
 import pageStyles from '../style/basicStyle';
 
@@ -12,18 +13,36 @@ class StandingsScreen extends Component {
         this.state = {
             tableHead: ['Team', 'Points', 'Total games', 'Wins', 'Lost', 'Sets won', 'Sets lost'],
             tableData: [],
+            tableDataM: [],
+            tableDataW: [],
+
             teamVisible: false,
             team: [],
             teamRanking: 0,
-            popupTeamData: []
+            popupTeamData: [],
+            activeLeaguage: 'Men'
         }
     }
     async componentDidMount() {
         let teams
+        let teamsW
         await axios.get('http://svbf-web.dataproject.com/CompetitionStandings.aspx?ID=174&PID=266')
             .then(function (response) {
                 teams = this.extractStandings(response.data)
             }.bind(this));
+
+        await axios.get('http://svbf-web.dataproject.com/CompetitionStandings.aspx?ID=175&PID=247')
+            .then(function (response) {
+                teamsW = this.extractStandings(response.data)
+            }.bind(this));
+
+        const tableDataM = this.createTableData(teams)
+
+
+        this.setState({ tableData: tableDataM, tableDataM: tableDataM, tableDataW: this.createTableData(teamsW) })
+
+    }
+    createTableData(teams) {
         let data = []
         for (let i = 0; i < teams.length; i++) {
             data.push([
@@ -38,8 +57,7 @@ class StandingsScreen extends Component {
                 teams[i].setsLost]
             )
         }
-        this.setState({ tableData: data })
-
+        return data
     }
     setTeamPopup(team, ranking) {
         let popupTeamData = [
@@ -102,6 +120,13 @@ class StandingsScreen extends Component {
         // console.log(team)
         return team
     }
+    changeLeage(){
+        if(this.state.activeLeaguage == 'Men'){
+            this.setState({tableData: this.state.tableDataM})
+        } else {
+            this.setState({tableData: this.state.tableDataW})
+        }
+    }
     render() {
         return (
             <View style={styles.container}>
@@ -127,13 +152,24 @@ class StandingsScreen extends Component {
                                     style={{ marginTop: 20 }}
                                     onPress={() => this.setState({ teamVisible: false })}
                                     title="close"
-                                    color="#5450ff"
-                                    accessibilityLabel="Learn more about this purple button"
+                                    color="#0095ff"
                                 />
                             </View>
                         </ScrollView>
                     </View>
                 </Dialog>
+                <Picker
+                    selectedValue={this.state.activeLeaguage}
+                    style={{ bottom:0, marginTop: 65}}
+                    onValueChange={(itemValue, itemIndex) => {
+                        this.setState({ activeLeaguage: itemValue })
+                        this.changeLeage()
+                    }}>
+
+                    <Picker.Item label={'Men'} value={'Men'} />
+                    <Picker.Item label={'Women'} value={'Women'} />
+
+                </Picker>
             </View>
         )
     }

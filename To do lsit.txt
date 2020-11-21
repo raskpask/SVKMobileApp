@@ -1,16 +1,22 @@
 To do list:
 Kalender:
-    Omgångar på kalendern
-    Men och kvinnor kalendern
-    Lägg till länk med livescore och skapa sida för det
-    Skapa länk till video för matcherna.
-    Add set result
+    Omgångar på kalendern []
+    Men och kvinnor kalendern  []
+    Lägg till länk med livescore och skapa sida för det []
+    Skapa länk till video för matcherna. []
+    Add set result []
 
 Stats:
-    Namn följer med
+    Namn stannar vid scroll. [X]
 
 Standings:
-    Men and women
+    Men and women [X]
+    Gör om så det blir likadant som vid stats och ta med all data[]
+    Lägg till stöd för alla divisioner []
     
 Total stats:
-    Skapa en flik för alla
+    Skapa en flik för alla []
+
+Settings:
+    Skapa val för Killar/tjejer []
+    Skapa val för vilket lag []
