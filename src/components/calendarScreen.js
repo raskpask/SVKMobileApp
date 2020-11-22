@@ -11,13 +11,18 @@ class Calendar extends Component {
         super(props);
 
         this.state = {
-            items: {},
             showAlert: false,
             matches: [[]],
-            listOfTeams: ['All Teams', 'Sollentuna VK', 'Falkenberg', 'Habo WK', 'Lunds VK', 'Örkelljung VK', 'RIG Falköping', 'Södertälje VK', 'Uppsala VBS', 'Vingåkers VK'],
+            matchesM: [[]],
+            matchesW: [[]],
+            listOfTeams: ['All Teams', 'Sollentuna VK (M)', 'Falkenberg VBK', 'Habo WK', 'Lunds VK (M)', 'Örkelljung VK', 'RIG Falköping (M)', 'Södertälje VK', 'Uppsala VBS', 'Vingåkers VK', 'Hylte/Halmstad (M)', 'Floby VK'],
+            listOfTeamsM: ['All Teams', 'Sollentuna VK (M)', 'Falkenberg VBK', 'Habo WK', 'Lunds VK (M)', 'Örkelljung VK', 'RIG Falköping (M)', 'Södertälje VK', 'Uppsala VBS', 'Vingåkers VK', 'Hylte/Halmstad (M)', 'Floby VK'],
+            listOfTeamsW: ['All Teams', 'Sollentuna VK (W)', 'Engelholm VBS', 'Örebro Volley', 'Lunds VK (W)', 'Värnamo VBA', 'RIG Falköping (W)', 'Gislaved VK', 'Linköping VC', 'IKSU Volleyboll', 'Lindesberg Volley', 'Hylte/Halmstad (W)'],
             chosenTeam: 'All Teams',
+            chosenLeague: 'League',
             refreshButtonColor: buttonColor,
-            refreshing: false
+            refreshing: false,
+            loading: true,
         };
     }
     scrollToIndex(index) {
@@ -31,15 +36,28 @@ class Calendar extends Component {
 
     }
     async getMatches() {
-        axios.get('http://svbf-web.dataproject.com/CompetitionMatches.aspx?ID=174&PID=266')
+        await axios.get('http://svbf-web.dataproject.com/CompetitionMatches.aspx?ID=174&PID=266')
             .then(function (response) {
                 const matches = this.extractMatches(response.data)
                 AsyncStorage.setItem(
                     'SCHEDULE',
                     JSON.stringify(matches),
                 );
-                this.setState({ matches: matches })
+                this.setState({ matchesM: matches })
             }.bind(this));
+        await axios.get('http://svbf-web.dataproject.com/CompetitionMatches.aspx?ID=175&PID=247')
+            .then(function (response) {
+                const matches = this.extractMatches(response.data)
+                AsyncStorage.setItem(
+                    'SCHEDULE_WOMEN',
+                    JSON.stringify(matches),
+                );
+                this.setState({ matchesW: matches })
+            }.bind(this));
+        this.setState({ loading: false })
+
+
+
     }
     extractMatches(data) {
         let matches = []
@@ -86,6 +104,51 @@ class Calendar extends Component {
 
     getTeamFromLogo(logoID) {
         switch (logoID) {
+            case '1117':
+                return 'Engelholm VBS'
+                break;
+            case '1120':
+                return 'IKSU Volleyboll'
+                break;
+            case '1127':
+                return 'Värnamo VBA'
+                break;
+            case '1119':
+                return 'Hylte/Halmstad (W)'
+                break;
+            case '1281':
+                return 'Hylte/Halmstad (M)'
+                break;
+            case '1123':
+                return 'Lunds VK (W)'
+                break;
+            case '1282':
+                return 'Lunds VK (M)'
+                break;
+            case '1124':
+                return 'Örebro Volley'
+                break;
+            case '1125':
+                return 'RIG Falköping (W)'
+                break;
+            case '1284':
+                return 'RIG Falköping (M)'
+                break;
+            case '1121':
+                return 'Lindesberg Volley'
+                break;
+            case '1126':
+                return 'Sollentuna VK (W)'
+                break;
+            case '1286':
+                return 'Sollentuna VK (M)'
+                break;
+            case '1122':
+                return 'Linköping VC'
+                break;
+            case '1118':
+                return 'Gislaved VK'
+                break;
             case '1278':
                 return 'Falkenberg VBK'
                 break;
@@ -95,23 +158,11 @@ class Calendar extends Component {
             case '1280':
                 return 'Habo WK'
                 break;
-            case '1281':
-                return 'Hylte/Halmstad'
-                break;
-            case '1282':
-                return 'Lunds VK'
-                break;
             case '1283':
                 return 'Örkelljung VK'
                 break;
-            case '1284':
-                return 'RIG Falköping'
-                break;
             case '1285':
                 return 'Södertälje VK'
-                break;
-            case '1286':
-                return 'Sollentuna VK'
                 break;
             case '1287':
                 return 'Uppsala VBS'
@@ -134,20 +185,48 @@ class Calendar extends Component {
         return index
     }
     renderSpecificTeam() {
-        AsyncStorage.getItem('SCHEDULE', (err, result) => {
-            if (this.state.chosenTeam == 'All Teams')
-                this.setState({ matches: JSON.parse(result) })
-            else {
-                const allMatches = JSON.parse(result)
-                let matchesOfTeam = []
-                allMatches.forEach(match => {
-                    if (match.homeTeam == this.state.chosenTeam || match.guestTeam == this.state.chosenTeam)
-                        matchesOfTeam.push(match)
-                });
-                this.scrollToIndex(0)
-                this.setState({ matches: matchesOfTeam })
+        if (this.state.chosenLeague != 'Women') {
+            AsyncStorage.getItem('SCHEDULE', (err, result) => {
+                if (this.state.chosenTeam == 'All Teams') {
+                    this.setState({ matches: JSON.parse(result) })
+                }
+                else {
+                    const allMatches = JSON.parse(result)
+                    let matchesOfTeam = []
+                    allMatches.forEach(match => {
+                        if (match.homeTeam == this.state.chosenTeam || match.guestTeam == this.state.chosenTeam)
+                            matchesOfTeam.push(match)
+                    });
+                    this.scrollToIndex(0)
+                    this.setState({ matches: matchesOfTeam })
+                }
+            });
+        } else {
+            AsyncStorage.getItem('SCHEDULE_WOMEN', (err, result) => {
+                if (this.state.chosenTeam == 'All Teams')
+                    this.setState({ matches: JSON.parse(result) })
+                else {
+                    const allMatches = JSON.parse(result)
+                    let matchesOfTeam = []
+                    allMatches.forEach(match => {
+                        if (match.homeTeam == this.state.chosenTeam || match.guestTeam == this.state.chosenTeam)
+                            matchesOfTeam.push(match)
+                    });
+                    this.scrollToIndex(0)
+                    this.setState({ matches: matchesOfTeam })
+                }
+            });
+        }
+    }
+    changeLeague(league) {
+        if (!this.state.loading) {
+            this.setState({ chosenLeague: league, chosenTeam: 'All Teams' })
+            if (league != 'Women') {
+                this.setState({ matches: this.state.matchesM, listOfTeams: this.state.listOfTeamsM })
+            } else {
+                this.setState({ matches: this.state.matchesW, listOfTeams: this.state.listOfTeamsW })
             }
-        });
+        }
     }
     async refreshPage() {
         this.setState({ refreshing: true })
@@ -187,7 +266,6 @@ class Calendar extends Component {
                                         }}>
                                         <Text style={{ maxWidth: 80, textAlign: 'center' }}>{match.date} {match.time}</Text>
                                         <Image source={{ uri: match.homeLogo }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
-                                        {/* <Text>{match.homeTeam}</Text> */}
                                         <View
                                             style={{
                                                 flexDirection: 'column',
@@ -196,8 +274,6 @@ class Calendar extends Component {
                                             <Text style={{ textAlign: 'center', fontWeight: "bold" }}>{match.homeWonSet} - {match.guestWonSet} </Text>
                                             <Text style={{ maxWidth: 60, textAlign: 'center', fontSize: 10 }}>{match.arena}</Text>
                                         </View>
-
-                                        {/* <Text>{match.guestTeam}</Text> */}
                                         <Image source={{ uri: match.guestLogo }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
                                     </View>
                                 </Card>
@@ -220,10 +296,11 @@ class Calendar extends Component {
                 <View style={{ marginLeft: 15 }}>
                     <Picker
                         selectedValue={this.state.chosenTeam}
-                        style={{ height: 50, width: 200 }}
+                        style={{ height: 50, width: 150 }}
                         onValueChange={(itemValue, itemIndex) => {
                             this.setState({ chosenTeam: itemValue })
-                            this.renderSpecificTeam()
+                            if (this.state.chosenTeam != 'All Teams')
+                                this.renderSpecificTeam()
                         }}>
                         {this.state.listOfTeams.map((team, i) => {
                             return (
@@ -236,10 +313,24 @@ class Calendar extends Component {
                         })}
                     </Picker>
                 </View>
-                <View style={{ marginRight: 15, width: 150 }}>
+                <View >
+                    <Picker
+                        enabled={!this.state.loading}
+                        selectedValue={this.state.chosenLeague}
+                        style={{ height: 50, width: 150 }}
+                        onValueChange={(itemValue, itemIndex) => {
+                            if (this.state.chosenTeam != 'Men')
+                                this.changeLeague(itemValue)
+                        }}>
+                        <Picker.Item label={'Men'} value={'Men'} />
+                        <Picker.Item label={'Women'} value={'Women'} />
+
+                    </Picker>
+                </View>
+                <View style={{ marginRight: 15, width: 70 }}>
                     <Button
                         onPress={() => this.scrollToIndex(this.getTodayScrollIndex())}
-                        title="Go to today"
+                        title="Today"
                         color={buttonColor}
                     />
                 </View>
