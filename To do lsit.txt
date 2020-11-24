@@ -20,3 +20,6 @@ Total stats:
 Settings:
     Skapa val för Killar/tjejer []
     Skapa val för vilket lag []
+
+
+Eff passing: (100 perf 70 pos 35 medium -35 bad -100 overpass -150 aced) / Total*100

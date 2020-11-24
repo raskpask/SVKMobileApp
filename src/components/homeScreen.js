@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { View, Text, Button, Image } from 'react-native';
 import { WebView } from 'react-native-webview';
 
 class Home extends Component {

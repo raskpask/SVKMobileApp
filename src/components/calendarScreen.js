@@ -3,7 +3,6 @@ import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, Button, Re
 import { Card } from 'react-native-elements'
 import { Picker } from '@react-native-picker/picker';
 import axios from 'react-native-axios';
-import AsyncStorage from '@react-native-community/async-storage';
 
 
 class Calendar extends Component {
@@ -29,30 +28,17 @@ class Calendar extends Component {
         this.myScroll.scrollTo({ x: 0, y: 89.125 * index, animated: true })
     }
     componentDidMount() {
-        AsyncStorage.getItem('SCHEDULE', (err, result) => {
-            this.setState({ matches: JSON.parse(result) })
-        });
         this.getMatches()
-
     }
     async getMatches() {
-        await axios.get('http://svbf-web.dataproject.com/CompetitionMatches.aspx?ID=174&PID=266')
+        axios.get('http://svbf-web.dataproject.com/CompetitionMatches.aspx?ID=174&PID=266')
             .then(function (response) {
                 const matches = this.extractMatches(response.data)
-                AsyncStorage.setItem(
-                    'SCHEDULE',
-                    JSON.stringify(matches),
-                );
-                this.setState({ matchesM: matches })
+                this.setState({ matches: matches, matchesM: matches })
             }.bind(this));
-        await axios.get('http://svbf-web.dataproject.com/CompetitionMatches.aspx?ID=175&PID=247')
+        axios.get('http://svbf-web.dataproject.com/CompetitionMatches.aspx?ID=175&PID=247')
             .then(function (response) {
-                const matches = this.extractMatches(response.data)
-                AsyncStorage.setItem(
-                    'SCHEDULE_WOMEN',
-                    JSON.stringify(matches),
-                );
-                this.setState({ matchesW: matches })
+                this.setState({ matchesW: this.extractMatches(response.data) })
             }.bind(this));
         this.setState({ loading: false })
 
@@ -186,36 +172,23 @@ class Calendar extends Component {
     }
     renderSpecificTeam() {
         if (this.state.chosenLeague != 'Women') {
-            AsyncStorage.getItem('SCHEDULE', (err, result) => {
-                if (this.state.chosenTeam == 'All Teams') {
-                    this.setState({ matches: JSON.parse(result) })
-                }
-                else {
-                    const allMatches = JSON.parse(result)
-                    let matchesOfTeam = []
-                    allMatches.forEach(match => {
-                        if (match.homeTeam == this.state.chosenTeam || match.guestTeam == this.state.chosenTeam)
-                            matchesOfTeam.push(match)
-                    });
-                    this.scrollToIndex(0)
-                    this.setState({ matches: matchesOfTeam })
-                }
+
+            let matchesOfTeam = []
+            this.state.matchesM.forEach(match => {
+                if (match.homeTeam == this.state.chosenTeam || match.guestTeam == this.state.chosenTeam)
+                    matchesOfTeam.push(match)
             });
+            this.scrollToIndex(0)
+            this.setState({ matches: matchesOfTeam })
+
         } else {
-            AsyncStorage.getItem('SCHEDULE_WOMEN', (err, result) => {
-                if (this.state.chosenTeam == 'All Teams')
-                    this.setState({ matches: JSON.parse(result) })
-                else {
-                    const allMatches = JSON.parse(result)
-                    let matchesOfTeam = []
-                    allMatches.forEach(match => {
-                        if (match.homeTeam == this.state.chosenTeam || match.guestTeam == this.state.chosenTeam)
-                            matchesOfTeam.push(match)
-                    });
-                    this.scrollToIndex(0)
-                    this.setState({ matches: matchesOfTeam })
-                }
+            let matchesOfTeam = []
+            this.state.matchesW.forEach(match => {
+                if (match.homeTeam == this.state.chosenTeam || match.guestTeam == this.state.chosenTeam)
+                    matchesOfTeam.push(match)
             });
+            this.scrollToIndex(0)
+            this.setState({ matches: matchesOfTeam })
         }
     }
     changeLeague(league) {
