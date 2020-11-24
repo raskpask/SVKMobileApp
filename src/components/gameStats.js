@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { View, Text, ScrollView, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import CheckBox from '@react-native-community/checkbox';
 import axios from 'react-native-axios';
 import { Table, Row, Col, Rows, TableWrapper } from 'react-native-table-component';
 
