@@ -14,9 +14,9 @@ class Calendar extends Component {
             matches: [[]],
             matchesM: [[]],
             matchesW: [[]],
-            listOfTeams: ['All Teams', 'Sollentuna VK (M)', 'Falkenberg VBK', 'Habo WK', 'Lunds VK (M)', 'Örkelljung VK', 'RIG Falköping (M)', 'Södertälje VK', 'Uppsala VBS', 'Vingåkers VK', 'Hylte/Halmstad (M)', 'Floby VK'],
-            listOfTeamsM: ['All Teams', 'Sollentuna VK (M)', 'Falkenberg VBK', 'Habo WK', 'Lunds VK (M)', 'Örkelljung VK', 'RIG Falköping (M)', 'Södertälje VK', 'Uppsala VBS', 'Vingåkers VK', 'Hylte/Halmstad (M)', 'Floby VK'],
-            listOfTeamsW: ['All Teams', 'Sollentuna VK (W)', 'Engelholm VBS', 'Örebro Volley', 'Lunds VK (W)', 'Värnamo VBA', 'RIG Falköping (W)', 'Gislaved VK', 'Linköping VC', 'IKSU Volleyboll', 'Lindesberg Volley', 'Hylte/Halmstad (W)'],
+            listOfTeams: ['All Teams', 'Sollentuna VK', 'Falkenberg VBK', 'Habo WK', 'Lunds VK', 'Örkelljung VK', 'RIG Falköping', 'Södertälje VK', 'Uppsala VBS', 'Vingåkers VK', 'Hylte/Halmstad', 'Floby VK'],
+            listOfTeamsM: ['All Teams', 'Sollentuna VK', 'Falkenberg VBK', 'Habo WK', 'Lunds VK', 'Örkelljung VK', 'RIG Falköping', 'Södertälje VK', 'Uppsala VBS', 'Vingåkers VK', 'Hylte/Halmstad', 'Floby VK'],
+            listOfTeamsW: ['All Teams', 'Sollentuna VK ', 'Engelholm VBS', 'Örebro Volley', 'Lunds VK ', 'Värnamo VBA', 'RIG Falköping ', 'Gislaved VK', 'Linköping VC', 'IKSU Volleyboll', 'Lindesberg Volley', 'Hylte/Halmstad '],
             chosenTeam: 'All Teams',
             chosenLeague: 'League',
             refreshButtonColor: buttonColor,
@@ -100,34 +100,34 @@ class Calendar extends Component {
                 return 'Värnamo VBA'
                 break;
             case '1119':
-                return 'Hylte/Halmstad (W)'
+                return 'Hylte/Halmstad '
                 break;
             case '1281':
-                return 'Hylte/Halmstad (M)'
+                return 'Hylte/Halmstad'
                 break;
             case '1123':
-                return 'Lunds VK (W)'
+                return 'Lunds VK '
                 break;
             case '1282':
-                return 'Lunds VK (M)'
+                return 'Lunds VK'
                 break;
             case '1124':
                 return 'Örebro Volley'
                 break;
             case '1125':
-                return 'RIG Falköping (W)'
+                return 'RIG Falköping '
                 break;
             case '1284':
-                return 'RIG Falköping (M)'
+                return 'RIG Falköping'
                 break;
             case '1121':
                 return 'Lindesberg Volley'
                 break;
             case '1126':
-                return 'Sollentuna VK (W)'
+                return 'Sollentuna VK '
                 break;
             case '1286':
-                return 'Sollentuna VK (M)'
+                return 'Sollentuna VK'
                 break;
             case '1122':
                 return 'Linköping VC'

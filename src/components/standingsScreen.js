@@ -1,21 +1,27 @@
 import React, { Component } from 'react';
 import axios from 'react-native-axios';
-import { Table, Row, Rows, TableWrapper } from 'react-native-table-component';
+import { Table, Row, Col, TableWrapper } from 'react-native-table-component';
 import { StyleSheet, View, Image, TouchableOpacity, Button, ScrollView } from 'react-native';
-import { Dialog } from 'react-native-simple-dialogs';
 import { Picker } from '@react-native-picker/picker';
 
 import pageStyles from '../style/basicStyle';
+const colWidth = 50
 
 class StandingsScreen extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            tableHead: ['Team', 'Points', 'Total games', 'Wins', 'Lost', 'Sets won', 'Sets lost'],
+            tableheader: ['Points', 'Matches', 'Set', 'Points', 'Results', 'Quotas'],
+            widthHeader: [55, 180, 100, 100, 210, 120],
+            tableHead: ['', 'Played', 'Won', 'Lost', 'Won', 'Lost', 'Won', 'Lost', '3-0', '3-1', '3-2', '2-3', '1-3', '0-3', 'Set', 'Point'],
+            widthMain: [55, 60, 60, 60, 50, 50, 50, 50, 35, 35, 35, 35, 35, 35, 60, 60],
             tableData: [],
             tableDataM: [],
             tableDataW: [],
 
+            logoRow: [],
+            logoRowM: [],
+            logoRowW: [],
             teamVisible: false,
             team: [],
             teamRanking: 0,
@@ -23,77 +29,57 @@ class StandingsScreen extends Component {
             activeLeaguage: 'Men'
         }
     }
-    async componentDidMount() {
+    componentDidMount() {
         let teams
         let teamsW
-        await axios.get('http://svbf-web.dataproject.com/CompetitionStandings.aspx?ID=174&PID=266')
+        axios.get('http://svbf-web.dataproject.com/CompetitionStandings.aspx?ID=174&PID=266')
             .then(function (response) {
                 teams = this.extractStandings(response.data)
+                this.createTableData(teams, 'Men')
             }.bind(this));
 
-        await axios.get('http://svbf-web.dataproject.com/CompetitionStandings.aspx?ID=175&PID=247')
+        axios.get('http://svbf-web.dataproject.com/CompetitionStandings.aspx?ID=175&PID=247')
             .then(function (response) {
                 teamsW = this.extractStandings(response.data)
+                this.createTableData(teamsW, 'Women')
             }.bind(this));
-
-        const tableDataM = this.createTableData(teams)
-
-
-        this.setState({ tableData: tableDataM, tableDataM: tableDataM, tableDataW: this.createTableData(teamsW) })
-
     }
-    createTableData(teams) {
+    createTableData(teams, league) {
+        let logoRow = []
         let data = []
         for (let i = 0; i < teams.length; i++) {
+            logoRow.push(<Image source={{ uri: teams[i].logoUrl }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />)
             data.push([
-                <TouchableOpacity onPress={() => this.setTeamPopup(teams[i], i + 1)}>
-                    <Image source={{ uri: teams[i].logoUrl }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
-                </TouchableOpacity >,
                 teams[i].points,
                 teams[i].matchesPlayed,
                 teams[i].wonMatches,
                 teams[i].lostMatches,
                 teams[i].setsWon,
-                teams[i].setsLost]
-            )
+                teams[i].setsLost,
+                teams[i].pointsWon,
+                teams[i].pointsLost,
+                teams[i].wins30,
+                teams[i].wins31,
+                teams[i].wins32,
+                teams[i].lost23,
+                teams[i].lost13,
+                teams[i].lost03,
+                teams[i].setQuota,
+                teams[i].pointQuota
+            ])
         }
-        return data
-    }
-    setTeamPopup(team, ranking) {
-        let popupTeamData = [
-            ['Points', team.points + 'p'],
-            ['Matches played', team.matchesPlayed],
-            ['Matches won', team.wonMatches],
-            ['Matches lost', team.lostMatches],
-            // ['Sets played', parseInt(team.setsWon) + parseInt(team.setsLost)],
-            ['Sets Won', team.setsWon],
-            ['Sets lost', team.setsLost],
-            ['Set quota', team.setQuota],
-            // ['Rallies played', parseInt(team.pointsLost) + parseInt(team.pointsWon)],
-            ['Rallies won', team.pointsWon],
-            ['Rallies lost', team.pointsLost],
-            ['Point quota', team.pointQuota],
-            ['3-0 wins', team.wins30],
-            ['3-1 wins', team.wins31],
-            ['3-2 wins', team.wins32],
-            ['2-3 losses', team.lost23],
-            ['1-3 losses', team.lost13],
-            ['0-3 losses', team.lost03],
-        ]
-
-        this.setState({ team: team, teamRanking: ranking, teamVisible: true, popupTeamData: popupTeamData })
+        if (league == 'Men')
+            this.setState({ logoRow: logoRow, logoRowM: logoRow, tableData: data, tableDataM: data })
+        else
+            this.setState({ logoRowW: logoRow, tableDataW: data })
     }
     extractStandings(response) {
         let teams = []
-        // console.log(response.split('<a href="/CompetitionTeamDetails.aspx?TeamID=')[10])
         const teamsString = response.split('<a href="/CompetitionTeamDetails.aspx?TeamID=')
         for (let i = 1; i < teamsString.length; i++) {
-            // console.log(this.extrcatTeam(teamsString[i]))
             teams.push(this.extrcatTeam(teamsString[i]))
         }
         return teams
-        // let teamsString = response.split('<a href="/CompetitionTeamDetails.aspx?TeamID=1279&ID=174" id="TeamDetails_Link">')[1].split('<div id="RG_Standing_Main"')[0]
-        // teams.push(this.extrcatTeam(teamsString.split('<a href="/CompetitionTeamDetails.aspx?TeamID=1279&ID=174" id="TeamDetails_Link">')[0].split('</td><td class="RadGrid_AdditionalColumn_hide_md" align="center">')[0]))
     }
     extrcatTeam(teamInfo) {
         //Logo address, name, pontis, played, wins,lost, setWin,setLost PointsWin, pointsLost, 3-0,3-1,3-2,2-3,1-3,0-1, SetQuota, PointQuota
@@ -117,50 +103,53 @@ class StandingsScreen extends Component {
             setQuota: teamInfo.split('<span id="QuotSet" style="text-align:center;">')[1].split('</span>')[0],
             pointQuota: teamInfo.split('<span id="QuotPoints">')[1].split('</span>')[0],
         }
-        // console.log(team)
         return team
     }
-    changeLeage(){
-        if(this.state.activeLeaguage == 'Men'){
-            this.setState({tableData: this.state.tableDataM})
+    changeLeage() {
+        if (this.state.activeLeaguage == 'Men') {
+            this.setState({ tableData: this.state.tableDataM, logoRow: this.state.logoRowM })
         } else {
-            this.setState({tableData: this.state.tableDataW})
+            this.setState({ tableData: this.state.tableDataW, logoRow: this.state.logoRowW })
         }
     }
     render() {
         return (
             <View style={styles.container}>
-                <Table borderStyle={pageStyles.borderStyle}>
-                    <Row data={this.state.tableHead} style={styles.head} textStyle={styles.text} />
-                    <Rows data={this.state.tableData} textStyle={styles.text} />
-                </Table>
-                <Dialog
-                    visible={this.state.teamVisible}
-                    title={this.state.team.name}
-                    onTouchOutside={() => this.setState({ teamVisible: false })} >
-                    <View >
-                        <ScrollView style={styles.dataWrapper}>
-                            <Table
-                                borderStyle={{ borderWidth: 1, borderColor: '#c8e1ff', margin: 0 }}
-                            >
-                                <TableWrapper>
-                                    <Rows data={this.state.popupTeamData} textStyle={styles.text} />
-                                </TableWrapper>
-                            </Table>
-                            <View style={{ marginTop: 20 }}>
-                                <Button
-                                    style={{ marginTop: 20 }}
-                                    onPress={() => this.setState({ teamVisible: false })}
-                                    title="close"
-                                    color="#0095ff"
+                <ScrollView horizontal={false}>
+                    <View>
+                        <TableWrapper style={{ flexDirection: 'row' }}>
+                            <Table borderStyle={{ borderWidth: 1, borderColor: '#f1f8ff' }} >
+                                <Row data={['Team']} widthArr={[colWidth]} textStyle={pageStyles.tableText} style={{ height: 32.5 }} />
+                                <Row data={['']} widthArr={[colWidth]} textStyle={pageStyles.tableText} />
+                                <Col
+                                    data={this.state.logoRow}
+                                    width={colWidth}
+                                    textStyle={pageStyles.tableText}
                                 />
-                            </View>
-                        </ScrollView>
+                            </Table>
+                            <ScrollView style={styles.dataWrapper, { flexDirection: 'row' }} horizontal={true}>
+                                <Table borderStyle={pageStyles.borderStyle}>
+                                    <Row data={this.state.tableheader} widthArr={this.state.widthHeader} textStyle={pageStyles.tableText} />
+                                    <Row data={this.state.tableHead} widthArr={this.state.widthMain} textStyle={pageStyles.tableText} />
+                                    {
+                                        this.state.tableData.map((rowData, index) => (
+                                            <Row
+                                                key={index}
+                                                data={rowData}
+                                                widthArr={this.state.widthMain}
+                                                style={[styles.row, index % 2 && pageStyles.tableBackgroundColor]}
+                                                textStyle={pageStyles.tableText}
+                                            />
+                                        ))
+                                    }
+                                </Table>
+                            </ScrollView>
+                        </TableWrapper>
                     </View>
-                </Dialog>
+                </ScrollView>
                 <Picker
                     selectedValue={this.state.activeLeaguage}
-                    style={{ bottom:0, marginTop: 65}}
+                    style={{ bottom: 0, marginTop: 40 }}
                     onValueChange={(itemValue, itemIndex) => {
                         this.setState({ activeLeaguage: itemValue })
                         this.changeLeage()
@@ -175,9 +164,10 @@ class StandingsScreen extends Component {
     }
 }
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 0, paddingTop: 0, backgroundColor: '#fff' },
+    container: { backgroundColor: '#fff' },
     head: { height: 40, backgroundColor: '#f1f8ff' },
     text: { margin: 6 },
     dataWrapper: { marginTop: -1 },
+    row: { height: 41 }
 });
 export default StandingsScreen;

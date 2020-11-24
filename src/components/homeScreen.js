@@ -5,9 +5,9 @@ class Home extends Component {
     render() {
         return (
             <WebView
-            style={{ marginTop: 20 }}
+            style={{ marginTop: 20}}
                 source={{
-                    uri: 'http://sollentuna-vk.se/'
+                    uri: 'http://elitserienvolleyboll.se/'
                 }}
             />
         )

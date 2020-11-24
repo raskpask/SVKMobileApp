@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { View, Text, ScrollView, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import axios from 'react-native-axios';
-import { Table, Row, Col, Rows, TableWrapper } from 'react-native-table-component';
+import { Table, Row, Col, TableWrapper } from 'react-native-table-component';
 
 import pageStyles from '../style/basicStyle';
 
@@ -28,6 +28,9 @@ class GameStats extends Component {
             numberActiveTeam: ['Loading...'],
             nameHomeTeam: [[]],
             nameGuestTeam: [[]],
+
+            gameResultSets: '0-0',
+            gameResultPoints: '(0-0, 0-0, 0-0)'
         }
     }
     async componentDidMount() {
@@ -65,7 +68,30 @@ class GameStats extends Component {
         }
         nameHomeTeam.push(['Total'])
         nameGuestTeam.push(['Total'])
-        // console.log(playersHome)
+
+        const rawResultPoints = data.split('SetsPartials')[1].split('>')[1].split('<')[0]
+        const listOfSets = rawResultPoints.split('/')
+        let resultPoints =
+            '(' + listOfSets[0] + '-' + listOfSets[1].split(' ')[0] + ', ' +
+            listOfSets[1].split(' ')[1] + '-' + listOfSets[2].split(' ')[0] + ', '
+        if (listOfSets.length == 4)
+            resultPoints += listOfSets[2].split(' ')[1] + '-' + listOfSets[3] + ')'
+        else
+            resultPoints += listOfSets[2].split(' ')[1] + '-' + listOfSets[3].split(' ')[0] + ', '
+
+        if (listOfSets.length == 5)
+            resultPoints += listOfSets[3].split(' ')[1] + '-' + listOfSets[4] + ')'
+        else if (listOfSets.length == 6)
+            resultPoints += listOfSets[3].split(' ')[1] + '-' + listOfSets[4].split(' ')[0] + ', '
+
+        if (listOfSets.length == 6)
+            resultPoints += listOfSets[4].split(' ')[1] + '-' + listOfSets[5] + ')'
+
+        const setsHomeTeam = data.split('WonSetHome')[1].split('>')[1].split('<')[0]
+        const setsGuestTeam = data.split('WonSetGuest')[1].split('>')[1].split('<')[0]
+
+        this.setState({ gameResultSets: setsHomeTeam + ' - ' + setsGuestTeam, gameResultPoints: resultPoints })
+
         if (this.state.activeTeam == this.props.route.params.tempMatch.homeTeam)
             this.setState({ tableData: playersHome, totalRow: totalHome, numberActiveTeam: nameHomeTeam })
         else
@@ -85,7 +111,6 @@ class GameStats extends Component {
 
         const playerData = [
             playerNumber,
-            // playerString.split('"PlayerName"')[1].split('b>')[1].split('<')[0],
             playerString.split('Set1')[1].split('>')[1].split('<')[0],
             playerString.split('Set2')[1].split('>')[1].split('<')[0],
             playerString.split('Set3')[1].split('>')[1].split('<')[0],
@@ -148,11 +173,6 @@ class GameStats extends Component {
             <View style={styles.container}>
                 <ScrollView horizontal={false}>
                     <View>
-                        {/* <Table borderStyle={pageStyles.tableHeaderBorder}>
-                        </Table>
-
-                        <Table borderStyle={pageStyles.tableHeadBorder}>
-                        </Table> */}
                         <TableWrapper style={{ flexDirection: 'row' }}>
                             <Table borderStyle={{ borderWidth: 1, borderColor: '#f1f8ff' }} >
                                 <Row data={['']} widthArr={[colWidth]} textStyle={styles.header} />
@@ -180,55 +200,18 @@ class GameStats extends Component {
                                     }
                                     <Row data={this.state.totalRow} widthArr={this.state.widthMain} textStyle={pageStyles.totalRow} />
                                 </Table>
-                                {/* <Table borderStyle={pageStyles.tableHeadBorder}> */}
-                                {/* </Table> */}
                             </ScrollView>
                         </TableWrapper>
                     </View>
+                    <View >
+                        <Text style={{ textAlign: 'center', fontWeight: 'bold' }}>
+                            {this.state.gameResultSets}
+                        </Text>
+                        <Text style={{ textAlign: 'center' }}>
+                            {this.state.gameResultPoints}
+                        </Text>
+                    </View>
                 </ScrollView>
-                {/* <View style={{ padding: 10 }}> */}
-                {/* <View style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                    }}> */}
-                {/* <CheckBox
-                            value={this.state.filterName}
-                            onValueChange={(newValue) => this.setState({ filterName: newValue })}
-                        />
-                        <Text style={{ margin: 0, padding: 0 }}>Name</Text>
-                        <CheckBox
-                            value={this.state.filterSets}
-                            onValueChange={(newValue) => this.setState({ filterSets: newValue })}
-                        />
-                        <Text style={{ margin: 0, padding: 0 }}>Set</Text>
-                        <CheckBox
-                            value={this.state.filterPoints}
-                            onValueChange={(newValue) => this.setState({ filterPoints: newValue })}
-                        />
-                        <Text style={{ margin: 0, padding: 0 }}>Pts</Text>
-                        <CheckBox
-                            value={this.state.filterServe}
-                            onValueChange={(newValue) => this.setState({ filterServe: newValue })}
-                        />
-                        <Text style={{ margin: 0, padding: 0 }}>Ser</Text>
-                        <CheckBox
-                            value={this.state.filterReception}
-                            onValueChange={(newValue) => this.setState({ filterReception: newValue })}
-                        />
-                        <Text style={{ margin: 0, padding: 0 }}>Rec</Text>
-                        <CheckBox
-                            value={this.state.filterAttack}
-                            onValueChange={(newValue) => this.setState({filterAttack:newValue})}
-                        />
-                        <Text style={{ margin: 0, padding: 0 }}>Att</Text>
-                        <CheckBox
-                            value={this.state.filterBlock}
-                            onValueChange={(newValue) => this.setState({filterBlock:newValue})}
-                        />
-                        <Text style={{ margin: 0, padding: 0 }}>Blo</Text> */}
-                {/* </View>
-                </View> */}
                 <View style={{ padding: 10 }}>
                     <View style={{
                         flexDirection: 'row',
