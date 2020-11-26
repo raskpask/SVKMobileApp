@@ -3,7 +3,10 @@ import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, Button, Re
 import { Card } from 'react-native-elements'
 import { Picker } from '@react-native-picker/picker';
 import axios from 'react-native-axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
+const keyForMatchesMen = 'matchesMen'
+const keyForMatchesWomen = 'matchesWomen'
 
 class Calendar extends Component {
     constructor(props) {
@@ -27,19 +30,51 @@ class Calendar extends Component {
     scrollToIndex(index) {
         this.myScroll.scrollTo({ x: 0, y: 89.125 * index, animated: true })
     }
-    componentDidMount() {
+    async componentDidMount() {
+        try {
+            const matchesM = JSON.parse(await AsyncStorage.getItem(keyForMatchesMen))
+            const matchesW = JSON.parse(await AsyncStorage.getItem(keyForMatchesWomen))
+
+            if (matchesM != null && matchesW != null) {
+                if (this.state.chosenLeague == 'Men' || this.state.chosenLeague == 'League') {
+                    this.setState({ matches: matchesM })
+                } else {
+                    this.setState({ matches: matchesW })
+                }
+                this.setState({ matchesM: matchesM, matchesW: matchesW })
+            }
+        } catch (e) {
+            console.log(e)
+        }
         this.getMatches()
     }
     async getMatches() {
-        axios.get('http://svbf-web.dataproject.com/CompetitionMatches.aspx?ID=174&PID=266')
+        await axios.get('http://svbf-web.dataproject.com/CompetitionMatches.aspx?ID=174&PID=266')
             .then(function (response) {
                 const matches = this.extractMatches(response.data)
-                this.setState({ matches: matches, matchesM: matches })
+                try {
+                    AsyncStorage.setItem(keyForMatchesMen, JSON.stringify(matches))
+                } catch (e) {
+                    console.log(e)
+                }
+                if (this.state.chosenLeague != 'Women')
+                    this.setState({ matches: matches })
+                this.setState({ matchesM: matches })
             }.bind(this));
-        axios.get('http://svbf-web.dataproject.com/CompetitionMatches.aspx?ID=175&PID=247')
+        await axios.get('http://svbf-web.dataproject.com/CompetitionMatches.aspx?ID=175&PID=247')
             .then(function (response) {
-                this.setState({ matchesW: this.extractMatches(response.data) })
+                const matchesW = this.extractMatches(response.data)
+                try {
+                    AsyncStorage.setItem(keyForMatchesWomen, JSON.stringify(matchesW))
+                } catch (e) {
+                    console.log(e)
+                }
+                if (this.state.chosenLeague == 'Women')
+                    this.setState({ matches: matchesW })
+                this.setState({ matchesW: matchesW })
             }.bind(this));
+
+
         this.setState({ loading: false })
 
 
@@ -62,7 +97,6 @@ class Calendar extends Component {
                 statsLink += '&';
             }
         }
-        const streamingLink = matchString.split('<a href="')[1]?.split('" target="_blank"')[0] ? matchString.split('<a href="')[1].split('" target="_blank"')[0] : ""
         const homeLogo = matchString.split('Home" class="Calendar_DIV_TeamLogo DIV_TeamLogo_Box" style="background-image:url(&quot;')[1].split('&quot;')[0]
         const guestLogo = matchString.split('Guest" class="Calendar_DIV_TeamLogo DIV_TeamLogo_Box" style="background-image:url(&quot;')[1].split('&quot;')[0]
         const homeTeam = this.getTeamFromLogo(homeLogo.split('_')[1].split('.')[0])
@@ -70,7 +104,6 @@ class Calendar extends Component {
         const matchData = {
             homeWonSet: matchString.split('WonSetHome" value="')[1].split('"')[0],
             guestWonSet: matchString.split('WonSetGuest" value="')[1].split('"')[0],
-            streamingLink: streamingLink,
             statsLink: 'http://svbf-web.dataproject.com/' + statsLink,
 
             date: matchString.split('DataOra"')[1].split('>')[1].split(' -')[0],
@@ -192,13 +225,11 @@ class Calendar extends Component {
         }
     }
     changeLeague(league) {
-        if (!this.state.loading) {
-            this.setState({ chosenLeague: league, chosenTeam: 'All Teams' })
-            if (league != 'Women') {
-                this.setState({ matches: this.state.matchesM, listOfTeams: this.state.listOfTeamsM })
-            } else {
-                this.setState({ matches: this.state.matchesW, listOfTeams: this.state.listOfTeamsW })
-            }
+        this.setState({ chosenLeague: league, chosenTeam: 'All Teams' })
+        if (league != 'Women') {
+            this.setState({ matches: this.state.matchesM, listOfTeams: this.state.listOfTeamsM })
+        } else {
+            this.setState({ matches: this.state.matchesW, listOfTeams: this.state.listOfTeamsW })
         }
     }
     async refreshPage() {
@@ -288,7 +319,6 @@ class Calendar extends Component {
                 </View>
                 <View >
                     <Picker
-                        enabled={!this.state.loading}
                         selectedValue={this.state.chosenLeague}
                         style={{ height: 50, width: 150 }}
                         onValueChange={(itemValue, itemIndex) => {
