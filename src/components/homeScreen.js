@@ -5,9 +5,11 @@ import { Text, View, TouchableOpacity, Image, RefreshControl, TouchableOpacityBa
 import { Card } from 'react-native-elements'
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { ScrollView } from 'react-native-gesture-handler';
+import { Picker } from '@react-native-picker/picker';
 
 const keyCurrentMatchesMen = 'currentMatchesMen'
 const keyCurrentMatchesWomen = 'currentMatchesWomen'
+const keyLeague = 'league'
 
 class Home extends Component {
     constructor(props) {
@@ -17,33 +19,41 @@ class Home extends Component {
             currentMatches: [[], [], [], [], [], [], [], [], [], [], [], [], [], [], []],
             currentMatchesM: [[]],
             currentMatchesW: [[]],
-            league: 'Men',
-            refreshing: false
+            league: '',
+            refreshing: false,
+            loading: true,
+
         };
     }
     async componentDidMount() {
         try {
             const matchesM = JSON.parse(await AsyncStorage.getItem(keyCurrentMatchesMen))
             const matchesW = JSON.parse(await AsyncStorage.getItem(keyCurrentMatchesWomen))
-            if (this.state.league != 'Women') {
+            const league = JSON.parse(await AsyncStorage.getItem(keyLeague))
+            if (league == 'WomenStandard')
+                this.setState({ league: 'Women' })
+            else
+                this.setState({ league: 'Men' })
+
+            if ((this.state.league == 'Men' && !this.state.loading) || league == 'MenStandard') {
                 this.setState({ currentMatches: matchesM })
             } else {
                 this.setState({ currentMatches: matchesW })
             }
+            this.scrollToIndex(this.getTodayScrollIndex())
         } catch (error) {
             console.log(error)
         }
         this.getCurrentMatches()
     }
-    getCurrentMatches() {
+    async getCurrentMatches() {
         let currentMatchesM = []
-        axios.get('http://svbf-web.dataproject.com/CompetitionHome.aspx?ID=174')
+        await axios.get('http://svbf-web.dataproject.com/CompetitionHome.aspx?ID=174')
             .then(function (response) {
                 currentMatchesM = this.extractCurrentMatches(response.data)
                 this.setState({ currentMatchesM: currentMatchesM })
-                if (this.state.league != 'Women') {
+                if (this.state.league == 'Men' || this.state.league == 'MenStandard') {
                     this.setState({ currentMatches: currentMatchesM })
-                    this.scrollToIndex(this.getTodayScrollIndex())
                 }
                 try {
                     AsyncStorage.setItem(keyCurrentMatchesMen, JSON.stringify(currentMatchesM))
@@ -52,13 +62,12 @@ class Home extends Component {
                 }
 
             }.bind(this));
-        axios.get('http://svbf-web.dataproject.com/CompetitionHome.aspx?ID=175')
+        await axios.get('http://svbf-web.dataproject.com/CompetitionHome.aspx?ID=175')
             .then(function (response) {
                 currentMatchesW = this.extractCurrentMatches(response.data)
                 this.setState({ currentMatchesW: currentMatchesW })
-                if (this.state.league == 'Women') {
+                if ((this.state.league == 'Women' && !this.state.loading) || this.state.league == 'WomenStandard') {
                     this.setState({ currentMatches: currentMatchesW })
-                    this.scrollToIndex(this.getTodayScrollIndex())
                 }
                 try {
                     AsyncStorage.setItem(keyCurrentMatchesWomen, JSON.stringify(currentMatchesW))
@@ -67,6 +76,7 @@ class Home extends Component {
                 }
 
             }.bind(this));
+        this.setState({ loading: false })
 
     }
     extractCurrentMatches(data) {
@@ -122,12 +132,19 @@ class Home extends Component {
         return (matchData)
     }
     changeLeague(league) {
-        this.setState({ league: league })
-        if (league != 'Women') {
-            this.setState({ currentMatches: this.state.currentMatchesM })
-        } else {
-            this.setState({ currentMatches: this.state.currentMatchesW })
+
+        if (league != this.state.league && (league == 'Men' || league == 'Women')) {
+            this.setState({ league: league })
+            try {
+                AsyncStorage.setItem(keyLeague, JSON.stringify(league + 'Standard'))
+            } catch (error) {
+                console.log(error)
+            }
         }
+        if (league == 'Men')
+            this.setState({ currentMatches: this.state.currentMatchesM })
+        else if (league == 'Women')
+            this.setState({ currentMatches: this.state.currentMatchesW })
     }
     async refreshPage() {
         this.setState({ refreshing: true })
@@ -235,6 +252,17 @@ class Home extends Component {
             <View>
                 {this.renderTopComponent()}
                 {this.renderCurrentGames()}
+                <View >
+                    <Picker
+                        selectedValue={this.state.league}
+                        onValueChange={(itemValue, itemIndex) => {
+                            if (!this.state.loading)
+                                this.changeLeague(itemValue)
+                        }}>
+                        <Picker.Item label={'Men'} value={'Men'} />
+                        <Picker.Item label={'Women'} value={'Women'} />
+                    </Picker>
+                </View>
             </View>
         )
     }
