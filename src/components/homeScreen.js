@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
-import { WebView } from 'react-native-webview';
 import axios from 'react-native-axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Text, View, TouchableOpacity, Image, RefreshControl } from 'react-native';
+import { Text, View, TouchableOpacity, Image, RefreshControl, TouchableOpacityBase } from 'react-native';
 import { Card } from 'react-native-elements'
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { ScrollView } from 'react-native-gesture-handler';
+
+const keyCurrentMatchesMen = 'currentMatchesMen'
+const keyCurrentMatchesWomen = 'currentMatchesWomen'
 
 class Home extends Component {
     constructor(props) {
@@ -19,18 +21,49 @@ class Home extends Component {
             refreshing: false
         };
     }
-    componentDidMount() {
+    async componentDidMount() {
+        try {
+            const matchesM = JSON.parse(await AsyncStorage.getItem(keyCurrentMatchesMen))
+            const matchesW = JSON.parse(await AsyncStorage.getItem(keyCurrentMatchesWomen))
+            if (this.state.league != 'Women') {
+                this.setState({ currentMatches: matchesM })
+            } else {
+                this.setState({ currentMatches: matchesW })
+            }
+        } catch (error) {
+            console.log(error)
+        }
         this.getCurrentMatches()
     }
-    async getCurrentMatches() {
+    getCurrentMatches() {
         let currentMatchesM = []
-        await axios.get('http://svbf-web.dataproject.com/CompetitionHome.aspx?ID=174')
+        axios.get('http://svbf-web.dataproject.com/CompetitionHome.aspx?ID=174')
             .then(function (response) {
                 currentMatchesM = this.extractCurrentMatches(response.data)
                 this.setState({ currentMatchesM: currentMatchesM })
                 if (this.state.league != 'Women') {
                     this.setState({ currentMatches: currentMatchesM })
                     this.scrollToIndex(this.getTodayScrollIndex())
+                }
+                try {
+                    AsyncStorage.setItem(keyCurrentMatchesMen, JSON.stringify(currentMatchesM))
+                } catch (e) {
+                    console.log(e)
+                }
+
+            }.bind(this));
+        axios.get('http://svbf-web.dataproject.com/CompetitionHome.aspx?ID=175')
+            .then(function (response) {
+                currentMatchesW = this.extractCurrentMatches(response.data)
+                this.setState({ currentMatchesW: currentMatchesW })
+                if (this.state.league == 'Women') {
+                    this.setState({ currentMatches: currentMatchesW })
+                    this.scrollToIndex(this.getTodayScrollIndex())
+                }
+                try {
+                    AsyncStorage.setItem(keyCurrentMatchesWomen, JSON.stringify(currentMatchesW))
+                } catch (e) {
+                    console.log(e)
                 }
 
             }.bind(this));
@@ -61,10 +94,19 @@ class Home extends Component {
         } else {
             streamLink = 'http://svbf-web.dataproject.com/' + matchString.split('"DIV_Stream"')[1].split('&quot;')[1].split('&quot;')
         }
+        let statsLink = ''
+        const statsLinkList = matchString.split('window.location=&#39;')[1].split('&#39;;')[0].split('amp;')
+        if (statsLink != undefined && statsLink != null) {
+            statsLink = 'http://svbf-web.dataproject.com/'
+            statsLinkList.forEach(element => {
+                statsLink += element;
+            });
+        }
         const matchData = {
             date: date,
             time: time,
             streamLink: streamLink,
+            statsLink: statsLink,
             homeLogo: matchString.split('"IMG_Home"')[1].split('src="')[1].split('"')[0],
             guestLogo: matchString.split('"IMG_Guest"')[1].split('src="')[1].split('"')[0],
             homeTeam: matchString.split('"Label1"')[1].split('>')[1].split('<')[0],
@@ -79,6 +121,14 @@ class Home extends Component {
         }
         return (matchData)
     }
+    changeLeague(league) {
+        this.setState({ league: league })
+        if (league != 'Women') {
+            this.setState({ currentMatches: this.state.currentMatchesM })
+        } else {
+            this.setState({ currentMatches: this.state.currentMatchesW })
+        }
+    }
     async refreshPage() {
         this.setState({ refreshing: true })
         await this.getMatches()
@@ -86,7 +136,7 @@ class Home extends Component {
         this.setState({ refreshing: false })
     }
     scrollToIndex(index) {
-        if(this.myScroll){
+        if (this.myScroll) {
             index = index ?? 0
             this.myScroll.scrollTo({ x: 0, y: 95 * (index - 1), animated: true })
         }
@@ -131,6 +181,10 @@ class Home extends Component {
             >
                 {
                     this.state.currentMatches.map((match, i) => {
+                        let isdisabled = false
+                        if (match.homeSets == '0' && match.guestSets == '0')
+                            isdisabled = true
+
                         return (
                             <Card key={i}>
                                 <View
@@ -139,22 +193,35 @@ class Home extends Component {
                                         justifyContent: 'space-between',
                                         alignItems: 'center',
                                     }}>
-                                        {
-                                            match.date == new Date().toJSON().slice(0, 10) ? 
-                                            <Icon name="youtube-tv" size={30} /> :
-                                            <Text style={{ maxWidth: 80, textAlign: 'center' }}>{match.date}</Text>
-                                        }
+                                    {
+                                        match.streamLink != undefined ?
+                                            <Icon name="youtube-tv" size={30}
+                                                onPress={() => this.props.navigation.navigate('Livestream', { link: match.streamLink })}
+                                            /> : <Text></Text>
+                                    }
+                                    <Text style={{ maxWidth: 80, textAlign: 'center' }}>{match.date}</Text>
                                     <Text style={{ maxWidth: 80, textAlign: 'center' }}>{match.time}</Text>
-                                    <Image source={{ uri: match.homeLogo }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
-                                    <View
+                                    <TouchableOpacity
                                         style={{
-                                            flexDirection: 'column',
+                                            flexDirection: 'row',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            width: 200
+                                        }}
+                                        disabled={isdisabled}
+                                        onPress={() => this.props.navigation.navigate('Match statistics', { tempMatch: match })}
+                                    >
+                                        <Image source={{ uri: match.homeLogo }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
+                                        <View
+                                            style={{
+                                                flexDirection: 'column',
 
-                                        }}>
-                                        <Text style={{ textAlign: 'center', fontWeight: "bold" }}>{match.homeSets} - {match.guestSets} </Text>
-                                        <Text style={{ maxWidth: 80, textAlign: 'center', fontSize: 10 }}>{match.set1 ? '(' + match.set1 + ', ' + match.set2 + ', ' + match.set3 + (match.set4 ? ', ' + match.set4 : '') + (match.set5 ? ',' + match.set5 + ')' : ')') : ''}</Text>
-                                    </View>
-                                    <Image source={{ uri: match.guestLogo }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
+                                            }}>
+                                            <Text style={{ textAlign: 'center', fontWeight: "bold" }}>{match.homeSets} - {match.guestSets} </Text>
+                                            <Text style={{ maxWidth: 80, textAlign: 'center', fontSize: 10 }}>{match.set1 ? '(' + match.set1 + ', ' + match.set2 + ', ' + match.set3 + (match.set4 ? ', ' + match.set4 : '') + (match.set5 ? ',' + match.set5 + ')' : ')') : ''}</Text>
+                                        </View>
+                                        <Image source={{ uri: match.guestLogo }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
+                                    </TouchableOpacity>
                                 </View>
                             </Card>
                         )
