@@ -237,7 +237,6 @@ class Calendar extends Component {
         await this.getMatches()
         this.renderSpecificTeam()
         this.setState({ refreshing: false })
-
     }
     renderCards() {
         return (
