@@ -1,14 +1,16 @@
 import React, { Component } from 'react';
-import { View, Text } from 'react-native';
+import { ScrollView, Text, View, StyleSheet } from 'react-native';
 import axios from 'react-native-axios';
+
+import MatchCard from './matchCard';
 
 class LiveTVScreen extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            matchesToday:[],
-            comingMatches:[],
-            previousMatches:[]
+            matchesToday: [],
+            comingMatches: [],
+            previousMatches: []
         }
     }
     componentDidMount() {
@@ -17,23 +19,18 @@ class LiveTVScreen extends Component {
     async getAllLivestreams() {
         await axios.get('http://svbf-web.dataproject.com/MainStreaming.aspx')
             .then(function (response) {
-                console.log(this.extractAllGames(response.data))
-                // this.setState({ currentMatchesM: currentMatchesM })
-                // if (this.state.league == 'Men' || this.state.league == 'MenStandard') {
-                //     this.setState({ currentMatches: currentMatchesM })
-                // }
-                // try {
-                //     AsyncStorage.setItem(keyCurrentMatchesMen, JSON.stringify(currentMatchesM))
-                // } catch (e) {
-                //     console.log(e)
-                // }
-
+                const matches = this.extractAllGames(response.data)
+                if (matches.gamesToday == undefined) {
+                    this.setState({ matchesToday: [[]], previousMatches: matches.playedGames, comingMatches: matches.commingMatches })
+                } else {
+                    this.setState({ matchesToday: matches.gamesToday, previousMatches: matches.playedGames, comingMatches: matches.commingMatches })
+                }
             }.bind(this));
     }
     extractAllGames(data) {
         const listOfCategories = data.split('"streaming-title">')
         return {
-            gamesToday: this.extractCategory(listOfCategories[1]),
+            matchesToday: this.extractCategory(listOfCategories[1]),
             commingMatches: this.extractCategory(listOfCategories[2]),
             playedGames: this.extractCategory(listOfCategories[3])
         }
@@ -48,8 +45,8 @@ class LiveTVScreen extends Component {
     }
     extractMatch(matchString) {
         const streamingLink = matchString.split('f_OpenInPlayer')[1] ? matchString.split('f_OpenInPlayer')[1].split('&quot;')[1].split('&quot;')[0] : ''
-        const homeSet = matchString.split('StreamingReplay_ctrl1_Label1')[1] ? matchString.split('StreamingReplay_ctrl1_Label1')[1].split('>')[1].split('<')[0] : 0
-        const guestSet = matchString.split('StreamingReplay_ctrl1_Label3')[1] ? matchString.split('StreamingReplay_ctrl1_Label3')[1].split('>')[1].split('<')[0] : 0
+        const homeSet = matchString.split('_Label1"')[1] ? matchString.split('_Label1"')[1].split('>')[1].split('<')[0] : 0
+        const guestSet = matchString.split('_Label3"')[1] ? matchString.split('_Label3"')[1].split('>')[1].split('<')[0] : 0
         return {
             homeLogo: matchString.split('team-logo home')[1].split('&quot;')[1].split('&quot;')[0],
             guestLogo: matchString.split('team-logo guest')[1].split('&quot;')[1].split('&quot;')[0],
@@ -57,19 +54,71 @@ class LiveTVScreen extends Component {
             guestTeam: matchString.split('team-guest')[1].split('>')[1].split('<')[0],
             time: matchString.split('DataOra')[1].split(' - ')[1].split('<')[0],
             date: matchString.split('DataOra')[1].split('>')[1].split(' - ')[0],
-            streamingLink: streamingLink,
-            homeSet: homeSet,
-            gusetSet: guestSet,
+            streamLink: 'http://svbf-web.dataproject.com/' + streamingLink,
+            homeSets: homeSet,
+            guestSets: guestSet,
         }
     }
+    renderMatches() {
+        return (
+            <ScrollView>
+                <Text style={styles.h1}>Matches today</Text>
+                {this.state.matchesToday.map((match, i) => {
+                    if (match.length < 1) {
+                        return (
+                            <Text style={styles.text}>No livestreamed games today</Text>
+                        )
+                    } else {
+                        return (
+                            <MatchCard key={i} navigation={this.props.navigation} match={match} isdisabled={true} />
+                        )
+                    }
+                })}
+                <Text style={styles.h1PaddingTop}>Upcoming matches</Text>
+                {this.state.comingMatches.map((match, i) => {
+                    return (
+                        <MatchCard key={i} navigation={this.props.navigation} match={match} isdisabled={true} />
+                    )
+                })}
+                <Text style={styles.h1PaddingTop}>Previous matches</Text>
+                {this.state.previousMatches.map((match, i) => {
+                    return (
+                        <MatchCard key={i} navigation={this.props.navigation} match={match} isdisabled={true} />
+                    )
+                })}
+            </ScrollView>
+        )
+    }
     render() {
-
         return (
             <View>
-                <Text>Live TV</Text>
+                {this.renderMatches()}
             </View>
         )
     }
 }
+const styles = StyleSheet.create({
+    h1: {
+        textAlign: 'center',
+        fontSize: 30,
+        fontWeight: 'bold',
+        borderBottomWidth: 1,
+        marginLeft: 20,
+        marginRight: 20,
+    },
+    h1PaddingTop: {
+        textAlign: 'center',
+        fontSize: 30,
+        fontWeight: 'bold',
+        paddingTop: 40,
+        borderBottomWidth: 1,
+        marginLeft: 20,
+        marginRight: 20,
+    },
+    text: {
+        textAlign: 'center',
+        fontSize: 20,
+    }
 
+});
 export default LiveTVScreen;

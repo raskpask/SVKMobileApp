@@ -21,6 +21,7 @@
     },
     "android": {
       "versionCode": 1,
+      "permissions": [ ],
       "package": "com.volleyboll.client"
     },
     "web": {

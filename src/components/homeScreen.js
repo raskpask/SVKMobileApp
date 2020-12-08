@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
 import axios from 'react-native-axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Text, View, TouchableOpacity, Image, RefreshControl, TouchableOpacityBase } from 'react-native';
+import { Text, View, TouchableOpacity, Image, RefreshControl } from 'react-native';
 import { Card } from 'react-native-elements'
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { ScrollView } from 'react-native-gesture-handler';
 import { Picker } from '@react-native-picker/picker';
+
+import MatchCard from './matchCard';
 
 const keyCurrentMatchesMen = 'currentMatchesMen'
 const keyCurrentMatchesWomen = 'currentMatchesWomen'
@@ -171,14 +173,9 @@ class Home extends Component {
     renderTopComponent() {
         return (
             <View style={{ flexDirection: 'row' }}>
-                <TouchableOpacity style={{ width: '50%' }} onPress={() => this.props.navigation.navigate('Live TV')}>
+                <TouchableOpacity style={{ width: '100%' }} onPress={() => this.props.navigation.navigate('Live')}>
                     <Card>
-                        <Text style={{ textAlign: 'center', fontSize: 30 }}>Live TV</Text>
-                    </Card>
-                </TouchableOpacity>
-                <TouchableOpacity style={{ width: '50%' }} onPress={() => this.props.navigation.navigate('Livescore')}>
-                    <Card >
-                        <Text style={{ textAlign: 'center', fontSize: 30 }}>Livescore</Text>
+                        <Text style={{ textAlign: 'center', fontSize: 30 }}>LIVE</Text>
                     </Card>
                 </TouchableOpacity>
             </View >
@@ -201,46 +198,8 @@ class Home extends Component {
                         let isdisabled = false
                         if (match.homeSets == '0' && match.guestSets == '0')
                             isdisabled = true
-
                         return (
-                            <Card key={i}>
-                                <View
-                                    style={{
-                                        flexDirection: 'row',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                    }}>
-                                    {
-                                        match.streamLink != undefined ?
-                                            <Icon name="youtube-tv" size={30}
-                                                onPress={() => this.props.navigation.navigate('Livestream', { link: match.streamLink })}
-                                            /> : <Text></Text>
-                                    }
-                                    <Text style={{ maxWidth: 80, textAlign: 'center' }}>{match.date}</Text>
-                                    <Text style={{ maxWidth: 80, textAlign: 'center' }}>{match.time}</Text>
-                                    <TouchableOpacity
-                                        style={{
-                                            flexDirection: 'row',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            width: 200
-                                        }}
-                                        disabled={isdisabled}
-                                        onPress={() => this.props.navigation.navigate('Match statistics', { tempMatch: match })}
-                                    >
-                                        <Image source={{ uri: match.homeLogo }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
-                                        <View
-                                            style={{
-                                                flexDirection: 'column',
-
-                                            }}>
-                                            <Text style={{ textAlign: 'center', fontWeight: "bold" }}>{match.homeSets} - {match.guestSets} </Text>
-                                            <Text style={{ maxWidth: 80, textAlign: 'center', fontSize: 10 }}>{match.set1 ? '(' + match.set1 + ', ' + match.set2 + ', ' + match.set3 + (match.set4 ? ', ' + match.set4 : '') + (match.set5 ? ',' + match.set5 + ')' : ')') : ''}</Text>
-                                        </View>
-                                        <Image source={{ uri: match.guestLogo }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
-                                    </TouchableOpacity>
-                                </View>
-                            </Card>
+                            <MatchCard key={i} navigation={this.props.navigation} match={match} isdisabled={isdisabled}/>
                         )
                     })
                 }

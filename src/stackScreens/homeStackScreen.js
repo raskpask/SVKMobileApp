@@ -20,7 +20,7 @@ class HomeStackScreen extends Component {
                 {/* <HomeStack.Screen name="Home" component={HomeScreen} options={{ headerTitle: props =>  <Header screen='Home'/>  }} /> */}
                 <HomeStack.Screen name="Home" component={HomeScreen} />
                 <HomeStack.Screen name="Livescore" component={LivescoreSreen} />
-                <HomeStack.Screen name="Live TV" component={LiveTVScreen} />
+                <HomeStack.Screen name="Live" component={LiveTVScreen} />
                 <HomeStack.Screen name="Calendar" component={CalendarScreen} />
                 <HomeStack.Screen name="Standings" component={StandingsScreen} />
                 <HomeStack.Screen name="Livestream" component={LivestreamScreen} />
