@@ -5,6 +5,8 @@ import { Picker } from '@react-native-picker/picker';
 import axios from 'react-native-axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import MatchCard from './matchCard';
+
 const keyForMatchesMen = 'matchesMen'
 const keyForMatchesWomen = 'matchesWomen'
 
@@ -97,14 +99,26 @@ class Calendar extends Component {
                 statsLink += '&';
             }
         }
+        let streamLink
+        if (matchString.split('onclick="f_OpenInPlayer')[1]?.length == undefined) {
+            if(matchString.split('onclick="f_OpenStreaming')[1]?.length == undefined){
+                streamLink = undefined
+            } else {
+                streamLink = 'http://svbf-web.dataproject.com/' + matchString.split('onclick="f_OpenStreaming')[1].split('&quot;')[1].split('&quot;')[0]
+            }
+        } else {
+            streamLink = 'http://svbf-web.dataproject.com/' + matchString.split('onclick="f_OpenInPlayer')[1].split('&quot;')[1].split('&quot;')[0]
+        }
+
         const homeLogo = matchString.split('Home" class="Calendar_DIV_TeamLogo DIV_TeamLogo_Box" style="background-image:url(&quot;')[1].split('&quot;')[0]
         const guestLogo = matchString.split('Guest" class="Calendar_DIV_TeamLogo DIV_TeamLogo_Box" style="background-image:url(&quot;')[1].split('&quot;')[0]
         const homeTeam = this.getTeamFromLogo(homeLogo.split('_')[1].split('.')[0])
         const guestTeam = this.getTeamFromLogo(guestLogo.split('_')[1].split('.')[0])
         const matchData = {
-            homeWonSet: matchString.split('WonSetHome" value="')[1].split('"')[0],
-            guestWonSet: matchString.split('WonSetGuest" value="')[1].split('"')[0],
+            homeSets: matchString.split('WonSetHome" value="')[1].split('"')[0],
+            guestSets: matchString.split('WonSetGuest" value="')[1].split('"')[0],
             statsLink: 'http://svbf-web.dataproject.com/' + statsLink,
+            streamLink: streamLink,
 
             date: matchString.split('DataOra"')[1].split('>')[1].split(' -')[0],
             time: matchString.split('DataOra"')[1].split('>')[1].split(' - ')[1].split('<')[0],
@@ -255,32 +269,33 @@ class Calendar extends Component {
                         if (match.homeWonSet == '0' && match.guestWonSet == '0')
                             isdisabled = true
                         return (
-                            <TouchableOpacity
-                                disabled={isdisabled}
-                                key={i}
-                                onPress={() => this.props.navigation.navigate('Match statistics', { tempMatch: match })}
-                            >
-                                <Card>
-                                    <View
-                                        style={{
-                                            flexDirection: 'row',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                        }}>
-                                        <Text style={{ maxWidth: 80, textAlign: 'center' }}>{match.date} {match.time}</Text>
-                                        <Image source={{ uri: match.homeLogo }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
-                                        <View
-                                            style={{
-                                                flexDirection: 'column',
+                            <MatchCard key={i} navigation={this.props.navigation} match={match} isdisabled={isdisabled} />
+                            // <TouchableOpacity
+                            //     disabled={isdisabled}
+                            //     key={i}
+                            //     onPress={() => this.props.navigation.navigate('Match statistics', { tempMatch: match })}
+                            // >
+                            //     <Card>
+                            //         <View
+                            //             style={{
+                            //                 flexDirection: 'row',
+                            //                 justifyContent: 'space-between',
+                            //                 alignItems: 'center',
+                            //             }}>
+                            //             <Text style={{ maxWidth: 80, textAlign: 'center' }}>{match.date} {match.time}</Text>
+                            //             <Image source={{ uri: match.homeLogo }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
+                            //             <View
+                            //                 style={{
+                            //                     flexDirection: 'column',
 
-                                            }}>
-                                            <Text style={{ textAlign: 'center', fontWeight: "bold" }}>{match.homeWonSet} - {match.guestWonSet} </Text>
-                                            <Text style={{ maxWidth: 60, textAlign: 'center', fontSize: 10 }}>{match.arena}</Text>
-                                        </View>
-                                        <Image source={{ uri: match.guestLogo }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
-                                    </View>
-                                </Card>
-                            </TouchableOpacity>
+                            //                 }}>
+                            //                 <Text style={{ textAlign: 'center', fontWeight: "bold" }}>{match.homeWonSet} - {match.guestWonSet} </Text>
+                            //                 <Text style={{ maxWidth: 60, textAlign: 'center', fontSize: 10 }}>{match.arena}</Text>
+                            //             </View>
+                            //             <Image source={{ uri: match.guestLogo }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
+                            //         </View>
+                            //     </Card>
+                            // </TouchableOpacity>
                         )
                     })
                 }

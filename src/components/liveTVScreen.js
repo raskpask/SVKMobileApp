@@ -20,10 +20,10 @@ class LiveTVScreen extends Component {
         await axios.get('http://svbf-web.dataproject.com/MainStreaming.aspx')
             .then(function (response) {
                 const matches = this.extractAllGames(response.data)
-                if (matches.gamesToday == undefined) {
+                if (matches.matchesToday == undefined) {
                     this.setState({ matchesToday: [[]], previousMatches: matches.playedGames, comingMatches: matches.commingMatches })
                 } else {
-                    this.setState({ matchesToday: matches.gamesToday, previousMatches: matches.playedGames, comingMatches: matches.commingMatches })
+                    this.setState({ matchesToday: matches.matchesToday, previousMatches: matches.playedGames, comingMatches: matches.commingMatches })
                 }
             }.bind(this));
     }
@@ -66,7 +66,7 @@ class LiveTVScreen extends Component {
                 {this.state.matchesToday.map((match, i) => {
                     if (match.length < 1) {
                         return (
-                            <Text style={styles.text}>No livestreamed games today</Text>
+                            <Text key={i} style={styles.text}>No livestreamed games today</Text>
                         )
                     } else {
                         return (

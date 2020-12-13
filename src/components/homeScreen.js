@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import axios from 'react-native-axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Text, View, TouchableOpacity, Image, RefreshControl } from 'react-native';
+import { Text, View, TouchableOpacity, ImageBackground, RefreshControl } from 'react-native';
 import { Card } from 'react-native-elements'
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { ScrollView } from 'react-native-gesture-handler';
 import { Picker } from '@react-native-picker/picker';
 
@@ -22,6 +21,7 @@ class Home extends Component {
             currentMatchesM: [[]],
             currentMatchesW: [[]],
             league: '',
+            news: [],
             refreshing: false,
             loading: true,
 
@@ -43,10 +43,34 @@ class Home extends Component {
                 this.setState({ currentMatches: matchesW })
             }
             this.scrollToIndex(this.getTodayScrollIndex())
+            this.getNews()
         } catch (error) {
             console.log(error)
         }
         this.getCurrentMatches()
+
+    }
+    getNews() {
+        axios.get('http://svbf-web.dataproject.com/MainHome.aspx')
+            .then(function (response) {
+                const news = this.extractNews(response.data)
+                this.setState({ news: news })
+            }.bind(this));
+    }
+    extractNews(data) {
+        let listOfNews = []
+        const listOfNewsString = data.split('"Content_Main_RP_Competitions_sm_HyperLink')
+        for (let i = 1; i < listOfNewsString.length - 1; i++) {
+            listOfNews.push(this.extractSingleNews(listOfNewsString[i]))
+        }
+        return listOfNews
+    }
+    extractSingleNews(newsString) {
+        return {
+            title: newsString.split('TileTitle')[1].split('>')[1].split('<')[0].split('  ').join('').split('\n').join(''),
+            newsLink: newsString.split('href=')[1].split('"')[1].split('&amp;')[0],
+            image: newsString.split('background-image:url')[1].split('&quot;')[1].split('&quot;')[0].split(' ').join('%20'),
+        }
     }
     async getCurrentMatches() {
         let currentMatchesM = []
@@ -184,7 +208,7 @@ class Home extends Component {
     renderCurrentGames() {
         return (
             <ScrollView
-                style={{ height: 400, borderWidth: 0 }}
+                style={{ height: 375, borderWidth: 0 }}
                 refreshControl={
                     <RefreshControl
                         onRefresh={() => this.refreshPage()}
@@ -199,31 +223,61 @@ class Home extends Component {
                         if (match.homeSets == '0' && match.guestSets == '0')
                             isdisabled = true
                         return (
-                            <MatchCard key={i} navigation={this.props.navigation} match={match} isdisabled={isdisabled}/>
+                            <MatchCard key={i} navigation={this.props.navigation} match={match} isdisabled={isdisabled} />
                         )
                     })
                 }
             </ ScrollView>
         )
     }
-    render() {
+    renderPicker() {
         return (
-            <View>
-                {this.renderTopComponent()}
-                {this.renderCurrentGames()}
-                <View >
-                    <Picker
-                        selectedValue={this.state.league}
-                        onValueChange={(itemValue, itemIndex) => {
-                            if (!this.state.loading)
-                                this.changeLeague(itemValue)
-                        }}>
-                        <Picker.Item label={'Men'} value={'Men'} />
-                        <Picker.Item label={'Women'} value={'Women'} />
-                    </Picker>
-                </View>
+            <View >
+                <Picker
+                    selectedValue={this.state.league}
+                    onValueChange={(itemValue, itemIndex) => {
+                        if (!this.state.loading)
+                            this.changeLeague(itemValue)
+                    }}>
+                    <Picker.Item label={'Men'} value={'Men'} />
+                    <Picker.Item label={'Women'} value={'Women'} />
+                </Picker>
             </View>
         )
     }
+    renderNews() {
+        return (
+            <ScrollView>
+                {this.state.news.map(((news, i) => {
+                    return (
+                        <TouchableOpacity key={i}>
+                            <ImageBackground
+                                style={{
+                                    resizeMode: 'contain',
+                                    flex: 1,
+                                    aspectRatio: 1,
+                                    justifyContent: 'flex-end'
+                                }}
+                                source={{ uri: news.image }} >
+                                <Text style={{ color: "white", fontSize: 20, fontWeight: "bold", textAlign: 'center', backgroundColor: "#000000a0" }}>{news.title}</Text>
+                            </ImageBackground>
+                        </TouchableOpacity>
+                    )
+                }))}
+            </ScrollView>
+        )
+    }
+    render() {
+        return (
+            <ScrollView>
+                {this.renderTopComponent()}
+                {this.renderCurrentGames()}
+                <Text style={{ fontSize: 30, textAlign: 'center', marginTop: 20, marginBottom: 10 }}>News</Text>
+                {this.renderNews()}
+                {this.renderPicker()}
+            </ScrollView>
+        )
+    }
 }
+
 export default Home;
