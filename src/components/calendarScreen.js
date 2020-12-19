@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, Button, RefreshControl } from 'react-native';
-import { Card } from 'react-native-elements'
+import { View, Text, StyleSheet, Image, ScrollView, Button, RefreshControl } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'react-native-axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -270,32 +269,6 @@ class Calendar extends Component {
                             isdisabled = true
                         return (
                             <MatchCard key={i} navigation={this.props.navigation} match={match} isdisabled={isdisabled} />
-                            // <TouchableOpacity
-                            //     disabled={isdisabled}
-                            //     key={i}
-                            //     onPress={() => this.props.navigation.navigate('Match statistics', { tempMatch: match })}
-                            // >
-                            //     <Card>
-                            //         <View
-                            //             style={{
-                            //                 flexDirection: 'row',
-                            //                 justifyContent: 'space-between',
-                            //                 alignItems: 'center',
-                            //             }}>
-                            //             <Text style={{ maxWidth: 80, textAlign: 'center' }}>{match.date} {match.time}</Text>
-                            //             <Image source={{ uri: match.homeLogo }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
-                            //             <View
-                            //                 style={{
-                            //                     flexDirection: 'column',
-
-                            //                 }}>
-                            //                 <Text style={{ textAlign: 'center', fontWeight: "bold" }}>{match.homeWonSet} - {match.guestWonSet} </Text>
-                            //                 <Text style={{ maxWidth: 60, textAlign: 'center', fontSize: 10 }}>{match.arena}</Text>
-                            //             </View>
-                            //             <Image source={{ uri: match.guestLogo }} style={{ width: 50, height: 40, resizeMode: 'contain' }} />
-                            //         </View>
-                            //     </Card>
-                            // </TouchableOpacity>
                         )
                     })
                 }

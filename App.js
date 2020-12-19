@@ -6,6 +6,7 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import HomeStackScreen from './src/stackScreens/homeStackScreen';
 import CalendarStackScreen from './src/stackScreens/calendarStackScreen';
 import StandingsStackScreen from './src/stackScreens/standingsStackScreen';
+import StatsStackScreen from './src/stackScreens/statsStackScreen';
 
 const Tab = createBottomTabNavigator();
 export default function App() {
@@ -27,6 +28,15 @@ export default function App() {
           options={{
             tabBarIcon: ({ color, size }) => (
               <Icon name="calendar" color={color} size={size} />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Stats"
+          component={StatsStackScreen}
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <Icon name="volleyball" color={color} size={size} />
             ),
           }}
         />

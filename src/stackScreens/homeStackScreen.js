@@ -9,7 +9,7 @@ import LiveTVScreen from '../components/liveTVScreen';
 import LivescoreSreen from '../components/livescoreScreen';
 import LivestreamScreen from '../components/livestreamScreen';
 import MatchStatisticsScreen from '../components/gameStats';
-import Header from '../components/header';
+import News from '../components/newsScreen';
 
 const HomeStack = createStackNavigator();
 
@@ -20,6 +20,7 @@ class HomeStackScreen extends Component {
                 {/* <HomeStack.Screen name="Home" component={HomeScreen} options={{ headerTitle: props =>  <Header screen='Home'/>  }} /> */}
                 <HomeStack.Screen name="Home" component={HomeScreen} />
                 <HomeStack.Screen name="Livescore" component={LivescoreSreen} />
+                <HomeStack.Screen name="News" component={News} />
                 <HomeStack.Screen name="Live" component={LiveTVScreen} />
                 <HomeStack.Screen name="Calendar" component={CalendarScreen} />
                 <HomeStack.Screen name="Standings" component={StandingsScreen} />

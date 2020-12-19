@@ -68,7 +68,7 @@ class Home extends Component {
     extractSingleNews(newsString) {
         return {
             title: newsString.split('TileTitle')[1].split('>')[1].split('<')[0].split('  ').join('').split('\n').join(''),
-            newsLink: newsString.split('href=')[1].split('"')[1].split('&amp;')[0],
+            newsLink: 'http://svbf-web.dataproject.com/' + newsString.split('href=')[1].split('"')[1].split('&amp;')[0],
             image: newsString.split('background-image:url')[1].split('&quot;')[1].split('&quot;')[0].split(' ').join('%20'),
         }
     }
@@ -250,18 +250,20 @@ class Home extends Component {
             <ScrollView>
                 {this.state.news.map(((news, i) => {
                     return (
-                        <TouchableOpacity key={i}>
-                            <ImageBackground
-                                style={{
-                                    resizeMode: 'contain',
-                                    flex: 1,
-                                    aspectRatio: 1,
-                                    justifyContent: 'flex-end'
-                                }}
-                                source={{ uri: news.image }} >
-                                <Text style={{ color: "white", fontSize: 20, fontWeight: "bold", textAlign: 'center', backgroundColor: "#000000a0" }}>{news.title}</Text>
-                            </ImageBackground>
-                        </TouchableOpacity>
+                        <Card containerStyle={{ padding: 0}}>
+                            <TouchableOpacity key={i} onPress={() => this.props.navigation.navigate('News', { newsLink: news.newsLink })}>
+                                <ImageBackground
+                                    style={{
+                                        resizeMode: 'contain',
+                                        flex: 1,
+                                        aspectRatio: 1,
+                                        justifyContent: 'flex-end'
+                                    }}
+                                    source={{ uri: news.image }} >
+                                    <Text style={{ color: "white", fontSize: 20, fontWeight: "bold", textAlign: 'center', backgroundColor: "#000000a0" }}>{news.title}</Text>
+                                </ImageBackground>
+                            </TouchableOpacity>
+                        </Card>
                     )
                 }))}
             </ScrollView>
