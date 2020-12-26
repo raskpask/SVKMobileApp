@@ -25,7 +25,7 @@ class MatchCard extends Component {
                                 onPress={() => this.props.navigation.navigate('Livestream', { link: this.props.match.streamLink })}
                             /> : <Text></Text>
                     }
-                    <Text style={{ maxWidth: 80, textAlign: 'center' }}>{this.props.match.date}</Text>
+                    <Text style={{ maxWidth: 80, textAlign: 'center' }}>{this.props.match.date}{this.props.isCalendar !== true ? this.props.match.gender === 'men' ? 'Men' : 'Women' : ''} </Text>
                     <Text style={{ maxWidth: 80, textAlign: 'center' }}>{this.props.match.time}</Text>
                     <TouchableOpacity
                         style={{

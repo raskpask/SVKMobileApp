@@ -8,9 +8,7 @@ import { Picker } from '@react-native-picker/picker';
 
 import MatchCard from './matchCard';
 
-const keyCurrentMatchesMen = 'currentMatchesMen'
-const keyCurrentMatchesWomen = 'currentMatchesWomen'
-const keyLeague = 'league'
+const keyCurrentMatches = 'currentMatches'
 
 class Home extends Component {
     constructor(props) {
@@ -24,24 +22,14 @@ class Home extends Component {
             news: [],
             refreshing: false,
             loading: true,
+            isMatchToday: false
 
         };
     }
     async componentDidMount() {
         try {
-            const matchesM = JSON.parse(await AsyncStorage.getItem(keyCurrentMatchesMen))
-            const matchesW = JSON.parse(await AsyncStorage.getItem(keyCurrentMatchesWomen))
-            const league = JSON.parse(await AsyncStorage.getItem(keyLeague))
-            if (league == 'WomenStandard')
-                this.setState({ league: 'Women' })
-            else
-                this.setState({ league: 'Men' })
-
-            if ((this.state.league == 'Men' && !this.state.loading) || league == 'MenStandard') {
-                this.setState({ currentMatches: matchesM })
-            } else {
-                this.setState({ currentMatches: matchesW })
-            }
+            const matches = JSON.parse(await AsyncStorage.getItem(keyCurrentMatches))
+            this.setState({ currentMatches: matches })
             this.scrollToIndex(this.getTodayScrollIndex())
             this.getNews()
         } catch (error) {
@@ -74,51 +62,37 @@ class Home extends Component {
     }
     async getCurrentMatches() {
         let currentMatchesM = []
+        let currentMatchesW = []
         await axios.get('http://svbf-web.dataproject.com/CompetitionHome.aspx?ID=174')
             .then(function (response) {
-                currentMatchesM = this.extractCurrentMatches(response.data)
-                this.setState({ currentMatchesM: currentMatchesM })
-                if (this.state.league == 'Men' || this.state.league == 'MenStandard') {
-                    this.setState({ currentMatches: currentMatchesM })
-                }
-                try {
-                    AsyncStorage.setItem(keyCurrentMatchesMen, JSON.stringify(currentMatchesM))
-                } catch (e) {
-                    console.log(e)
-                }
-
+                currentMatchesM = this.extractCurrentMatches(response.data,'men')
             }.bind(this));
         await axios.get('http://svbf-web.dataproject.com/CompetitionHome.aspx?ID=175')
             .then(function (response) {
-                currentMatchesW = this.extractCurrentMatches(response.data)
+                currentMatchesW = this.extractCurrentMatches(response.data,'women')
                 this.setState({ currentMatchesW: currentMatchesW })
-                if ((this.state.league == 'Women' && !this.state.loading) || this.state.league == 'WomenStandard') {
-                    this.setState({ currentMatches: currentMatchesW })
-                }
-                try {
-                    AsyncStorage.setItem(keyCurrentMatchesWomen, JSON.stringify(currentMatchesW))
-                } catch (e) {
-                    console.log(e)
-                }
-
             }.bind(this));
-        this.setState({ loading: false })
+
+        let currentMatches = currentMatchesW.concat(currentMatchesM).sort((a, b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)).sort((a, b) => (a.date > b.date) ? 1 : ((b.date > a.date) ? -1 : 0))
+        AsyncStorage.setItem(keyCurrentMatches, JSON.stringify(currentMatches))
+        this.setState({ loading: false, currentMatches: currentMatches })
 
     }
-    extractCurrentMatches(data) {
+    extractCurrentMatches(data,gender) {
         const listOfGames = data.split('"DIV_Match_Main"')
         let matches = []
         for (let i = 1; i < listOfGames.length; i++) {
-            matches.push(this.extractOneMatch(listOfGames[i]))
+            matches.push(this.extractOneMatch(listOfGames[i],gender))
         }
         return matches
     }
-    extractOneMatch(matchString) {
+    extractOneMatch(matchString,gender) {
         let date
         let time
         if (matchString.split('"LB_DataOra"').length < 2) {
             time = matchString.split('"LB_Ora_Today"')[1].split('>')[1].split('<')[0]
             date = new Date().toISOString().slice(0, 10)
+            this.setState({ isMatchToday: true })
         } else {
             const dateAndTime = matchString.split('"LB_DataOra"')[1].split('>')[1].split('<')[0]
             date = dateAndTime.split(' - ')[0]
@@ -139,6 +113,7 @@ class Home extends Component {
             });
         }
         const matchData = {
+            gender: gender,
             date: date,
             time: time,
             streamLink: streamLink,
@@ -195,15 +170,17 @@ class Home extends Component {
         return index
     }
     renderTopComponent() {
-        return (
-            <View style={{ flexDirection: 'row' }}>
-                <TouchableOpacity style={{ width: '100%' }} onPress={() => this.props.navigation.navigate('Live')}>
-                    <Card>
-                        <Text style={{ textAlign: 'center', fontSize: 30 }}>LIVE</Text>
-                    </Card>
-                </TouchableOpacity>
-            </View >
-        )
+        if (this.state.isMatchToday) {
+            return (
+                <View style={{ flexDirection: 'row' }}>
+                    <TouchableOpacity style={{ width: '100%' }} onPress={() => this.props.navigation.navigate('Live')}>
+                        <Card>
+                            <Text style={{ textAlign: 'center', fontSize: 30 }}>LIVE</Text>
+                        </Card>
+                    </TouchableOpacity>
+                </View >
+            )
+        }
     }
     renderCurrentGames() {
         return (
@@ -250,7 +227,7 @@ class Home extends Component {
             <ScrollView>
                 {this.state.news.map(((news, i) => {
                     return (
-                        <Card containerStyle={{ padding: 0}}>
+                        <Card key={i} containerStyle={{ padding: 0 }}>
                             <TouchableOpacity key={i} onPress={() => this.props.navigation.navigate('News', { newsLink: news.newsLink })}>
                                 <ImageBackground
                                     style={{
@@ -273,10 +250,11 @@ class Home extends Component {
         return (
             <ScrollView>
                 {this.renderTopComponent()}
+                <Text style={{ fontSize: 30, textAlign: 'center', marginTop: 20, marginBottom: 10 }}>Matches</Text>
                 {this.renderCurrentGames()}
                 <Text style={{ fontSize: 30, textAlign: 'center', marginTop: 20, marginBottom: 10 }}>News</Text>
                 {this.renderNews()}
-                {this.renderPicker()}
+                {/* {this.renderPicker()} */}
             </ScrollView>
         )
     }

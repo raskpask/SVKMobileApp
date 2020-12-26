@@ -268,7 +268,7 @@ class Calendar extends Component {
                         if (match.homeWonSet == '0' && match.guestWonSet == '0')
                             isdisabled = true
                         return (
-                            <MatchCard key={i} navigation={this.props.navigation} match={match} isdisabled={isdisabled} />
+                            <MatchCard key={i} navigation={this.props.navigation} match={match} isdisabled={isdisabled} isCalendar={true} />
                         )
                     })
                 }

@@ -13,9 +13,9 @@ class GameStats extends Component {
         this.state = {
             tableheader: ['', 'SET', 'Points', 'Serve', 'Reception', 'Attack', 'Block'],
             tableHead: ['Nr', '1', '2', '3', '4', '5', 'Tot', 'BP', 'V-L', 'Tot', 'Miss', 'Ace', 'Tot', 'Miss', 'Pos %', 'Perf %', 'Tot', 'Miss', 'Block', 'Perf', 'Perf %', 'Eff %', 'Points'],
-            widthMainHead: [30, 25, 25, 25, 25, 25, 35, 35, 35, 45, 45, 40, 45, 45, 55, 55, 45, 45, 55, 40, 55, 60, 55],
-            widthMain: [30, 25, 25, 25, 25, 25, 35, 35, 35, 45, 45, 40, 45, 45, 55, 55, 45, 45, 55, 40, 55, 60, 55],
-            widthHeader: [30, 125, 105, 130, 200, 295, 55],
+            // widthMainHead: [40, 25, 25, 25, 25, 25, 35, 35, 35, 45, 45, 40, 45, 45, 55, 55, 45, 45, 55, 40, 55, 60, 55],
+            widthMain: [40, 25, 25, 25, 25, 25, 45, 45, 45, 45, 55, 40, 45, 55, 55, 65, 45, 60, 55, 50, 65, 60, 65],
+            widthHeader: [40, 125, 135, 140, 220, 335, 65],
 
             totalRow: [],
             totalHome: [],
@@ -186,7 +186,7 @@ class GameStats extends Component {
                             <ScrollView style={styles.dataWrapper, { flexDirection: 'row' }} horizontal={true}>
                                 <Table borderStyle={pageStyles.borderStyle}>
                                     <Row data={this.state.tableheader} widthArr={this.state.widthHeader} textStyle={styles.header} />
-                                    <Row data={this.state.tableHead} widthArr={this.state.widthMainHead} textStyle={pageStyles.tableText} />
+                                    <Row data={this.state.tableHead} widthArr={this.state.widthMain} textStyle={pageStyles.tableText} />
                                     {
                                         this.state.tableData.map((rowData, index) => (
                                             <Row
