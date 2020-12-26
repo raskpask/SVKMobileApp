@@ -5,16 +5,16 @@ import { StyleSheet, View, Image, TouchableOpacity, Button, ScrollView } from 'r
 import { Picker } from '@react-native-picker/picker';
 
 import pageStyles from '../style/basicStyle';
-const colWidth = 50
+const colWidth = 55
 
 class StandingsScreen extends Component {
     constructor(props) {
         super(props);
         this.state = {
             tableheader: ['Points', 'Matches', 'Set', 'Points', 'Results', 'Quotas'],
-            widthHeader: [55, 180, 100, 100, 210, 120],
+            widthHeader: [65, 190, 100, 100, 210, 120],
             tableHead: ['', 'Played', 'Won', 'Lost', 'Won', 'Lost', 'Won', 'Lost', '3-0', '3-1', '3-2', '2-3', '1-3', '0-3', 'Set', 'Point'],
-            widthMain: [55, 60, 60, 60, 50, 50, 50, 50, 35, 35, 35, 35, 35, 35, 60, 60],
+            widthMain: [65, 60, 60, 60, 50, 50, 50, 50, 35, 35, 35, 35, 35, 35, 60, 60],
             tableData: [],
             tableDataM: [],
             tableDataW: [],
