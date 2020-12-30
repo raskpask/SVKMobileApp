@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, ScrollView, Image, StyleSheet, TouchableOpacity, Alert, Dimensions } from 'react-native';
+import { View, Text, ScrollView, Image, StyleSheet, TextInput, Dimensions } from 'react-native';
 import axios from 'react-native-axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Table, Row, Col, TableWrapper } from 'react-native-table-component';
@@ -16,6 +16,7 @@ class StatsScreen extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            rawDataPlayers: [],
             allPlayers: [],
             filteredPlayers: [],
 
@@ -26,6 +27,8 @@ class StatsScreen extends Component {
             topTotalAces: [],
             topTotalKills: [],
             topTotalBlocks: [],
+
+            searchText: "",
 
             tableheader: ['', 'Total', 'Serve', 'Reception', 'Attack', 'Block'],
             tableHead: ['Nr', 'Team', 'Mat', 'Set', 'Pts', 'BP', 'W-L', 'Tot', 'Err', '!', '-', '+', 'OVP', 'Ace', 'Tot', 'Err', 'OVP', 'Pos %', 'Perf %', 'Tot', 'Err', 'Block', 'Perf', 'Perf %', 'Eff %', 'Tot', 'Err', 'Perf %', 'Points'],
@@ -46,9 +49,7 @@ class StatsScreen extends Component {
         } catch (e) {
             console.log(e)
         }
-        this.setState({ filteredPlayers: playerList.slice(0, 30), filteredNameList: nameList.slice(0, 30) })
-
-        // this.setState({ filteredPlayers: playerList, filteredNameList: nameList })
+        this.setState({ filteredPlayers: playerList.slice(0, 30), filteredNameList: nameList.slice(0, 30), allPlayers: playerList, nameList: nameList })
         this.setTop()
         this.setData()
     }
@@ -77,6 +78,7 @@ class StatsScreen extends Component {
         let playerList = []
         let nameList = []
         await axios.post('http://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData', { "startIndex": 0, "maximumRows": 148, "sortExpressions": "PointsTot_ForAllPlayerStats DESC", "filterExpressions": [], "compID": "174", "phaseID": "266", "playerSearchByName": "" }).then(function (response) {
+            this.setState({ rawDataPlayers: response.data.d })
             for (let i = 0; i < response.data.d.length; i++) {
                 playerList.push(this.extractData(response.data.d[i]))
                 nameList.push(this.formatName(response.data.d[i].Name, response.data.d[i].Surname))
@@ -155,6 +157,28 @@ class StatsScreen extends Component {
             data.BlockWin,
         ]
     }
+    newSearch(text) {
+        this.setState({ searchText: text })
+        this.filterPlayers(text)
+    }
+    filterPlayers(text) {
+        if (text === '') {
+            this.setState({ filteredNameList: this.state.nameList.slice(0, 30), filteredPlayers: this.state.allPlayers.slice(0, 30) })
+        }
+        let nameList = []
+        let playerList = []
+        this.state.rawDataPlayers.map((player, i) => {
+            const playerSearchString = player.Name + ' ' + player.Surname + ' ' + player.Team
+            if (playerSearchString.includes(text)) {
+
+                playerList.push(this.state.allPlayers[i])
+                nameList.push(this.state.nameList[i])
+            }
+        })
+        if (text !== '') {
+            this.setState({ filteredNameList: nameList, filteredPlayers: playerList })
+        }
+    }
     renderTopContent(title, category, pointName, pointNameDescription) {
         return (
             <Card>
@@ -194,10 +218,23 @@ class StatsScreen extends Component {
             </ScrollView>
         )
     }
+    renderSearch() {
+        return (
+            <View style={{ flexDirection: 'row', backgroundColor: 'white' }}>
+                <Text>Search for player or team: </Text>
+                <TextInput
+                    style={{ borderColor: 'grey', borderWidth: 1, margin: 15 }}
+                    onChangeText={(text) => this.newSearch(text)}
+                    value={this.state.searchText}
+                />
+            </View>
+        )
+    }
     render() {
         return (
-            <ScrollView style={styles.container} stickyHeaderIndices={[1]}>
+            <ScrollView style={styles.container} stickyHeaderIndices={[1,2]}>
                 {this.renderTop()}
+                {this.renderSearch()}
                 <TableWrapper style={{ flexDirection: 'row', backgroundColor: 'white' }}>
                     <ScrollView style={styles.dataWrapper, { flexDirection: 'row' }} horizontal={true} ref={'topScroll'} showsHorizontalScrollIndicator={false}>
                         <Table borderStyle={{ borderWidth: 1, borderColor: '#f1f8ff' }} >
@@ -223,8 +260,6 @@ class StatsScreen extends Component {
                             onScroll={(e) => this.refs.topScroll.scrollTo({ x: e.nativeEvent.contentOffset.x, animated: false })}
                         >
                             <Table borderStyle={pageStyles.borderStyle}>
-                                {/* <Row data={this.state.tableheader} widthArr={this.state.widthHeader} textStyle={styles.header} />
-                                    <Row data={this.state.tableHead} widthArr={this.state.widthMainHead} textStyle={pageStyles.tableText} /> */}
                                 {
                                     this.state.filteredPlayers.map((rowData, index) => (
                                         <Row
