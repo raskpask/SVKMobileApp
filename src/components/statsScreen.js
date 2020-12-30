@@ -7,6 +7,7 @@ import { Card, ListItem } from 'react-native-elements'
 
 const allStatsKey = 'allStats'
 const allNamesKey = 'allNames'
+const topKey = 'allTops'
 const colWidth = 130
 const windowWidth = Dimensions.get('window').width;
 import pageStyles from '../style/basicStyle';
@@ -36,7 +37,10 @@ class StatsScreen extends Component {
     async componentDidMount() {
         let playerList = []
         let nameList = []
+        let tops = {}
         try {
+            tops = JSON.parse(await AsyncStorage.getItem(topKey))
+            this.setState({ topTotalPoints: tops.points, topTotalKills: tops.kills, topTotalBlocks: tops.blocks, topTotalAces: tops.aces })
             playerList = JSON.parse(await AsyncStorage.getItem(allStatsKey))
             nameList = JSON.parse(await AsyncStorage.getItem(allNamesKey))
         } catch (e) {
@@ -53,6 +57,11 @@ class StatsScreen extends Component {
         const playerListTotalAces = await this.makeRequest('ServeWin DESC', '174')
         const playerListTotalKills = await this.makeRequest('SpikeWin DESC', '174')
         const playerListTotalBlocks = await this.makeRequest('BlockWin DESC', '174')
+        try {
+            AsyncStorage.setItem(topKey, JSON.stringify({ points: playerListTotalPoints, aces: playerListTotalAces, kills: playerListTotalKills, blocks: playerListTotalBlocks }))
+        } catch (e) {
+            console.log(e)
+        }
         this.setState({ topTotalPoints: playerListTotalPoints, topTotalAces: playerListTotalAces, topTotalKills: playerListTotalKills, topTotalBlocks: playerListTotalBlocks })
     }
     async makeRequest(sortExpression, compID) {
