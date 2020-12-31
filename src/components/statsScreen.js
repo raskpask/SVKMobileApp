@@ -3,13 +3,15 @@ import { View, Text, ScrollView, Image, StyleSheet, TextInput, Dimensions } from
 import axios from 'react-native-axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Table, Row, Col, TableWrapper } from 'react-native-table-component';
-import { Card, ListItem } from 'react-native-elements'
+import { Card } from 'react-native-elements'
+import { Picker } from '@react-native-picker/picker';
 
 const allStatsKey = 'allStats'
 const allNamesKey = 'allNames'
 const topKey = 'allTops'
 const colWidth = 130
 const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 import pageStyles from '../style/basicStyle';
 
 class StatsScreen extends Component {
@@ -29,6 +31,8 @@ class StatsScreen extends Component {
             topTotalBlocks: [],
 
             searchText: "",
+            chosenTeam: "All teams",
+            listOfTeams: ['All teams', 'Sollentuna', 'Vingåker', 'Lund', 'Södertelge', 'Hylte Halmstad', 'Floby', 'Habo', 'Örkelljunga', 'Uppsala', 'RIG Falköping', 'Falkenberg'],
 
             tableheader: ['', 'Total', 'Serve', 'Reception', 'Attack', 'Block'],
             tableHead: ['Nr', 'Team', 'Mat', 'Set', 'Pts', 'BP', 'W-L', 'Tot', 'Err', '!', '-', '+', 'OVP', 'Ace', 'Tot', 'Err', 'OVP', 'Pos %', 'Perf %', 'Tot', 'Err', 'Block', 'Perf', 'Perf %', 'Eff %', 'Tot', 'Err', 'Perf %', 'Points'],
@@ -157,22 +161,40 @@ class StatsScreen extends Component {
             data.BlockWin,
         ]
     }
-    newSearch(text) {
-        this.setState({ searchText: text })
-        this.filterPlayers(text)
+    newSearch(text, isTeam) {
+        if (isTeam) {
+            if (this.state.chosenTeam !== text) {
+                this.setState({ chosenTeam: text })
+            }
+        } else {
+            this.setState({ searchText: text })
+        }
+        this.filterPlayers(text, isTeam)
+        if (text !== 'All teams')
+            this.myScroll.scrollTo({ x: 0, y: windowHeight / 1.8, animated: true })
     }
-    filterPlayers(text) {
+    filterPlayers(text, isTeam) {
         if (text === '') {
+            text = this.state.chosenTeam
+        }
+        if ((text === '' || text === 'All teams') && this.state.chosenTeam === 'All teams') {
             this.setState({ filteredNameList: this.state.nameList.slice(0, 30), filteredPlayers: this.state.allPlayers.slice(0, 30) })
+            return
         }
         let nameList = []
         let playerList = []
         this.state.rawDataPlayers.map((player, i) => {
             const playerSearchString = player.Name + ' ' + player.Surname + ' ' + player.Team
-            if (playerSearchString.includes(text)) {
-
-                playerList.push(this.state.allPlayers[i])
-                nameList.push(this.state.nameList[i])
+            if (playerSearchString.includes(text) || text === '') {
+                if (this.state.chosenTeam === 'All teams' || isTeam) {
+                    playerList.push(this.state.allPlayers[i])
+                    nameList.push(this.state.nameList[i])
+                } else {
+                    if (playerSearchString.includes(this.state.chosenTeam)) {
+                        playerList.push(this.state.allPlayers[i])
+                        nameList.push(this.state.nameList[i])
+                    }
+                }
             }
         })
         if (text !== '') {
@@ -220,19 +242,41 @@ class StatsScreen extends Component {
     }
     renderSearch() {
         return (
-            <View style={{ flexDirection: 'row', backgroundColor: 'white' }}>
-                <Text>Search for player or team: </Text>
-                <TextInput
-                    style={{ borderColor: 'grey', borderWidth: 1, margin: 15 }}
-                    onChangeText={(text) => this.newSearch(text)}
-                    value={this.state.searchText}
-                />
+            <View style={{ backgroundColor: 'white' }}>
+                <Text style={{ fontSize: 30, textAlign: 'center', paddingTop: 20, paddingBottom: 20 }}>Stats</Text>
+                <View style={{ flexDirection: 'row' }}>
+                    <Text style={{ marginLeft: 15, marginBottom: 0 }}>Filter by player: </Text>
+                    <Text style={{ marginRight: windowWidth / 5, marginBottom: 0, marginLeft: 'auto' }}>Filter by team: </Text>
+                </View>
+                <View style={{ flexDirection: 'row' }}>
+                    <TextInput
+                        style={{ borderColor: 'grey', borderWidth: 1, margin: 15, marginTop: 0, width: windowWidth / 2, height: 30 }}
+                        onChangeText={(text) => this.newSearch(text, false)}
+                        value={this.state.searchText}
+                    />
+                    <Picker
+                        selectedValue={this.state.chosenTeam}
+                        style={{ height: 30, width: windowWidth / 2.5, margin: 15, marginTop: 0 }}
+                        onValueChange={(itemValue, itemIndex) => {
+                            this.newSearch(itemValue, true)
+                        }}>
+                        {this.state.listOfTeams.map((team, i) => {
+                            return (
+                                <Picker.Item
+                                    label={team}
+                                    value={team}
+                                    key={i}
+                                />
+                            )
+                        })}
+                    </Picker>
+                </View>
             </View>
         )
     }
     render() {
         return (
-            <ScrollView style={styles.container} stickyHeaderIndices={[1,2]}>
+            <ScrollView style={styles.container} stickyHeaderIndices={[2]} ref={(ref) => this.myScroll = ref}>
                 {this.renderTop()}
                 {this.renderSearch()}
                 <TableWrapper style={{ flexDirection: 'row', backgroundColor: 'white' }}>
@@ -248,7 +292,7 @@ class StatsScreen extends Component {
                     </ScrollView>
                 </TableWrapper>
                 <View>
-                    <TableWrapper style={{ flexDirection: 'row' }}>
+                    <TableWrapper style={{ flexDirection: 'row', marginBottom: windowHeight / 2 }}>
                         <Table borderStyle={{ borderWidth: 1, borderColor: '#f1f8ff' }} >
                             <Col
                                 data={this.state.filteredNameList}
