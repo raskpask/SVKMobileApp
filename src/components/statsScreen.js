@@ -205,11 +205,10 @@ class StatsScreen extends Component {
             this.setState({ filteredNameList: nameList, filteredPlayers: playerList })
         }
         if (playerList.length < 20) {
-            this.extractTotalrow(playerList)
+            this.extractTotalrow(playerList, nameList)
         }
     }
-    extractTotalrow(playerList) {
-        console.log(playerList)
+    extractTotalrow(playerList, nameList) {
         let totPoints = 0, bp = 0, wl = 0, serTot = 0, serErr = 0, serMedium = 0, serMinus = 0, serPlus = 0, serOVP = 0, serAce = 0, recTot = 0, recErr = 0, recOVP = 0, recPos = 0, recPerf = 0, attTot = 0, attErr = 0, attBlo = 0, attPerf = 0, bloTot = 0, bloErr = 0, bloPerf = 0
         playerList.map((player, i) => {
             totPoints += player[4]
@@ -225,20 +224,23 @@ class StatsScreen extends Component {
             recTot += player[14]
             recErr += player[15]
             recOVP += player[16]
-            recPos += parseInt(player[17].split(' ')[0]) / 100 * player[14]
-            recPerf += parseInt(player[18].split(' ')[0]) / 100 * player[14]
+            recPos += player[17] === '-' ? 0 : Math.round(parseInt(player[17].split(' ')[0]) / 100 * player[14])
+            recPerf += player[18] === '-' ? 0 : Math.round(parseInt(player[18].split(' ')[0]) / 100 * player[14])
             attTot += player[19]
             attErr += player[20]
             attBlo += player[21]
             attPerf += player[22]
             bloTot += player[25]
             bloErr += player[26]
-            bloPerf += player[27]
+            bloPerf += player[28]
         })
         const totalRow = ['-', '-', '-', '-', totPoints, bp, wl, serTot, serErr, serMedium, serMinus, serPlus, serOVP, serAce,
-         recTot, recErr, recOVP, Math.round(recPos / recTot * 100) + ' %', Math.round(recPerf / recTot * 100) + ' %',
-        attTot,attErr,attBlo,attPerf, Math.round(attPerf/attTot * 100) + ' %', Math.round((attPerf-attBlo-attErr) / attTot * 100) + ' %']
-        this.setState({ totalRow: totalRow })
+            recTot, recErr, recOVP, Math.round(recPos / recTot * 100) + ' %', Math.round(recPerf / recTot * 100) + ' %',
+            attTot, attErr, attBlo, attPerf, Math.round(attPerf / attTot * 100) + ' %', Math.round((attPerf - attBlo - attErr) / attTot * 100) + ' %',
+            bloTot, bloErr, Math.round(bloPerf / bloTot * 100) + ' %', bloPerf]
+
+        nameList[nameList.length] = 'Total'
+        this.setState({ totalRow: totalRow, filteredNameList: nameList })
     }
     loadAllPlayers() {
         this.setState({ isAllPlayersLoaded: true, filteredPlayers: this.state.allPlayers, filteredNameList: this.state.nameList })
@@ -292,6 +294,7 @@ class StatsScreen extends Component {
                 </View>
                 <View style={{ flexDirection: 'row' }}>
                     <TextInput
+                        clearButtonMode="while-editing"
                         style={{ borderColor: 'lightgrey', borderWidth: 1, margin: 15, marginTop: 0, width: windowWidth / 2, height: 30 }}
                         onChangeText={(text) => this.newSearch(text, false)}
                         value={this.state.searchText}
@@ -360,7 +363,7 @@ class StatsScreen extends Component {
                                 <Row
                                     data={this.state.totalRow}
                                     widthArr={widthMainHead}
-                                    textStyle={pageStyles.tableText}
+                                    textStyle={{ fontWeight: 'bold', margin: 6, textAlign: 'center' }}
                                 />
                             </Table>
                         </ScrollView>
