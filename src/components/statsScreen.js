@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import { View, Text, ScrollView, Image, StyleSheet, TextInput, Dimensions } from 'react-native';
+import { View, Text, ScrollView, Image, StyleSheet, TextInput, Dimensions, TouchableOpacity } from 'react-native';
 import axios from 'react-native-axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Table, Row, Col, TableWrapper } from 'react-native-table-component';
 import { Card } from 'react-native-elements'
 import { Picker } from '@react-native-picker/picker';
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const allStatsKey = 'allStats'
 const allNamesKey = 'allNames'
@@ -14,10 +15,19 @@ const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 import pageStyles from '../style/basicStyle';
 
+const widthMainHead = [30, 100, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 55, 55, 55, 40, 55, 45, 60, 65, 45, 45, 60, 55]
+const widthHeader = [130, 225, 315, 245, 320, 205]
+const tableheader = ['', 'Total', 'Serve', 'Reception', 'Attack', 'Block']
+const tableHead = ['Nr', 'Team', 'Mat', 'Set', 'Pts', 'BP', 'W-L', 'Tot', 'Err', '!', '-', '+', 'OVP', 'Ace', 'Tot', 'Err', 'OVP', 'Pos %', 'Perf %', 'Tot', 'Err', 'Block', 'Perf', 'Perf %', 'Eff %', 'Tot', 'Err', 'Perf %', 'Points']
+
 class StatsScreen extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            isAllPlayersLoaded: false,
+            showTotalRow: false,
+            totalRow: [],
+
             rawDataPlayers: [],
             allPlayers: [],
             filteredPlayers: [],
@@ -33,12 +43,6 @@ class StatsScreen extends Component {
             searchText: "",
             chosenTeam: "All teams",
             listOfTeams: ['All teams', 'Sollentuna', 'Vingåker', 'Lund', 'Södertelge', 'Hylte Halmstad', 'Floby', 'Habo', 'Örkelljunga', 'Uppsala', 'RIG Falköping', 'Falkenberg'],
-
-            tableheader: ['', 'Total', 'Serve', 'Reception', 'Attack', 'Block'],
-            tableHead: ['Nr', 'Team', 'Mat', 'Set', 'Pts', 'BP', 'W-L', 'Tot', 'Err', '!', '-', '+', 'OVP', 'Ace', 'Tot', 'Err', 'OVP', 'Pos %', 'Perf %', 'Tot', 'Err', 'Block', 'Perf', 'Perf %', 'Eff %', 'Tot', 'Err', 'Perf %', 'Points'],
-            widthMainHead: [30, 100, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 55, 55, 55, 40, 55, 45, 60, 65, 45, 45, 60, 55],
-            widthMain: [30, 25, 25, 25, 25, 25, 35, 35, 35, 45, 45, 40, 45, 45, 55, 55, 45, 45, 55, 40, 55, 60, 55],
-            widthHeader: [130, 225, 315, 245, 320, 205],
         }
     }
     async componentDidMount() {
@@ -200,6 +204,44 @@ class StatsScreen extends Component {
         if (text !== '') {
             this.setState({ filteredNameList: nameList, filteredPlayers: playerList })
         }
+        if (playerList.length < 20) {
+            this.extractTotalrow(playerList)
+        }
+    }
+    extractTotalrow(playerList) {
+        console.log(playerList)
+        let totPoints = 0, bp = 0, wl = 0, serTot = 0, serErr = 0, serMedium = 0, serMinus = 0, serPlus = 0, serOVP = 0, serAce = 0, recTot = 0, recErr = 0, recOVP = 0, recPos = 0, recPerf = 0, attTot = 0, attErr = 0, attBlo = 0, attPerf = 0, bloTot = 0, bloErr = 0, bloPerf = 0
+        playerList.map((player, i) => {
+            totPoints += player[4]
+            bp += player[5]
+            wl += player[6]
+            serTot += player[7]
+            serErr += player[8]
+            serMedium += player[9]
+            serMinus += player[10]
+            serPlus += player[11]
+            serOVP += player[12]
+            serAce += player[13]
+            recTot += player[14]
+            recErr += player[15]
+            recOVP += player[16]
+            recPos += parseInt(player[17].split(' ')[0]) / 100 * player[14]
+            recPerf += parseInt(player[18].split(' ')[0]) / 100 * player[14]
+            attTot += player[19]
+            attErr += player[20]
+            attBlo += player[21]
+            attPerf += player[22]
+            bloTot += player[25]
+            bloErr += player[26]
+            bloPerf += player[27]
+        })
+        const totalRow = ['-', '-', '-', '-', totPoints, bp, wl, serTot, serErr, serMedium, serMinus, serPlus, serOVP, serAce,
+         recTot, recErr, recOVP, Math.round(recPos / recTot * 100) + ' %', Math.round(recPerf / recTot * 100) + ' %',
+        attTot,attErr,attBlo,attPerf, Math.round(attPerf/attTot * 100) + ' %', Math.round((attPerf-attBlo-attErr) / attTot * 100) + ' %']
+        this.setState({ totalRow: totalRow })
+    }
+    loadAllPlayers() {
+        this.setState({ isAllPlayersLoaded: true, filteredPlayers: this.state.allPlayers, filteredNameList: this.state.nameList })
     }
     renderTopContent(title, category, pointName, pointNameDescription) {
         return (
@@ -250,7 +292,7 @@ class StatsScreen extends Component {
                 </View>
                 <View style={{ flexDirection: 'row' }}>
                     <TextInput
-                        style={{ borderColor: 'grey', borderWidth: 1, margin: 15, marginTop: 0, width: windowWidth / 2, height: 30 }}
+                        style={{ borderColor: 'lightgrey', borderWidth: 1, margin: 15, marginTop: 0, width: windowWidth / 2, height: 30 }}
                         onChangeText={(text) => this.newSearch(text, false)}
                         value={this.state.searchText}
                     />
@@ -286,13 +328,13 @@ class StatsScreen extends Component {
                             <Row data={['Name']} widthArr={[colWidth]} textStyle={pageStyles.tableText} />
                         </Table>
                         <Table borderStyle={pageStyles.borderStyle}>
-                            <Row data={this.state.tableheader} widthArr={this.state.widthHeader} textStyle={styles.header} />
-                            <Row data={this.state.tableHead} widthArr={this.state.widthMainHead} textStyle={pageStyles.tableText} />
+                            <Row data={tableheader} widthArr={widthHeader} textStyle={styles.header} />
+                            <Row data={tableHead} widthArr={widthMainHead} textStyle={pageStyles.tableText} />
                         </Table>
                     </ScrollView>
                 </TableWrapper>
-                <View>
-                    <TableWrapper style={{ flexDirection: 'row', marginBottom: windowHeight / 2 }}>
+                <View style={{ marginBottom: windowHeight / 2 }}>
+                    <TableWrapper style={{ flexDirection: 'row' }}>
                         <Table borderStyle={{ borderWidth: 1, borderColor: '#f1f8ff' }} >
                             <Col
                                 data={this.state.filteredNameList}
@@ -309,15 +351,34 @@ class StatsScreen extends Component {
                                         <Row
                                             key={index}
                                             data={rowData}
-                                            widthArr={this.state.widthMainHead}
+                                            widthArr={widthMainHead}
                                             style={[styles.row, index % 2 && pageStyles.tableBackgroundColor]}
                                             textStyle={pageStyles.tableText}
                                         />
                                     ))
                                 }
+                                <Row
+                                    data={this.state.totalRow}
+                                    widthArr={widthMainHead}
+                                    textStyle={pageStyles.tableText}
+                                />
                             </Table>
                         </ScrollView>
                     </TableWrapper>
+                    {this.state.isAllPlayersLoaded ?
+                        <TouchableOpacity
+                            onPress={() => this.myScroll.scrollTo({ x: 0, y: windowHeight / 1.8, animated: true })}
+                        >
+                            <Icon name="arrow-up-circle-outline" size={30} style={{ textAlign: 'center', marginTop: 10 }} />
+                        </TouchableOpacity>
+                        :
+                        <TouchableOpacity
+                            onPress={() => this.loadAllPlayers()}
+                        >
+                            <Icon name="arrow-down-circle-outline" size={30} style={{ textAlign: 'center', marginTop: 10 }} />
+                        </TouchableOpacity>
+                    }
+
                 </View>
             </ScrollView >
         )
