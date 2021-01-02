@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, ScrollView, Image, StyleSheet, TextInput, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, StyleSheet, TextInput, Dimensions, TouchableOpacity } from 'react-native';
 import axios from 'react-native-axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Table, Row, Col, TableWrapper } from 'react-native-table-component';
@@ -15,16 +15,17 @@ const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 import pageStyles from '../style/basicStyle';
 
-const widthMainHead = [30, 100, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 55, 55, 55, 40, 55, 45, 60, 65, 45, 45, 60, 55]
-const widthHeader = [130, 225, 315, 245, 320, 205]
+const widthMainHead = [30, 100, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 55, 45, 45, 45, 45, 45, 55, 55, 55, 55, 40, 55, 45, 60, 65, 45, 45, 60, 55]
+const widthHeader = [130, 225, 370, 390, 320, 205]
 const tableheader = ['', 'Total', 'Serve', 'Reception', 'Attack', 'Block']
-const tableHead = ['Nr', 'Team', 'Mat', 'Set', 'Pts', 'BP', 'W-L', 'Tot', 'Err', '!', '-', '+', 'OVP', 'Ace', 'Tot', 'Err', 'OVP', 'Pos %', 'Perf %', 'Tot', 'Err', 'Block', 'Perf', 'Perf %', 'Eff %', 'Tot', 'Err', 'Perf %', 'Points']
+const tableHead = ['Nr', 'Team', 'Mat', 'Set', 'Pts', 'BP', 'W-L', 'Tot', 'Err', '!', '-', '+', 'OVP', 'Ace', ' Eff %', 'Tot', 'Err', 'OVP', '-', '!', 'Pos %', 'Perf %', 'Eff %', 'Tot', 'Err', 'Block', 'Perf', 'Perf %', 'Eff %', 'Tot', 'Err', 'Perf %', 'Points']
 
 class StatsScreen extends Component {
     constructor(props) {
         super(props);
         this.state = {
             isAllPlayersLoaded: false,
+            isLoading: true,
             showTotalRow: false,
             totalRow: [],
 
@@ -57,15 +58,15 @@ class StatsScreen extends Component {
         } catch (e) {
             console.log(e)
         }
-        this.setState({ filteredPlayers: playerList.slice(0, 30), filteredNameList: nameList.slice(0, 30), allPlayers: playerList, nameList: nameList })
+        this.setState({ filteredPlayers: playerList.slice(0, 30), filteredNameList: nameList.slice(0, 30), allPlayers: playerList, nameList: nameList, isLoading: false })
         this.setTop()
         this.setData()
     }
     async setTop() {
-        const playerListTotalPoints = await this.makeRequest('PointsTot_ForAllPlayerStats DESC', '174')
-        const playerListTotalAces = await this.makeRequest('ServeWin DESC', '174')
-        const playerListTotalKills = await this.makeRequest('SpikeWin DESC', '174')
-        const playerListTotalBlocks = await this.makeRequest('BlockWin DESC', '174')
+        const playerListTotalPoints = await this.makeRequest('PointsTot_ForAllPlayerStats DESC', '174', 10)
+        const playerListTotalAces = await this.makeRequest('ServeWin DESC', '174', 10)
+        const playerListTotalKills = await this.makeRequest('SpikeWin DESC', '174', 10)
+        const playerListTotalBlocks = await this.makeRequest('BlockWin DESC', '174', 10)
         try {
             AsyncStorage.setItem(topKey, JSON.stringify({ points: playerListTotalPoints, aces: playerListTotalAces, kills: playerListTotalKills, blocks: playerListTotalBlocks }))
         } catch (e) {
@@ -73,9 +74,9 @@ class StatsScreen extends Component {
         }
         this.setState({ topTotalPoints: playerListTotalPoints, topTotalAces: playerListTotalAces, topTotalKills: playerListTotalKills, topTotalBlocks: playerListTotalBlocks })
     }
-    async makeRequest(sortExpression, compID) {
+    async makeRequest(sortExpression, compID, noOfRows) {
         let playerList = []
-        await axios.post('http://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData', { "startIndex": 0, "maximumRows": 10, "sortExpressions": sortExpression, "filterExpressions": [], "compID": compID, "phaseID": "266", "playerSearchByName": "" }).then(function (response) {
+        await axios.post('http://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData', { "startIndex": 0, "maximumRows": noOfRows, "sortExpressions": sortExpression, "filterExpressions": [], "compID": compID, "phaseID": "266", "playerSearchByName": "" }).then(function (response) {
             for (let i = 0; i < response.data.d.length; i++) {
                 playerList.push(this.extractNameAndStats(response.data.d[i]))
             }
@@ -148,11 +149,15 @@ class StatsScreen extends Component {
             data.ServePlus,
             data.ServeHP,
             data.ServeWin,
+            totalServ > 20 ? Math.round((data.ServeWin * 2 + data.ServePlus + data.ServeHP * 2 - data.ServeMinus - data.ServeErr * 2) / totalServ * 100) + ' %' : '-',
             totalRec,
             data.RecErr,
             data.RecHP,
-            Math.round((data.RecPlus + data.RecWin) / totalRec * 100) ? Math.round((data.RecPlus + data.RecWin) / totalRec * 100) + ' %' : '-',
-            Math.round((data.RecWin) / totalRec * 100) ? Math.round((data.RecWin) / totalRec * 100) + ' %' : '-',
+            data.RecMinus,
+            data.RecEx,
+            (data.RecPlus + data.RecWin) / totalRec * 100 ? Math.round((data.RecPlus + data.RecWin) / totalRec * 100) + ' %' : '-',
+            (data.RecWin) / totalRec * 100 ? Math.round((data.RecWin) / totalRec * 100) + ' %' : '-',
+            totalRec > 20 ? Math.round((data.RecWin * 2 + data.RecPlus - data.RecMinus - data.RecErr * 2 - data.RecHP * 2) / totalRec * 100) + ' %' : '-',
             totalAtt,
             data.SpikeErr,
             data.SpikeHP,
@@ -202,14 +207,12 @@ class StatsScreen extends Component {
             }
         })
         if (text !== '') {
-            this.setState({ filteredNameList: nameList, filteredPlayers: playerList })
+            this.setState({ filteredNameList: nameList, filteredPlayers: playerList, isAllPlayersLoaded: true })
         }
-        if (playerList.length < 20) {
-            this.extractTotalrow(playerList, nameList)
-        }
+        this.extractTotalrow(playerList, nameList)
     }
     extractTotalrow(playerList, nameList) {
-        let totPoints = 0, bp = 0, wl = 0, serTot = 0, serErr = 0, serMedium = 0, serMinus = 0, serPlus = 0, serOVP = 0, serAce = 0, recTot = 0, recErr = 0, recOVP = 0, recPos = 0, recPerf = 0, attTot = 0, attErr = 0, attBlo = 0, attPerf = 0, bloTot = 0, bloErr = 0, bloPerf = 0
+        let totPoints = 0, bp = 0, wl = 0, serTot = 0, serErr = 0, serMedium = 0, serMinus = 0, serPlus = 0, serOVP = 0, serAce = 0, recTot = 0, recErr = 0, recOVP = 0, recMed = 0, recMin = 0, recPos = 0, recPerf = 0, attTot = 0, attErr = 0, attBlo = 0, attPerf = 0, bloTot = 0, bloErr = 0, bloPerf = 0
         playerList.map((player, i) => {
             totPoints += player[4]
             bp += player[5]
@@ -221,24 +224,26 @@ class StatsScreen extends Component {
             serPlus += player[11]
             serOVP += player[12]
             serAce += player[13]
-            recTot += player[14]
-            recErr += player[15]
-            recOVP += player[16]
-            recPos += player[17] === '-' ? 0 : Math.round(parseInt(player[17].split(' ')[0]) / 100 * player[14])
-            recPerf += player[18] === '-' ? 0 : Math.round(parseInt(player[18].split(' ')[0]) / 100 * player[14])
-            attTot += player[19]
-            attErr += player[20]
-            attBlo += player[21]
-            attPerf += player[22]
-            bloTot += player[25]
-            bloErr += player[26]
-            bloPerf += player[28]
+            recTot += player[15]
+            recErr += player[16]
+            recOVP += player[17]
+            recMin += player[18]
+            recMed += player[19]
+            recPos += player[20] === '-' ? 0 : Math.round(parseInt(player[20].split(' ')[0]) / 100 * player[15])
+            recPerf += player[21] === '-' ? 0 : Math.round(parseInt(player[21].split(' ')[0]) / 100 * player[15])
+            attTot += player[23]
+            attErr += player[24]
+            attBlo += player[25]
+            attPerf += player[26]
+            bloTot += player[29]
+            bloErr += player[30]
+            bloPerf += player[32]
         })
-        const totalRow = ['-', '-', '-', '-', totPoints, bp, wl, serTot, serErr, serMedium, serMinus, serPlus, serOVP, serAce,
-            recTot, recErr, recOVP, Math.round(recPos / recTot * 100) + ' %', Math.round(recPerf / recTot * 100) + ' %',
+        const totalRow = ['-', '-', '-', '-', totPoints, bp, wl, serTot, serErr, serMedium, serMinus, serPlus, serOVP, serAce, (serTot > 20) ? Math.round((serAce * 2 + serOVP * 2 + serPlus - serMinus - serErr * 2) / serTot * 100) + ' %' : '-',
+            recTot, recErr, recOVP, recMin, recMed, Math.round(recPos / recTot * 100) + ' %', Math.round(recPerf / recTot * 100) + ' %', (recTot > 20) ? Math.round((recPerf + recPos - recMin - recOVP * 2 - recErr * 2) / recTot * 100) + ' %' : '-',
             attTot, attErr, attBlo, attPerf, Math.round(attPerf / attTot * 100) + ' %', Math.round((attPerf - attBlo - attErr) / attTot * 100) + ' %',
-            bloTot, bloErr, Math.round(bloPerf / bloTot * 100) + ' %', bloPerf]
-
+            bloTot, bloErr, Math.round(bloPerf / bloTot * 100) + ' %', bloPerf
+        ]
         nameList[nameList.length] = 'Total'
         this.setState({ totalRow: totalRow, filteredNameList: nameList })
     }
@@ -298,8 +303,10 @@ class StatsScreen extends Component {
                         style={{ borderColor: 'lightgrey', borderWidth: 1, margin: 15, marginTop: 0, width: windowWidth / 2, height: 30 }}
                         onChangeText={(text) => this.newSearch(text, false)}
                         value={this.state.searchText}
+                        editable={!this.state.isLoading}
                     />
                     <Picker
+                        enabled={!this.state.isLoading}
                         selectedValue={this.state.chosenTeam}
                         style={{ height: 30, width: windowWidth / 2.5, margin: 15, marginTop: 0 }}
                         onValueChange={(itemValue, itemIndex) => {
@@ -368,7 +375,9 @@ class StatsScreen extends Component {
                             </Table>
                         </ScrollView>
                     </TableWrapper>
-                    {this.state.isAllPlayersLoaded ?
+                    {this.state.isLoading ?
+                    <ActivityIndicator size="large" color='lightgrey' style={{margin: 10}}/> :
+                    this.state.isAllPlayersLoaded ?
                         <TouchableOpacity
                             onPress={() => this.myScroll.scrollTo({ x: 0, y: windowHeight / 1.8, animated: true })}
                         >
@@ -381,7 +390,6 @@ class StatsScreen extends Component {
                             <Icon name="arrow-down-circle-outline" size={30} style={{ textAlign: 'center', marginTop: 10 }} />
                         </TouchableOpacity>
                     }
-
                 </View>
             </ScrollView >
         )

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'react-native-axios';
 import { Table, Row, Col, TableWrapper } from 'react-native-table-component';
-import { StyleSheet, View, Image, TouchableOpacity, Button, ScrollView } from 'react-native';
+import { StyleSheet, View, Image, ActivityIndicator, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
 import pageStyles from '../style/basicStyle';
@@ -26,23 +26,25 @@ class StandingsScreen extends Component {
             team: [],
             teamRanking: 0,
             popupTeamData: [],
-            activeLeaguage: 'Men'
+            activeLeaguage: 'Men',
+            isLoading: true
         }
     }
-    componentDidMount() {
+    async componentDidMount() {
         let teams
         let teamsW
-        axios.get('http://svbf-web.dataproject.com/CompetitionStandings.aspx?ID=174&PID=266')
+        await axios.get('http://svbf-web.dataproject.com/CompetitionStandings.aspx?ID=174&PID=266')
             .then(function (response) {
                 teams = this.extractStandings(response.data)
                 this.createTableData(teams, 'Men')
             }.bind(this));
 
-        axios.get('http://svbf-web.dataproject.com/CompetitionStandings.aspx?ID=175&PID=247')
+        await axios.get('http://svbf-web.dataproject.com/CompetitionStandings.aspx?ID=175&PID=247')
             .then(function (response) {
                 teamsW = this.extractStandings(response.data)
                 this.createTableData(teamsW, 'Women')
             }.bind(this));
+        this.setState({isLoading: false})
     }
     createTableData(teams, league) {
         let logoRow = []
@@ -112,41 +114,49 @@ class StandingsScreen extends Component {
             this.setState({ tableData: this.state.tableDataW, logoRow: this.state.logoRowW })
         }
     }
+    renderStandings() {
+        return (
+            <ScrollView horizontal={false}>
+                <View>
+                    <TableWrapper style={{ flexDirection: 'row' }}>
+                        <Table borderStyle={{ borderWidth: 1, borderColor: '#f1f8ff' }} >
+                            <Row data={['Team']} widthArr={[colWidth]} textStyle={pageStyles.tableText} style={{ height: 32.5 }} />
+                            <Row data={['']} widthArr={[colWidth]} textStyle={pageStyles.tableText} />
+                            <Col
+                                data={this.state.logoRow}
+                                width={colWidth}
+                                textStyle={pageStyles.tableText}
+                            />
+                        </Table>
+                        <ScrollView style={styles.dataWrapper, { flexDirection: 'row' }} horizontal={true}>
+                            <Table borderStyle={pageStyles.borderStyle}>
+                                <Row data={this.state.tableheader} widthArr={this.state.widthHeader} textStyle={pageStyles.tableText} />
+                                <Row data={this.state.tableHead} widthArr={this.state.widthMain} textStyle={pageStyles.tableText} />
+                                {
+                                    this.state.tableData.map((rowData, index) => (
+                                        <Row
+                                            key={index}
+                                            data={rowData}
+                                            widthArr={this.state.widthMain}
+                                            style={[styles.row, index % 2 && pageStyles.tableBackgroundColor]}
+                                            textStyle={pageStyles.tableText}
+                                        />
+                                    ))
+                                }
+                            </Table>
+                        </ScrollView>
+                    </TableWrapper>
+                </View>
+            </ScrollView>
+        )
+    }
     render() {
         return (
             <View style={styles.container}>
-                <ScrollView horizontal={false}>
-                    <View>
-                        <TableWrapper style={{ flexDirection: 'row' }}>
-                            <Table borderStyle={{ borderWidth: 1, borderColor: '#f1f8ff' }} >
-                                <Row data={['Team']} widthArr={[colWidth]} textStyle={pageStyles.tableText} style={{ height: 32.5 }} />
-                                <Row data={['']} widthArr={[colWidth]} textStyle={pageStyles.tableText} />
-                                <Col
-                                    data={this.state.logoRow}
-                                    width={colWidth}
-                                    textStyle={pageStyles.tableText}
-                                />
-                            </Table>
-                            <ScrollView style={styles.dataWrapper, { flexDirection: 'row' }} horizontal={true}>
-                                <Table borderStyle={pageStyles.borderStyle}>
-                                    <Row data={this.state.tableheader} widthArr={this.state.widthHeader} textStyle={pageStyles.tableText} />
-                                    <Row data={this.state.tableHead} widthArr={this.state.widthMain} textStyle={pageStyles.tableText} />
-                                    {
-                                        this.state.tableData.map((rowData, index) => (
-                                            <Row
-                                                key={index}
-                                                data={rowData}
-                                                widthArr={this.state.widthMain}
-                                                style={[styles.row, index % 2 && pageStyles.tableBackgroundColor]}
-                                                textStyle={pageStyles.tableText}
-                                            />
-                                        ))
-                                    }
-                                </Table>
-                            </ScrollView>
-                        </TableWrapper>
-                    </View>
-                </ScrollView>
+                {this.state.isLoading ?
+                    <ActivityIndicator size="large" color='lightgrey' style={{ margin: 10 }} /> :
+                    this.renderStandings()
+                }
                 <Picker
                     selectedValue={this.state.activeLeaguage}
                     style={{ bottom: 0, marginTop: 40 }}

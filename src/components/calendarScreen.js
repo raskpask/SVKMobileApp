@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, Button, RefreshControl } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Image, ScrollView, Button, RefreshControl, Text } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'react-native-axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -100,7 +100,7 @@ class Calendar extends Component {
         }
         let streamLink
         if (matchString.split('onclick="f_OpenInPlayer')[1]?.length == undefined) {
-            if(matchString.split('onclick="f_OpenStreaming')[1]?.length == undefined){
+            if (matchString.split('onclick="f_OpenStreaming')[1]?.length == undefined) {
                 streamLink = undefined
             } else {
                 streamLink = 'http://svbf-web.dataproject.com/' + matchString.split('onclick="f_OpenStreaming')[1].split('&quot;')[1].split('&quot;')[0]
@@ -331,7 +331,10 @@ class Calendar extends Component {
         return (
             <View style={{ flex: 1 }}>
                 {this.renderTop()}
-                {this.renderCards()}
+                {this.state.loading ?
+                    <ActivityIndicator size="large" color='lightgrey' style={{ margin: 10 }} /> :
+                    this.renderCards()
+                }
             </View>
         )
     }
