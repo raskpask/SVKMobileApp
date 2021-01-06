@@ -13,7 +13,6 @@ class GameStats extends Component {
         this.state = {
             tableheader: ['', 'SET', 'Points', 'Serve', 'Reception', 'Attack', 'Block'],
             tableHead: ['Nr', '1', '2', '3', '4', '5', 'Tot', 'BP', 'V-L', 'Tot', 'Miss', 'Ace', 'Tot', 'Miss', 'Pos %', 'Perf %', 'Tot', 'Miss', 'Block', 'Perf', 'Perf %', 'Eff %', 'Points'],
-            // widthMainHead: [40, 25, 25, 25, 25, 25, 35, 35, 35, 45, 45, 40, 45, 45, 55, 55, 45, 45, 55, 40, 55, 60, 55],
             widthMain: [40, 25, 25, 25, 25, 25, 45, 45, 45, 45, 55, 40, 45, 55, 55, 65, 45, 60, 55, 50, 65, 60, 65],
             widthHeader: [40, 125, 135, 140, 220, 335, 65],
 

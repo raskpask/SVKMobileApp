@@ -15,19 +15,56 @@ const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 import pageStyles from '../style/basicStyle';
 
-const widthMainHead = [30, 100, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 55, 45, 45, 45, 45, 45, 55, 55, 55, 55, 40, 55, 45, 60, 65, 45, 45, 60, 55]
-const widthHeader = [130, 225, 370, 390, 320, 205]
+const widthMainHead = [40, 100, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 55, 45, 45, 45, 45, 45, 55, 55, 55, 55, 40, 55, 45, 60, 65, 45, 45, 60, 55]
+const widthHeader = [140, 225, 370, 390, 320, 205]
 const tableheader = ['', 'Total', 'Serve', 'Reception', 'Attack', 'Block']
-const tableHead = ['Nr', 'Team', 'Mat', 'Set', 'Pts', 'BP', 'W-L', 'Tot', 'Err', '!', '-', '+', 'OVP', 'Ace', ' Eff %', 'Tot', 'Err', 'OVP', '-', '!', 'Pos %', 'Perf %', 'Eff %', 'Tot', 'Err', 'Block', 'Perf', 'Perf %', 'Eff %', 'Tot', 'Err', 'Perf %', 'Points']
 
 class StatsScreen extends Component {
     constructor(props) {
         super(props);
+        this.tableHead = [
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(0) }) }}><Text style={{ textAlign: 'center' }}>Nr</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(1) }) }}><Text style={{ textAlign: 'center' }}>Team</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(2) }) }}><Text style={{ textAlign: 'center' }}>Mts</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(3) }) }}><Text style={{ textAlign: 'center' }}>Set</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(4) }) }}><Text style={{ textAlign: 'center' }}>Pts</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(5) }) }}><Text style={{ textAlign: 'center' }}>BP</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(6) }) }}><Text style={{ textAlign: 'center' }}>W-L</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(7) }) }}><Text style={{ textAlign: 'center' }}>Tot</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(8) }) }}><Text style={{ textAlign: 'center' }}>Err</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(9) }) }}><Text style={{ textAlign: 'center' }}>!</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(10) }) }}><Text style={{ textAlign: 'center' }}>-</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(11) }) }}><Text style={{ textAlign: 'center' }}>+</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(12) }) }}><Text style={{ textAlign: 'center' }}>OVP</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(13) }) }}><Text style={{ textAlign: 'center' }}>Ace</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(14) }) }}><Text style={{ textAlign: 'center' }}>Eff %</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(15) }) }}><Text style={{ textAlign: 'center' }}>Tot</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(16) }) }}><Text style={{ textAlign: 'center' }}>Err</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(17) }) }}><Text style={{ textAlign: 'center' }}>OVP</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(18) }) }}><Text style={{ textAlign: 'center' }}>-</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(19) }) }}><Text style={{ textAlign: 'center' }}>!</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(20) }) }}><Text style={{ textAlign: 'center' }}>Pos %</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(21) }) }}><Text style={{ textAlign: 'center' }}>Perf %</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(22) }) }}><Text style={{ textAlign: 'center' }}>Eff %</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(23) }) }}><Text style={{ textAlign: 'center' }}>Tot</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(24) }) }}><Text style={{ textAlign: 'center' }}>Err</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(25) }) }}><Text style={{ textAlign: 'center' }}>Block</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(26) }) }}><Text style={{ textAlign: 'center' }}>Perf</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(27) }) }}><Text style={{ textAlign: 'center' }}>Perf %</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(28) }) }}><Text style={{ textAlign: 'center' }}>Eff %</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(29) }) }}><Text style={{ textAlign: 'center' }}>Tot</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(30) }) }}><Text style={{ textAlign: 'center' }}>Err</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(31) }) }}><Text style={{ textAlign: 'center' }}>Perf %</Text></TouchableOpacity>,
+            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(32) }) }}><Text style={{ textAlign: 'center' }}>Points</Text></TouchableOpacity>
+        ]
         this.state = {
             isAllPlayersLoaded: false,
             isLoading: true,
             showTotalRow: false,
             totalRow: [],
+
+            lastSortedByID: 0,
+            sortOrderDescending: true,
 
             rawDataPlayers: [],
             allPlayers: [],
@@ -134,41 +171,44 @@ class StatsScreen extends Component {
         const totalRec = data.RecErr + data.RecWin + data.RecMinus + data.RecPlus + data.RecHP + data.RecEx
         const totalAtt = data.SpikeErr + data.SpikeWin + data.SpikeMinus + data.SpikePlus + data.SpikeHP + data.SpikeEx
         const totalBlock = data.BlockErr + data.BlockWin + data.BlockMinus + data.BlockPlus + data.BlockHP + data.BlockEx
-        return [
-            data.Number,
-            data.Team.split(' ')[0],
-            data.PlayedMatches,
-            data.PlayedSets,
-            data.PointsTot_ForAllPlayerStats,
-            data.Points,
-            data.PointsW_P,
-            totalServ,
-            data.ServeErr,
-            data.ServeEx,
-            data.ServeMinus,
-            data.ServePlus,
-            data.ServeHP,
-            data.ServeWin,
-            totalServ > 20 ? Math.round((data.ServeWin * 2 + data.ServePlus + data.ServeHP * 2 - data.ServeMinus - data.ServeErr * 2) / totalServ * 100) + ' %' : '-',
-            totalRec,
-            data.RecErr,
-            data.RecHP,
-            data.RecMinus,
-            data.RecEx,
-            (data.RecPlus + data.RecWin) / totalRec * 100 ? Math.round((data.RecPlus + data.RecWin) / totalRec * 100) + ' %' : '-',
-            (data.RecWin) / totalRec * 100 ? Math.round((data.RecWin) / totalRec * 100) + ' %' : '-',
-            totalRec > 20 ? Math.round((data.RecWin * 2 + data.RecPlus - data.RecMinus - data.RecErr * 2 - data.RecHP * 2) / totalRec * 100) + ' %' : '-',
-            totalAtt,
-            data.SpikeErr,
-            data.SpikeHP,
-            data.SpikeWin,
-            Math.round((data.SpikeWin) / totalAtt * 100) ? Math.round((data.SpikeWin) / totalAtt * 100) + ' %' : '-',
-            Math.round((data.SpikeWin - data.SpikeErr - data.SpikeHP) / totalAtt * 100) ? Math.round((data.SpikeWin - data.SpikeErr - data.SpikeHP) / totalAtt * 100) + ' %' : '-',
-            totalBlock,
-            data.BlockErr,
-            Math.round((data.BlockWin) / totalBlock * 100) ? Math.round((data.BlockWin) / totalBlock * 100) + ' %' : '-',
-            data.BlockWin,
-        ]
+        return {
+            name: data.Name + ' ' + data.Surname,
+            data: [
+                data.Number,
+                data.Team.split(' ')[0],
+                data.PlayedMatches,
+                data.PlayedSets,
+                data.PointsTot_ForAllPlayerStats,
+                data.Points,
+                data.PointsW_P,
+                totalServ,
+                data.ServeErr,
+                data.ServeEx,
+                data.ServeMinus,
+                data.ServePlus,
+                data.ServeHP,
+                data.ServeWin,
+                totalServ > 20 ? Math.round((data.ServeWin * 2 + data.ServePlus + data.ServeHP * 2 - data.ServeMinus - data.ServeErr * 2) / totalServ * 100) + ' %' : '-',
+                totalRec,
+                data.RecErr,
+                data.RecHP,
+                data.RecMinus,
+                data.RecEx,
+                (data.RecPlus + data.RecWin) / totalRec * 100 ? Math.round((data.RecPlus + data.RecWin) / totalRec * 100) + ' %' : '-',
+                (data.RecWin) / totalRec * 100 ? Math.round((data.RecWin) / totalRec * 100) + ' %' : '-',
+                totalRec > 20 ? Math.round((data.RecWin * 2 + data.RecPlus - data.RecMinus - data.RecErr * 2 - data.RecHP * 2) / totalRec * 100) + ' %' : '-',
+                totalAtt,
+                data.SpikeErr,
+                data.SpikeHP,
+                data.SpikeWin,
+                Math.round((data.SpikeWin) / totalAtt * 100) ? Math.round((data.SpikeWin) / totalAtt * 100) + ' %' : '-',
+                Math.round((data.SpikeWin - data.SpikeErr - data.SpikeHP) / totalAtt * 100) ? Math.round((data.SpikeWin - data.SpikeErr - data.SpikeHP) / totalAtt * 100) + ' %' : '-',
+                totalBlock,
+                data.BlockErr,
+                Math.round((data.BlockWin) / totalBlock * 100) ? Math.round((data.BlockWin) / totalBlock * 100) + ' %' : '-',
+                data.BlockWin,
+            ]
+        }
     }
     newSearch(text, isTeam) {
         if (isTeam) {
@@ -214,30 +254,30 @@ class StatsScreen extends Component {
     extractTotalrow(playerList, nameList) {
         let totPoints = 0, bp = 0, wl = 0, serTot = 0, serErr = 0, serMedium = 0, serMinus = 0, serPlus = 0, serOVP = 0, serAce = 0, recTot = 0, recErr = 0, recOVP = 0, recMed = 0, recMin = 0, recPos = 0, recPerf = 0, attTot = 0, attErr = 0, attBlo = 0, attPerf = 0, bloTot = 0, bloErr = 0, bloPerf = 0
         playerList.map((player, i) => {
-            totPoints += player[4]
-            bp += player[5]
-            wl += player[6]
-            serTot += player[7]
-            serErr += player[8]
-            serMedium += player[9]
-            serMinus += player[10]
-            serPlus += player[11]
-            serOVP += player[12]
-            serAce += player[13]
-            recTot += player[15]
-            recErr += player[16]
-            recOVP += player[17]
-            recMin += player[18]
-            recMed += player[19]
-            recPos += player[20] === '-' ? 0 : Math.round(parseInt(player[20].split(' ')[0]) / 100 * player[15])
-            recPerf += player[21] === '-' ? 0 : Math.round(parseInt(player[21].split(' ')[0]) / 100 * player[15])
-            attTot += player[23]
-            attErr += player[24]
-            attBlo += player[25]
-            attPerf += player[26]
-            bloTot += player[29]
-            bloErr += player[30]
-            bloPerf += player[32]
+            totPoints += player.data[4]
+            bp += player.data[5]
+            wl += player.data[6]
+            serTot += player.data[7]
+            serErr += player.data[8]
+            serMedium += player.data[9]
+            serMinus += player.data[10]
+            serPlus += player.data[11]
+            serOVP += player.data[12]
+            serAce += player.data[13]
+            recTot += player.data[15]
+            recErr += player.data[16]
+            recOVP += player.data[17]
+            recMin += player.data[18]
+            recMed += player.data[19]
+            recPos += player.data[20] === '-' ? 0 : Math.round(parseInt(player.data[20].split(' ')[0]) / 100 * player.data[15])
+            recPerf += player.data[21] === '-' ? 0 : Math.round(parseInt(player.data[21].split(' ')[0]) / 100 * player.data[15])
+            attTot += player.data[23]
+            attErr += player.data[24]
+            attBlo += player.data[25]
+            attPerf += player.data[26]
+            bloTot += player.data[29]
+            bloErr += player.data[30]
+            bloPerf += player.data[32]
         })
         const totalRow = ['-', '-', '-', '-', totPoints, bp, wl, serTot, serErr, serMedium, serMinus, serPlus, serOVP, serAce, (serTot > 20) ? Math.round((serAce * 2 + serOVP * 2 + serPlus - serMinus - serErr * 2) / serTot * 100) + ' %' : '-',
             recTot, recErr, recOVP, recMin, recMed, Math.round(recPos / recTot * 100) + ' %', Math.round(recPerf / recTot * 100) + ' %', (recTot > 20) ? Math.round((recPerf + recPos - recMin - recOVP * 2 - recErr * 2) / recTot * 100) + ' %' : '-',
@@ -249,6 +289,40 @@ class StatsScreen extends Component {
     }
     loadAllPlayers() {
         this.setState({ isAllPlayersLoaded: true, filteredPlayers: this.state.allPlayers, filteredNameList: this.state.nameList })
+    }
+    sortList(index) {
+        console.log(index)
+        const procentList = [14, 20, 21, 22, 27, 28, 31]
+        let newList = []
+        if (index === this.state.lastSortedByID) {
+            if (this.state.sortOrderDescending) {
+                if (procentList.includes(index)) {
+                    newList = this.state.filteredPlayers.sort((a, b) => (parseInt(a.data[index].split(' ').length > 1 ? a.data[index].split(' ')[0] : -1000) < parseInt(b.data[index].split(' ').length > 1 ? b.data[index].split(' ')[0] : -1000)) ? 1 :
+                    ((parseInt(b.data[index].split(' ').length > 1 ? b.data[index].split(' ')[0] : -1000) < parseInt(a.data[index].split(' ').length > 1 ? a.data[index].split(' ')[0] : -1000)) ? -1 : 0)); // Descending sort
+            
+                } else {
+                    newList = this.state.filteredPlayers.sort((a, b) => (parseInt(a.data[index].split(' ').length > 1 ? a.data[index].split(' ')[0] : -1000) > parseInt(b.data[index].split(' ').length > 1 ? b.data[index].split(' ')[0] : -1000)) ? 1 :
+                    ((parseInt(b.data[index].split(' ').length > 1 ? b.data[index].split(' ')[0] : -1000) > parseInt(a.data[index].split(' ').length > 1 ? a.data[index].split(' ')[0] : -1000)) ? -1 : 0)); // Descending sort
+            
+                }
+            } else {
+                if (procentList.includes(index)) {
+                    newList = this.state.filteredPlayers.sort((a, b) => (parseInt(a.data[index].split(' ')[0]) > parseInt(b.data[index].split(' ')[0])) ? 1 : ((parseInt(b.data[index].split(' ')[0]) > parseInt(a.data[index].split(' ')[0])) ? -1 : 0)); // Descending sort
+                } else {
+                    newList = this.state.filteredPlayers.sort((a, b) => (a.data[index] > b.data[index]) ? 1 : ((b.data[index] > a.data[index]) ? -1 : 0)); // Descending sort
+                }
+            }
+            this.setState({ sortOrderDescending: !this.state.sortOrderDescending })
+        } else {
+            if (procentList.includes(index)) {
+                newList = this.state.filteredPlayers.sort((a, b) => (parseInt(a.data[index].split(' ').length > 1 ? a.data[index].split(' ')[0] : -1000) < parseInt(b.data[index].split(' ').length > 1 ? b.data[index].split(' ')[0] : -1000)) ? 1 :
+                    ((parseInt(b.data[index].split(' ').length > 1 ? b.data[index].split(' ')[0] : -1000) < parseInt(a.data[index].split(' ').length > 1 ? a.data[index].split(' ')[0] : -1000)) ? -1 : 0)); // Descending sort
+            } else {
+                newList = this.state.filteredPlayers.sort((a, b) => (a.data[index] < b.data[index]) ? 1 : ((b.data[index] < a.data[index]) ? -1 : 0)); // Descending sort
+            }
+            this.setState({ sortOrderDescending: true })
+        }
+        return newList
     }
     renderTopContent(title, category, pointName, pointNameDescription) {
         return (
@@ -327,6 +401,10 @@ class StatsScreen extends Component {
         )
     }
     render() {
+        let nameList = []
+        this.state.filteredPlayers.map((rowData) => (
+            nameList.push(this.formatName(rowData.name.split(' ')[0], rowData.name.split(' ')[1]))
+        ))
         return (
             <ScrollView style={styles.container} stickyHeaderIndices={[2]} ref={(ref) => this.myScroll = ref}>
                 {this.renderTop()}
@@ -339,7 +417,7 @@ class StatsScreen extends Component {
                         </Table>
                         <Table borderStyle={pageStyles.borderStyle}>
                             <Row data={tableheader} widthArr={widthHeader} textStyle={styles.header} />
-                            <Row data={tableHead} widthArr={widthMainHead} textStyle={pageStyles.tableText} />
+                            <Row data={this.tableHead} widthArr={widthMainHead} textStyle={pageStyles.tableText} />
                         </Table>
                     </ScrollView>
                 </TableWrapper>
@@ -347,7 +425,7 @@ class StatsScreen extends Component {
                     <TableWrapper style={{ flexDirection: 'row' }}>
                         <Table borderStyle={{ borderWidth: 1, borderColor: '#f1f8ff' }} >
                             <Col
-                                data={this.state.filteredNameList}
+                                data={nameList}
                                 width={colWidth}
                                 textStyle={pageStyles.tableText}
                             />
@@ -360,7 +438,7 @@ class StatsScreen extends Component {
                                     this.state.filteredPlayers.map((rowData, index) => (
                                         <Row
                                             key={index}
-                                            data={rowData}
+                                            data={rowData.data}
                                             widthArr={widthMainHead}
                                             style={[styles.row, index % 2 && pageStyles.tableBackgroundColor]}
                                             textStyle={pageStyles.tableText}
@@ -376,19 +454,19 @@ class StatsScreen extends Component {
                         </ScrollView>
                     </TableWrapper>
                     {this.state.isLoading ?
-                    <ActivityIndicator size="large" color='lightgrey' style={{margin: 10}}/> :
-                    this.state.isAllPlayersLoaded ?
-                        <TouchableOpacity
-                            onPress={() => this.myScroll.scrollTo({ x: 0, y: windowHeight / 1.8, animated: true })}
-                        >
-                            <Icon name="arrow-up-circle-outline" size={30} style={{ textAlign: 'center', marginTop: 10 }} />
-                        </TouchableOpacity>
-                        :
-                        <TouchableOpacity
-                            onPress={() => this.loadAllPlayers()}
-                        >
-                            <Icon name="arrow-down-circle-outline" size={30} style={{ textAlign: 'center', marginTop: 10 }} />
-                        </TouchableOpacity>
+                        <ActivityIndicator size="large" color='lightgrey' style={{ margin: 10 }} /> :
+                        this.state.isAllPlayersLoaded ?
+                            <TouchableOpacity
+                                onPress={() => this.myScroll.scrollTo({ x: 0, y: windowHeight / 1.8, animated: true })}
+                            >
+                                <Icon name="arrow-up-circle-outline" size={30} style={{ textAlign: 'center', marginTop: 10 }} />
+                            </TouchableOpacity>
+                            :
+                            <TouchableOpacity
+                                onPress={() => this.loadAllPlayers()}
+                            >
+                                <Icon name="arrow-down-circle-outline" size={30} style={{ textAlign: 'center', marginTop: 10 }} />
+                            </TouchableOpacity>
                     }
                 </View>
             </ScrollView >

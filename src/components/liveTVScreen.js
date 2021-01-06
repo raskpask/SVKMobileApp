@@ -59,11 +59,15 @@ class LiveTVScreen extends Component {
             guestSets: guestSet,
         }
     }
+    extractGender(match){
+        return match.guestLogo.split('TeamLogo_')[1].split('.')[0] > 1200 ? 'men' : 'women'
+    }
     renderMatches() {
         return (
             <ScrollView>
                 <Text style={styles.h1}>Matches today</Text>
                 {this.state.matchesToday.map((match, i) => {
+                    match.gender= this.extractGender(match)
                     if (match.length < 1) {
                         return (
                             <Text key={i} style={styles.text}>No livestreamed games today</Text>
@@ -76,12 +80,14 @@ class LiveTVScreen extends Component {
                 })}
                 <Text style={styles.h1PaddingTop}>Upcoming matches</Text>
                 {this.state.comingMatches.map((match, i) => {
+                    match.gender= this.extractGender(match)
                     return (
                         <MatchCard key={i} navigation={this.props.navigation} match={match} isdisabled={true} />
                     )
                 })}
                 <Text style={styles.h1PaddingTop}>Previous matches</Text>
                 {this.state.previousMatches.map((match, i) => {
+                    match.gender= this.extractGender(match)
                     return (
                         <MatchCard key={i} navigation={this.props.navigation} match={match} isdisabled={true} />
                     )
