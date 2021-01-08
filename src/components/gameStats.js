@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { View, Text, ScrollView, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import axios from 'react-native-axios';
 import { Table, Row, Col, TableWrapper } from 'react-native-table-component';
+import {formatName} from '../model/formatName';
 
 import pageStyles from '../style/basicStyle';
 
@@ -143,20 +144,8 @@ class GameStats extends Component {
     }
     extractNameAndNumber(playerString) {
         let playerName = playerString.split('"PlayerName"')[1].split('b>')[1].split('<')[0]
-        if (playerName.length > 15) {
-            const listOfNames = playerName.split(' ')
-            if (listOfNames.length > 2) {
-                if (listOfNames[2] == '(L)') {
-                    playerName = listOfNames[1].charAt(0) + '. ' + listOfNames[0] + ' ' + listOfNames[2]
-                } else {
-                    playerName = listOfNames[2].charAt(0) + '. ' + listOfNames[0]
-                }
-            } else {
-                playerName = listOfNames[1].charAt(0) + '. ' + listOfNames[0]
-            }
-        }
         return ([
-            playerName
+            formatName(playerName.split(' ')[1], playerName.split(' ')[0])
         ])
 
     }

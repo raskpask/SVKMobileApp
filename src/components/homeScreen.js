@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
 import axios from 'react-native-axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Text, View, TouchableOpacity, ImageBackground, RefreshControl } from 'react-native';
-import { Card, CardItem } from 'react-native-elements'
+import { Card } from 'react-native-elements'
 import { ScrollView } from 'react-native-gesture-handler';
-import { Picker } from '@react-native-picker/picker';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import MatchCard from './matchCard';
 
@@ -16,7 +15,7 @@ class Home extends Component {
         super(props);
 
         this.state = {
-            currentMatches: [[], [], [], [], [], [], [], [], [], [], [], [], [], [], []],
+            currentMatches: [],
             currentMatchesM: [[]],
             currentMatchesW: [[]],
             league: '',
@@ -31,11 +30,13 @@ class Home extends Component {
     async componentDidMount() {
         try {
             const matches = JSON.parse(await AsyncStorage.getItem(keyCurrentMatches))
-            this.setState({ currentMatches: matches })
+            if(matches !== null){
+                this.setState({ currentMatches: matches })
+            }
             this.scrollToIndex(this.getTodayScrollIndex())
             this.getNews()
         } catch (error) {
-            console.log(error)
+            console.warn(error)
         }
         this.getCurrentMatches()
     }

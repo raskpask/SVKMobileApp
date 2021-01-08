@@ -29,7 +29,11 @@ class Calendar extends Component {
         };
     }
     scrollToIndex(index) {
-        this.myScroll.scrollTo({ x: 0, y: 89.125 * index, animated: true })
+        try {
+            this.myScroll.scrollTo({ x: 0, y: 89.125 * index, animated: true })
+        } catch (error) {
+            console.warn(error)
+        }
     }
     async componentDidMount() {
         try {
@@ -45,7 +49,7 @@ class Calendar extends Component {
                 this.setState({ matchesM: matchesM, matchesW: matchesW })
             }
         } catch (e) {
-            console.log(e)
+            console.warn(e)
         }
         this.getMatches()
     }
@@ -56,7 +60,7 @@ class Calendar extends Component {
                 try {
                     AsyncStorage.setItem(keyForMatchesMen, JSON.stringify(matches))
                 } catch (e) {
-                    console.log(e)
+                    console.warn(e)
                 }
                 if (this.state.chosenLeague != 'Women')
                     this.setState({ matches: matches })
@@ -68,7 +72,7 @@ class Calendar extends Component {
                 try {
                     AsyncStorage.setItem(keyForMatchesWomen, JSON.stringify(matchesW))
                 } catch (e) {
-                    console.log(e)
+                    console.warn(e)
                 }
                 if (this.state.chosenLeague == 'Women')
                     this.setState({ matches: matchesW })
