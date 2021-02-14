@@ -1,9 +1,10 @@
 export function formatName(name, surname) {
+    const maxNameLength = 15
     let newName = name + ' ' + surname
-    if (newName.length > 15) {
+    if (newName.length > maxNameLength) {
         newName = name.charAt(0) + '. ' + surname
     }
-    if (newName.length > 15) {
+    if (newName.length > maxNameLength) {
         const listOfNames = newName.split(' ')
         if (listOfNames.length > 2) {
             newName = listOfNames[0] + ' ' + listOfNames[1].charAt(0) + '. ' + listOfNames[2]

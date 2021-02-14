@@ -7,8 +7,10 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import MatchCard from './matchCard';
-
 const keyCurrentMatches = 'currentMatches'
+const now = new Date() 
+const dateNow = now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate()
+const timeNow = now.getHours() + ":" + now.getMinutes()
 
 class Home extends Component {
     constructor(props) {
@@ -142,6 +144,7 @@ class Home extends Component {
             set3: matchString.split('"Label9"')[1]?.split('>')[1].split('<')[0],
             set4: matchString.split('"Label11"')[1]?.split('>')[1].split('<')[0],
             set5: matchString.split('"Label13"')[1]?.split('>')[1].split('<')[0],
+            livescoreLink: matchString.split('"onclick="window.open("')[1]?.split('&#39;')[1].split('&#39;')[0],
         }
         return (matchData)
     }
@@ -205,7 +208,7 @@ class Home extends Component {
                 {
                     this.state.currentMatches.map((match, i) => {
                         let isdisabled = false
-                        if (match.homeSets == '0' && match.guestSets == '0')
+                        if ( match.date >  dateNow  || match.date === dateNow && match.time >= timeNow)
                             isdisabled = true
                         return (
                             <MatchCard key={i} navigation={this.props.navigation} match={match} isdisabled={isdisabled} />

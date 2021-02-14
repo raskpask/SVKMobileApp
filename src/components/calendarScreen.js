@@ -1,13 +1,17 @@
 import React, { Component } from 'react';
-import { View, ActivityIndicator, StyleSheet, Image, ScrollView, Button, RefreshControl, Text } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Image, ScrollView, Button, RefreshControl, Text, Dimensions  } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'react-native-axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// import Dimensions from 'dime'
 
 import MatchCard from './matchCard';
 
 const keyForMatchesMen = 'matchesMen'
 const keyForMatchesWomen = 'matchesWomen'
+
+const windowWidth = Dimensions.get('window').width;
+
 
 class Calendar extends Component {
     constructor(props) {
@@ -292,7 +296,7 @@ class Calendar extends Component {
                     <Picker
                         enabled={!this.state.isLoading}
                         selectedValue={this.state.chosenTeam}
-                        style={{ height: 50, width: 150 }}
+                        style={{ height: 50, width: windowWidth/3.2 }}
                         onValueChange={(itemValue, itemIndex) => {
                             this.setState({ chosenTeam: itemValue })
                             if (this.state.chosenTeam != 'All Teams')
@@ -313,7 +317,7 @@ class Calendar extends Component {
                     <Picker
                         enabled={!this.state.isLoading}
                         selectedValue={this.state.chosenLeague}
-                        style={{ height: 50, width: 150 }}
+                        style={{ height: 50, width: windowWidth/3.2 }}
                         onValueChange={(itemValue, itemIndex) => {
                             if (this.state.chosenTeam != 'Men')
                                 this.changeLeague(itemValue)
@@ -323,7 +327,7 @@ class Calendar extends Component {
 
                     </Picker>
                 </View>
-                <View style={{ marginRight: 15, width: 70 }}>
+                <View style={{ marginRight: 15, width: windowWidth/5 }}>
                     <Button
                         onPress={() => this.scrollToIndex(this.getTodayScrollIndex())}
                         title="Today"

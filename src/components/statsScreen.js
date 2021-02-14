@@ -15,7 +15,7 @@ const allNamesKeyM = 'allNamesM'
 const allNamesKeyW = 'allNamesW'
 const topKeyM = 'allTopsM'
 const topKeyW = 'allTopsW'
-const colWidth = 130
+const colWidth = 150
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 import pageStyles from '../style/basicStyle';
