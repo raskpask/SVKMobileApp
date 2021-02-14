@@ -8,8 +8,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import MatchCard from './matchCard';
 const keyCurrentMatches = 'currentMatches'
-const now = new Date() 
-const dateNow = now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate()
+const now = new Date()
+const dateNow = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate()
 const timeNow = now.getHours() + ":" + now.getMinutes()
 
 class Home extends Component {
@@ -32,7 +32,7 @@ class Home extends Component {
     async componentDidMount() {
         try {
             const matches = JSON.parse(await AsyncStorage.getItem(keyCurrentMatches))
-            if(matches !== null){
+            if (matches !== null) {
                 this.setState({ currentMatches: matches })
             }
             this.scrollToIndex(this.getTodayScrollIndex())
@@ -127,6 +127,10 @@ class Home extends Component {
                 statsLink += element;
             });
         }
+        let livescoreLink = matchString.split('"onclick="window.open("')[1]?.split('&#39;')[1].split('&#39;')[0]
+        if (livescoreLink !== null) {
+            livescoreLink = 'http://svbf-web.dataproject.com' + livescoreLink;
+        }
         const matchData = {
             gender: gender,
             date: date,
@@ -144,7 +148,7 @@ class Home extends Component {
             set3: matchString.split('"Label9"')[1]?.split('>')[1].split('<')[0],
             set4: matchString.split('"Label11"')[1]?.split('>')[1].split('<')[0],
             set5: matchString.split('"Label13"')[1]?.split('>')[1].split('<')[0],
-            livescoreLink: matchString.split('"onclick="window.open("')[1]?.split('&#39;')[1].split('&#39;')[0],
+            livescoreLink: livescoreLink,
         }
         return (matchData)
     }
@@ -208,7 +212,7 @@ class Home extends Component {
                 {
                     this.state.currentMatches.map((match, i) => {
                         let isdisabled = false
-                        if ( match.date >  dateNow  || match.date === dateNow && match.time >= timeNow)
+                        if (match.date > dateNow || match.date === dateNow && match.time >= timeNow)
                             isdisabled = true
                         return (
                             <MatchCard key={i} navigation={this.props.navigation} match={match} isdisabled={isdisabled} />

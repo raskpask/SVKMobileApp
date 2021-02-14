@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { View,Text } from 'react-native';
 import { WebView } from 'react-native-webview';
 
 class LivescoreScreen extends Component {
@@ -9,9 +8,11 @@ class LivescoreScreen extends Component {
     render() {
 
         return (
-            <View>
-                <Text>Livescore</Text>
-            </View>
+            <WebView 
+                allowsFullscreenVideo={true}
+                scrollEnabled={false}
+                source={{ uri: this.props.route.params.link }}
+            />
         )
     }
 }

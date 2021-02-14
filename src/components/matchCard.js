@@ -12,11 +12,10 @@ class MatchCard extends Component {
         }
     }
     goToStats() {
-        console.log(this.props.match.livescoreLink)
         if (this.props.match.livescoreLink !== null) {
             this.props.navigation.navigate('Match statistics', { tempMatch: this.props.match })
         } else {
-            this.props.navigation.navigate('Livestream', { link: this.props.match.livescoreLink })
+            this.props.navigation.navigate('Livescore', { link: this.props.match.livescoreLink })
         }
     }
     render() {
@@ -35,7 +34,6 @@ class MatchCard extends Component {
                             /> : <Text></Text>
                     }
                     <Text style={{ maxWidth: windowWidth / 4, textAlign: 'center' }}>{this.props.match.date} {this.props.isCalendar !== true ? this.props.match.gender === 'men' ? 'Men' : 'Women' : ''} {this.props.match.time} </Text>
-                    {/* <Text style={{ maxWidth: windowWidth / 5.5, textAlign: 'center' }}></Text> */}
                     <TouchableOpacity
                         style={{
                             flexDirection: 'row',
