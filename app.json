@@ -20,7 +20,7 @@
       "supportsTablet": true
     },
     "android": {
-      "versionCode": 4,
+      "versionCode": 5,
       "permissions": [ ],
       "package": "com.volleyboll.client"
     },

@@ -25,7 +25,7 @@ class Calendar extends Component {
             chosenLeague: 'League',
             refreshButtonColor: buttonColor,
             refreshing: false,
-            loading: true,
+            isLoading: true,
         };
     }
     scrollToIndex(index) {
@@ -80,7 +80,7 @@ class Calendar extends Component {
             }.bind(this));
 
 
-        this.setState({ loading: false })
+        this.setState({ isLoading: false })
 
 
 
@@ -290,6 +290,7 @@ class Calendar extends Component {
             >
                 <View style={{ marginLeft: 15 }}>
                     <Picker
+                        enabled={!this.state.isLoading}
                         selectedValue={this.state.chosenTeam}
                         style={{ height: 50, width: 150 }}
                         onValueChange={(itemValue, itemIndex) => {
@@ -310,6 +311,7 @@ class Calendar extends Component {
                 </View>
                 <View >
                     <Picker
+                        enabled={!this.state.isLoading}
                         selectedValue={this.state.chosenLeague}
                         style={{ height: 50, width: 150 }}
                         onValueChange={(itemValue, itemIndex) => {
@@ -335,7 +337,7 @@ class Calendar extends Component {
         return (
             <View style={{ flex: 1 }}>
                 {this.renderTop()}
-                {this.state.loading ?
+                {this.state.isLoading ?
                     <ActivityIndicator size="large" color='lightgrey' style={{ margin: 10 }} /> :
                     this.renderCards()
                 }

@@ -282,13 +282,16 @@ class StatsScreen extends Component {
             text = this.state.chosenTeam
         }
         if ((text === '' || text === 'All teams') && this.state.chosenTeam === 'All teams' && this.state.nameList !== undefined) {
-            this.setState({ filteredNameList: this.state.nameList.slice(0, 30), filteredPlayers: this.state.allPlayers.slice(0, 30) })
+            this.setState({ filteredNameList: this.state.nameList.slice(0, 30), filteredPlayers: this.state.allPlayers.slice(0, 30), isAllPlayersLoaded: false })
             return
         }
         let nameList = []
         let playerList = []
         this.state.rawDataPlayers.map((player, i) => {
-            const playerSearchString = player.Name + ' ' + player.Surname + ' ' + player.Team
+            let playerSearchString = player.Team
+            if (!isTeam && text === 'All teams') {
+                playerSearchString += ' ' + player.Name + ' ' + player.Surname
+            }
             if (playerSearchString.includes(text) || text === '') {
                 if (this.state.chosenTeam === 'All teams' || isTeam) {
                     playerList.push(this.state.allPlayers[i])
@@ -302,7 +305,7 @@ class StatsScreen extends Component {
             }
         })
         if (text !== '') {
-            this.setState({ filteredNameList: nameList, filteredPlayers: playerList, isAllPlayersLoaded: true })
+            this.setState({ filteredNameList: nameList, filteredPlayers: playerList })
         }
         this.extractTotalrow(playerList, nameList)
     }
@@ -532,11 +535,16 @@ class StatsScreen extends Component {
                                         />
                                     ))
                                 }
-                                <Row
-                                    data={this.state.totalRow}
-                                    widthArr={widthMainHead}
-                                    textStyle={{ fontWeight: 'bold', margin: 6, textAlign: 'center' }}
-                                />
+                                {
+                                    this.state.chosenTeam === 'All teams' ?
+                                        <Text></Text>
+                                        :
+                                        <Row
+                                            data={this.state.totalRow}
+                                            widthArr={widthMainHead}
+                                            textStyle={{ fontWeight: 'bold', margin: 6, textAlign: 'center' }}
+                                        />
+                                }
                             </Table>
                         </ScrollView>
                     </TableWrapper>
