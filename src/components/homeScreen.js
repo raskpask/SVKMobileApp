@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import MatchCard from './matchCard';
 const keyCurrentMatches = 'currentMatches'
 const now = new Date()
-const dateNow = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate()
+const dateNow = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0')
 const timeNow = now.getHours() + ":" + now.getMinutes()
 
 class Home extends Component {
@@ -127,8 +127,8 @@ class Home extends Component {
                 statsLink += element;
             });
         }
-        let livescoreLink = matchString.split('"onclick="window.open("')[1]?.split('&#39;')[1].split('&#39;')[0]
-        if (livescoreLink !== null) {
+        let livescoreLink = matchString.split('onclick="window.open(')[1]?.split('&#39;')[1].split('&#39;')[0]
+        if (livescoreLink !== undefined) {
             livescoreLink = 'http://svbf-web.dataproject.com' + livescoreLink;
         }
         const matchData = {

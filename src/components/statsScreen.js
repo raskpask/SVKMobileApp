@@ -24,7 +24,7 @@ const widthMainHead = [40, 100, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 
 const widthHeader = [140, 225, 370, 400, 320, 205]
 const tableheader = ['', 'Total', 'Serve', 'Reception', 'Attack', 'Block']
 const listOfTeamsMen = ['All teams', 'Sollentuna', 'Vingåker', 'Lund', 'Södertelge', 'Hylte Halmstad', 'Floby', 'Habo', 'Örkelljunga', 'Uppsala', 'RIG Falköping', 'Falkenberg']
-const listOfTeamsWomen = ['All teams', 'Sollentuna', 'Värnamo', 'Lund', 'Gislaved', 'Hylte Halmstad', 'Linköping', 'Lindesberg', 'Örebro', 'Engelholm', 'RIG Falköping', 'IKSU']
+const listOfTeamsWomen = ['All teams', 'Sollentuna', 'Värnamo', 'Lund', 'Gislaved', 'Hylte Halmstad', 'Linköpings VC', 'Lindesberg', 'Örebro', 'Engelholm', 'RIG Falköping', 'IKSU']
 
 class StatsScreen extends Component {
     constructor(props) {
@@ -181,6 +181,10 @@ class StatsScreen extends Component {
         let nameListW = []
         let rawDataPlayersM = []
         let rawDataPlayersW = []
+        const searchUrl = `http://svbf-web.dataproject.com/Statistics_AllPlayers.aspx?ID=174&PID=266`
+        const response = await fetch(searchUrl)
+        const htmlString = await response.text()
+        console.log(htmlString.split("DSCTop'>")[1].split('<')[0])
         await axios.post('http://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData', { "startIndex": 0, "maximumRows": 148, "sortExpressions": "PointsTot_ForAllPlayerStats DESC", "filterExpressions": [], "compID": "174", "phaseID": "266", "playerSearchByName": "" }).then(function (response) {
             rawDataPlayersM = response.data.d
             for (let i = 0; i < response.data.d.length; i++) {
@@ -210,6 +214,17 @@ class StatsScreen extends Component {
         } else {
             this.setState({ filteredPlayers: playerListW.slice(0, 30), filteredNameList: nameListW.slice(0, 30), rawDataPlayers: rawDataPlayersW })
         }
+    }
+    findNumberOfPlayers(url){
+        let numberOfPlayers = 150
+        await axios.post(url, { "startIndex": 0, "maximumRows": numberOfPlayers, "sortExpressions": "PointsTot_ForAllPlayerStats DESC", "filterExpressions": [], "compID": "174", "phaseID": "266", "playerSearchByName": "" }).then(function (response) {
+            rawDataPlayersM = response.Status === 200
+            for (let i = 0; i < response.data.d.length; i++) {
+                playerListM.push(this.extractData(response.data.d[i]))
+                nameListM.push(formatName(response.data.d[i].Name, response.data.d[i].Surname))
+            }
+            this.setState({ allPlayersM: playerListM, nameListM: nameListM, rawDataPlayersM: rawDataPlayersM })
+        }.bind(this));
     }
     extractNameAndStats(data) {
         return {
@@ -273,14 +288,28 @@ class StatsScreen extends Component {
         } else {
             this.setState({ searchText: text })
         }
-        this.filterPlayers(text, isTeam)
+        if (isTeam)
+            this.filterPlayersByTeam(text)
+        else
+            this.filterPlayers(text)
         if (text !== 'All teams')
             this.myScroll.scrollTo({ x: 0, y: windowHeight / 1.8, animated: true })
     }
-    filterPlayers(text, isTeam) {
-        if (text === '') {
-            text = this.state.chosenTeam
+    filterPlayersByTeam(text) {
+        let nameList = []
+        let playerList = []
+        if (this.state.chosenTeam !== text) {
+            this.state.rawDataPlayers.map((player, i) => {
+                if (player.Team.trim() == text.trim()) {
+                    playerList.push(this.state.allPlayers[i])
+                    nameList.push(this.state.nameList[i])
+                }
+            })
         }
+        this.setState({ filteredNameList: nameList, filteredPlayers: playerList })
+        this.extractTotalrow(playerList, nameList)
+    }
+    filterPlayers(text) {
         if ((text === '' || text === 'All teams') && this.state.chosenTeam === 'All teams' && this.state.nameList !== undefined) {
             this.setState({ filteredNameList: this.state.nameList.slice(0, 30), filteredPlayers: this.state.allPlayers.slice(0, 30), isAllPlayersLoaded: false })
             return
@@ -288,25 +317,13 @@ class StatsScreen extends Component {
         let nameList = []
         let playerList = []
         this.state.rawDataPlayers.map((player, i) => {
-            let playerSearchString = player.Team
-            if (!isTeam && text === 'All teams') {
-                playerSearchString += ' ' + player.Name + ' ' + player.Surname
-            }
-            if (playerSearchString.includes(text) || text === '') {
-                if (this.state.chosenTeam === 'All teams' || isTeam) {
-                    playerList.push(this.state.allPlayers[i])
-                    nameList.push(this.state.nameList[i])
-                } else {
-                    if (playerSearchString.includes(this.state.chosenTeam)) {
-                        playerList.push(this.state.allPlayers[i])
-                        nameList.push(this.state.nameList[i])
-                    }
-                }
+            const playerSearchString = player.Name.toLowerCase() + ' ' + player.Surname.toLowerCase()
+            if (playerSearchString.includes(text.toLowerCase())) {
+                playerList.push(this.state.allPlayers[i])
+                nameList.push(this.state.nameList[i])
             }
         })
-        if (text !== '') {
-            this.setState({ filteredNameList: nameList, filteredPlayers: playerList })
-        }
+        this.setState({ filteredNameList: nameList, filteredPlayers: playerList })
         this.extractTotalrow(playerList, nameList)
     }
     extractTotalrow(playerList, nameList) {
@@ -458,7 +475,8 @@ class StatsScreen extends Component {
                         selectedValue={this.state.chosenTeam}
                         style={{ height: 30, width: windowWidth / 2.5, margin: 15, marginTop: 0 }}
                         onValueChange={(itemValue, itemIndex) => {
-                            this.newSearch(itemValue, true)
+                            if (this.state.chosenTeam !== itemValue)
+                                this.newSearch(itemValue, true)
                         }}>
                         {this.state.listOfTeams.map((team, i) => {
                             return (

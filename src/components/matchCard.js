@@ -4,6 +4,8 @@ import { Card } from 'react-native-elements'
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const windowWidth = Dimensions.get('window').width;
+const now = new Date()
+const dateNow = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0')
 
 class MatchCard extends Component {
     constructor(props) {
@@ -12,11 +14,16 @@ class MatchCard extends Component {
         }
     }
     goToStats() {
-        if (this.props.match.livescoreLink !== null) {
-            this.props.navigation.navigate('Match statistics', { tempMatch: this.props.match })
-        } else {
+        if (this.checkIfMatchHasLivescore()) {
             this.props.navigation.navigate('Livescore', { link: this.props.match.livescoreLink })
+        } else {
+            this.props.navigation.navigate('Match statistics', { tempMatch: this.props.match })
         }
+    }
+    checkIfMatchHasLivescore(){
+        if(dateNow !== this.props.match.date)
+            return false
+        return this.props.match.livescoreLink !== undefined
     }
     render() {
         return (
@@ -51,6 +58,7 @@ class MatchCard extends Component {
 
                             }}>
                             <Text style={{ textAlign: 'center', fontWeight: "bold" }}>{this.props.match.homeSets} - {this.props.match.guestSets} </Text>
+                            {this.checkIfMatchHasLivescore() ? <Text style={{backgroundColor: 'yellow', paddingBottom: 3,paddingLeft: 3,margin:0}}>Live</Text>:<View/>}
                             <Text style={{ maxWidth: windowWidth / 5.5, textAlign: 'center', fontSize: 10 }}>{this.props.match.set1 ? '(' + this.props.match.set1 + ', ' + this.props.match.set2 + ', ' + this.props.match.set3 + (this.props.match.set4 ? ', ' + this.props.match.set4 : '') + (this.props.match.set5 ? ',' + this.props.match.set5 + ')' : ')') : ''}</Text>
                         </View>
                         <Image source={{ uri: this.props.match.guestLogo }} style={{ width: windowWidth / 9, height: 40, resizeMode: 'contain' }} />
