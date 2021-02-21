@@ -8,6 +8,10 @@ import CalendarStackScreen from './src/stackScreens/calendarStackScreen';
 import StandingsStackScreen from './src/stackScreens/standingsStackScreen';
 import StatsStackScreen from './src/stackScreens/statsStackScreen';
 
+import RunAtStartup from './src/model/startup';
+
+RunAtStartup();
+
 const Tab = createBottomTabNavigator();
 export default function App() {
   return (

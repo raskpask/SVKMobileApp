@@ -181,11 +181,15 @@ class StatsScreen extends Component {
         let nameListW = []
         let rawDataPlayersM = []
         let rawDataPlayersW = []
-        const searchUrl = `http://svbf-web.dataproject.com/Statistics_AllPlayers.aspx?ID=174&PID=266`
-        const response = await fetch(searchUrl)
-        const htmlString = await response.text()
-        console.log(htmlString.split("DSCTop'>")[1].split('<')[0])
-        await axios.post('http://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData', { "startIndex": 0, "maximumRows": 148, "sortExpressions": "PointsTot_ForAllPlayerStats DESC", "filterExpressions": [], "compID": "174", "phaseID": "266", "playerSearchByName": "" }).then(function (response) {
+        let numberOfPlayersM = 100
+        let numberOfPlayersW = 100
+        try {
+            numberOfPlayersM = JSON.parse(await AsyncStorage.getItem("numberOfPlayersM"))
+            numberOfPlayersW = JSON.parse(await AsyncStorage.getItem("numberOfPlayersW"))
+        } catch (error) {
+            console.warn(error)
+        }
+        await axios.post('http://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData', { "startIndex": 0, "maximumRows": parseInt(numberOfPlayersM), "sortExpressions": "PointsTot_ForAllPlayerStats DESC", "filterExpressions": [], "compID": "174", "phaseID": "266", "playerSearchByName": "" }).then(function (response) {
             rawDataPlayersM = response.data.d
             for (let i = 0; i < response.data.d.length; i++) {
                 playerListM.push(this.extractData(response.data.d[i]))
@@ -193,7 +197,7 @@ class StatsScreen extends Component {
             }
             this.setState({ allPlayersM: playerListM, nameListM: nameListM, rawDataPlayersM: rawDataPlayersM })
         }.bind(this));
-        await axios.post('http://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData', { "startIndex": 0, "maximumRows": 149, "sortExpressions": "PointsTot_ForAllPlayerStats DESC", "filterExpressions": [], "compID": "175", "phaseID": "247", "playerSearchByName": "" }).then(function (response) {
+        await axios.post('http://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData', { "startIndex": 0, "maximumRows": parseInt(numberOfPlayersW), "sortExpressions": "PointsTot_ForAllPlayerStats DESC", "filterExpressions": [], "compID": "175", "phaseID": "247", "playerSearchByName": "" }).then(function (response) {
             rawDataPlayersW = response.data.d
             for (let i = 0; i < response.data.d.length; i++) {
                 playerListW.push(this.extractData(response.data.d[i]))
@@ -214,17 +218,6 @@ class StatsScreen extends Component {
         } else {
             this.setState({ filteredPlayers: playerListW.slice(0, 30), filteredNameList: nameListW.slice(0, 30), rawDataPlayers: rawDataPlayersW })
         }
-    }
-    findNumberOfPlayers(url){
-        let numberOfPlayers = 150
-        await axios.post(url, { "startIndex": 0, "maximumRows": numberOfPlayers, "sortExpressions": "PointsTot_ForAllPlayerStats DESC", "filterExpressions": [], "compID": "174", "phaseID": "266", "playerSearchByName": "" }).then(function (response) {
-            rawDataPlayersM = response.Status === 200
-            for (let i = 0; i < response.data.d.length; i++) {
-                playerListM.push(this.extractData(response.data.d[i]))
-                nameListM.push(formatName(response.data.d[i].Name, response.data.d[i].Surname))
-            }
-            this.setState({ allPlayersM: playerListM, nameListM: nameListM, rawDataPlayersM: rawDataPlayersM })
-        }.bind(this));
     }
     extractNameAndStats(data) {
         return {
