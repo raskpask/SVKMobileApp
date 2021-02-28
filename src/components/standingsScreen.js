@@ -107,8 +107,8 @@ class StandingsScreen extends Component {
         }
         return team
     }
-    changeLeage() {
-        if (this.state.activeLeaguage == 'Men') {
+    changeLeage(league) {
+        if (league == 'Men') {
             this.setState({ tableData: this.state.tableDataM, logoRow: this.state.logoRowM })
         } else {
             this.setState({ tableData: this.state.tableDataW, logoRow: this.state.logoRowW })
@@ -162,7 +162,7 @@ class StandingsScreen extends Component {
                     style={{ bottom: 0, marginTop: 40 }}
                     onValueChange={(itemValue, itemIndex) => {
                         this.setState({ activeLeaguage: itemValue })
-                        this.changeLeage()
+                        this.changeLeage(itemValue)
                     }}>
 
                     <Picker.Item label={'Men'} value={'Men'} />

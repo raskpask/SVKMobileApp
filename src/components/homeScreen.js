@@ -7,6 +7,7 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import MatchCard from './matchCard';
+import BaggerWar from './baggerWar';
 const keyCurrentMatches = 'currentMatches'
 const now = new Date()
 const dateNow = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0')
@@ -33,9 +34,9 @@ class Home extends Component {
         try {
             const matches = JSON.parse(await AsyncStorage.getItem(keyCurrentMatches))
             if (matches !== null) {
+
                 this.setState({ currentMatches: matches })
             }
-            this.scrollToIndex(this.getTodayScrollIndex())
             this.getNews()
         } catch (error) {
             console.warn(error)
@@ -84,6 +85,15 @@ class Home extends Component {
             this.interval = setInterval(() => this.setState({ liveBackgroundColor: this.state.liveBackgroundColor === 'white' ? 'yellow' : 'white' }), 1000);
         }
         let currentMatches = currentMatchesW.concat(currentMatchesM).sort((a, b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)).sort((a, b) => (a.date > b.date) ? 1 : ((b.date > a.date) ? -1 : 0))
+        let matchesToday = []
+        let matcherOtherDAys =[]
+        currentMatches.forEach(match => {
+            if(match.date === dateNow)
+                matchesToday.push(match)
+            else 
+                matcherOtherDAys.push(match)
+        })
+        currentMatches = matchesToday.concat(matcherOtherDAys)
         AsyncStorage.setItem(keyCurrentMatches, JSON.stringify(currentMatches))
         this.setState({ loading: false, currentMatches: currentMatches })
 
@@ -157,22 +167,6 @@ class Home extends Component {
         await this.getMatches()
         this.renderSpecificTeam()
         this.setState({ refreshing: false })
-    }
-    scrollToIndex(index) {
-        if (this.myScroll) {
-            index = index ?? 0
-            this.myScroll.scrollTo({ x: 0, y: 95 * (index - 1), animated: true })
-        }
-    }
-    getTodayScrollIndex() {
-        let index = 0
-        for (const [i, match] of this.state.currentMatches.entries()) {
-            if (Date.parse(new Date().toJSON().slice(0, 10)) <= Date.parse(match.date)) {
-                index = i
-                break;
-            }
-        }
-        return index
     }
     renderLiveStreamComponent(isTop) {
         if (this.state.isMatchToday) {
@@ -252,6 +246,8 @@ class Home extends Component {
                 {this.renderLiveStreamComponent(true)}
                 <Text style={{ fontSize: 30, textAlign: 'center', marginTop: 20, marginBottom: 10 }}>Matches</Text>
                 {this.renderCurrentGames()}
+                <Text style={{ fontSize: 30, textAlign: 'center', marginTop: 20, marginBottom: 10 }}>Bagger Bagger stats</Text>
+                <BaggerWar/>
                 <Text style={{ fontSize: 30, textAlign: 'center', marginTop: 20, marginBottom: 10 }}>News</Text>
                 {this.renderNews()}
                 {this.renderLiveStreamComponent(false)}

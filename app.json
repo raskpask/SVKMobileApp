@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Volleyboll",
-    "slug": "SVKMobileApp",
+    "slug": "VolleybollApp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -20,7 +20,7 @@
       "supportsTablet": true
     },
     "android": {
-      "versionCode": 6,
+      "versionCode": 8,
       "permissions": [ ],
       "package": "com.volleyboll.client"
     },

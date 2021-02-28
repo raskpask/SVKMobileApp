@@ -289,6 +289,10 @@ class StatsScreen extends Component {
             this.myScroll.scrollTo({ x: 0, y: windowHeight / 1.8, animated: true })
     }
     filterPlayersByTeam(text) {
+        if (text === 'All teams') {
+            this.setState({ filteredNameList: this.state.nameList.slice(0, 30), filteredPlayers: this.state.allPlayers.slice(0, 30), isAllPlayersLoaded: false })
+            return
+        }
         let nameList = []
         let playerList = []
         if (this.state.chosenTeam !== text) {
@@ -303,10 +307,6 @@ class StatsScreen extends Component {
         this.extractTotalrow(playerList, nameList)
     }
     filterPlayers(text) {
-        if ((text === '' || text === 'All teams') && this.state.chosenTeam === 'All teams' && this.state.nameList !== undefined) {
-            this.setState({ filteredNameList: this.state.nameList.slice(0, 30), filteredPlayers: this.state.allPlayers.slice(0, 30), isAllPlayersLoaded: false })
-            return
-        }
         let nameList = []
         let playerList = []
         this.state.rawDataPlayers.map((player, i) => {
@@ -364,31 +364,34 @@ class StatsScreen extends Component {
         if (index === this.state.lastSortedByID) {
             if (this.state.sortOrderDescending) {
                 if (procentList.includes(index)) {
-                    newList = this.state.filteredPlayers.sort((a, b) => (parseInt(a.data[index].split(' ').length > 1 ? a.data[index].split(' ')[0] : -1000) < parseInt(b.data[index].split(' ').length > 1 ? b.data[index].split(' ')[0] : -1000)) ? 1 :
+                    newList = this.state.allPlayers.sort((a, b) => (parseInt(a.data[index].split(' ').length > 1 ? a.data[index].split(' ')[0] : -1000) < parseInt(b.data[index].split(' ').length > 1 ? b.data[index].split(' ')[0] : -1000)) ? 1 :
                         ((parseInt(b.data[index].split(' ').length > 1 ? b.data[index].split(' ')[0] : -1000) < parseInt(a.data[index].split(' ').length > 1 ? a.data[index].split(' ')[0] : -1000)) ? -1 : 0)); // Descending sort
 
                 } else {
-                    newList = this.state.filteredPlayers.sort((a, b) => (a.data[index] > b.data[index]) ? 1 : ((b.data[index] > a.data[index]) ? -1 : 0)); // Descending sort
+                    newList = this.state.allPlayers.sort((a, b) => (a.data[index] > b.data[index]) ? 1 : ((b.data[index] > a.data[index]) ? -1 : 0)); // Descending sort
                 }
                 this.setState({ sortOrderDescending: false })
             } else {
                 if (procentList.includes(index)) {
-                    newList = this.state.filteredPlayers.sort((a, b) => (parseInt(a.data[index].split(' ')[0]) < parseInt(b.data[index].split(' ')[0])) ? 1 : ((parseInt(b.data[index].split(' ')[0]) < parseInt(a.data[index].split(' ')[0])) ? -1 : 0)); // ASC sort
+                    newList = this.state.allPlayers.sort((a, b) => (parseInt(a.data[index].split(' ')[0]) < parseInt(b.data[index].split(' ')[0])) ? 1 : ((parseInt(b.data[index].split(' ')[0]) < parseInt(a.data[index].split(' ')[0])) ? -1 : 0)); // ASC sort
                 } else {
-                    newList = this.state.filteredPlayers.sort((a, b) => (a.data[index] < b.data[index]) ? 1 : ((b.data[index] < a.data[index]) ? -1 : 0)); // ASC sort
+                    newList = this.state.allPlayers.sort((a, b) => (a.data[index] < b.data[index]) ? 1 : ((b.data[index] < a.data[index]) ? -1 : 0)); // ASC sort
                 }
                 this.setState({ sortOrderDescending: true })
             }
         } else {
             if (procentList.includes(index)) {
-                newList = this.state.filteredPlayers.sort((a, b) => (parseInt(a.data[index].split(' ').length > 1 ? a.data[index].split(' ')[0] : -1000) < parseInt(b.data[index].split(' ').length > 1 ? b.data[index].split(' ')[0] : -1000)) ? 1 :
+                newList = this.state.allPlayers.sort((a, b) => (parseInt(a.data[index].split(' ').length > 1 ? a.data[index].split(' ')[0] : -1000) < parseInt(b.data[index].split(' ').length > 1 ? b.data[index].split(' ')[0] : -1000)) ? 1 :
                     ((parseInt(b.data[index].split(' ').length > 1 ? b.data[index].split(' ')[0] : -1000) < parseInt(a.data[index].split(' ').length > 1 ? a.data[index].split(' ')[0] : -1000)) ? -1 : 0)); // Descending sort
             } else {
-                newList = this.state.filteredPlayers.sort((a, b) => (a.data[index] < b.data[index]) ? 1 : ((b.data[index] < a.data[index]) ? -1 : 0)); // Descending sort
+                newList = this.state.allPlayers.sort((a, b) => (a.data[index] < b.data[index]) ? 1 : ((b.data[index] < a.data[index]) ? -1 : 0)); // Descending sort
             }
             this.setState({ sortOrderDescending: true, lastSortedByID: index })
         }
-        return newList
+        if(this.state.isAllPlayersLoaded)
+            return newList
+        else 
+            return newList.splice(0,30)
     }
     changeLeague(league) {
         if (!this.state.isLoading) {

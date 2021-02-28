@@ -10,7 +10,7 @@ const pageStyles = StyleSheet.create({
     tableHeadBorder: {borderWidth: 1,borderBottomWidth: 2 ,borderColor: '#f1f8ff' },
     tableHeaderBorder: {borderWidth: 1, borderColor: '#f1f8ff'},
     totalRow:{fontWeight:"bold", textAlign: 'center',fontSize: 16},
-    tableText: { margin: 6, textAlign: 'center' },
+    tableText: { margin: 2, textAlign: 'center', overflow: 'hidden' },
     standardBlue: {color:'#f1f8ff'},
 
 });
