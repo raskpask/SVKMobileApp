@@ -13,6 +13,9 @@ const now = new Date()
 const dateNow = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0')
 const timeNow = now.getHours() + ":" + now.getMinutes()
 
+const urlWomen = 'https://svbf-web.dataproject.com/CompetitionHome.aspx?ID=263'
+const urlMen ='https://svbf-web.dataproject.com/CompetitionHome.aspx?ID=264'
+
 class Home extends Component {
     constructor(props) {
         super(props);
@@ -71,11 +74,11 @@ class Home extends Component {
     async getCurrentMatches() {
         let currentMatchesM = []
         let currentMatchesW = []
-        await axios.get('http://svbf-web.dataproject.com/CompetitionHome.aspx?ID=174')
+        await axios.get(urlMen)
             .then(function (response) {
                 currentMatchesM = this.extractCurrentMatches(response.data, 'men')
             }.bind(this));
-        await axios.get('http://svbf-web.dataproject.com/CompetitionHome.aspx?ID=175')
+        await axios.get(urlWomen)
             .then(function (response) {
                 currentMatchesW = this.extractCurrentMatches(response.data, 'women')
                 this.setState({ currentMatchesW: currentMatchesW })
@@ -246,8 +249,8 @@ class Home extends Component {
                 {this.renderLiveStreamComponent(true)}
                 <Text style={{ fontSize: 30, textAlign: 'center', marginTop: 20, marginBottom: 10 }}>Matches</Text>
                 {this.renderCurrentGames()}
-                <Text style={{ fontSize: 30, textAlign: 'center', marginTop: 20, marginBottom: 10 }}>Bagger Bagger stats</Text>
-                <BaggerWar/>
+                {/* <Text style={{ fontSize: 30, textAlign: 'center', marginTop: 20, marginBottom: 10 }}>Bagger Bagger stats</Text> */}
+                {/* <BaggerWar/> */}
                 <Text style={{ fontSize: 30, textAlign: 'center', marginTop: 20, marginBottom: 10 }}>News</Text>
                 {this.renderNews()}
                 {this.renderLiveStreamComponent(false)}

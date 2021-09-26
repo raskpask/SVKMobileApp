@@ -26,6 +26,9 @@ const tableheader = ['', 'Total', 'Serve', 'Reception', 'Attack', 'Block']
 const listOfTeamsMen = ['All teams', 'Sollentuna', 'Vingåker', 'Lund', 'Södertelge', 'Hylte Halmstad', 'Floby', 'Habo', 'Örkelljunga', 'Uppsala', 'RIG Falköping', 'Falkenberg']
 const listOfTeamsWomen = ['All teams', 'Sollentuna', 'Värnamo', 'Lund', 'Gislaved', 'Hylte Halmstad', 'Linköpings VC', 'Lindesberg', 'Örebro', 'Engelholm', 'RIG Falköping', 'IKSU']
 
+const compIdMen = '264'
+const compIdWomen = '263'
+
 class StatsScreen extends Component {
     constructor(props) {
         super(props);
@@ -127,7 +130,7 @@ class StatsScreen extends Component {
         } catch (e) {
             console.warn(e)
         }
-        if (playerListM !== undefined || nameListM !== undefined || playerListW !== undefined || nameListW !== undefined) {
+        if (playerListM !== undefined && nameListM !== undefined && playerListM !== null && playerListW !== undefined && nameListW !== undefined) {
             this.setState({ allPlayersM: playerListM, nameListM: nameListM, allPlayersW: playerListW, nameListW: nameListW })
             if (this.state.chosenLeague !== 'Women') {
                 this.setState({ filteredPlayers: playerListM.slice(0, 30), filteredNameList: nameListM.slice(0, 30), allPlayers: playerListM, nameList: nameListM })
@@ -140,15 +143,15 @@ class StatsScreen extends Component {
         this.setData()
     }
     async setTop() {
-        const playerListTotalPointsM = await this.makeRequest('PointsTot_ForAllPlayerStats DESC', '174', '266', 10)
-        const playerListTotalAcesM = await this.makeRequest('ServeWin DESC', '174', '266', 10)
-        const playerListTotalKillsM = await this.makeRequest('SpikeWin DESC', '174', '266', 10)
-        const playerListTotalBlocksM = await this.makeRequest('BlockWin DESC', '174', '266', 10)
+        const playerListTotalPointsM = await this.makeRequest('PointsTot_ForAllPlayerStats DESC', compIdMen, '0', 10)
+        const playerListTotalAcesM = await this.makeRequest('ServeWin DESC', compIdMen, '0', 10)
+        const playerListTotalKillsM = await this.makeRequest('SpikeWin DESC', compIdMen, '0', 10)
+        const playerListTotalBlocksM = await this.makeRequest('BlockWin DESC', compIdMen, '0', 10)
 
-        const playerListTotalPointsW = await this.makeRequest('PointsTot_ForAllPlayerStats DESC', '175', '247', 10)
-        const playerListTotalAcesW = await this.makeRequest('ServeWin DESC', '175', '247', 10)
-        const playerListTotalKillsW = await this.makeRequest('SpikeWin DESC', '175', '247', 10)
-        const playerListTotalBlocksW = await this.makeRequest('BlockWin DESC', '175', '247', 10)
+        const playerListTotalPointsW = await this.makeRequest('PointsTot_ForAllPlayerStats DESC', compIdWomen, '0', 10)
+        const playerListTotalAcesW = await this.makeRequest('ServeWin DESC', compIdWomen, '0', 10)
+        const playerListTotalKillsW = await this.makeRequest('SpikeWin DESC', compIdWomen, '0', 10)
+        const playerListTotalBlocksW = await this.makeRequest('BlockWin DESC', compIdWomen, '0', 10)
         try {
             AsyncStorage.setItem(topKeyM, JSON.stringify({ points: playerListTotalPointsM, aces: playerListTotalAcesM, kills: playerListTotalKillsM, blocks: playerListTotalBlocksM }))
             AsyncStorage.setItem(topKeyW, JSON.stringify({ points: playerListTotalPointsW, aces: playerListTotalAcesW, kills: playerListTotalKillsW, blocks: playerListTotalBlocksW }))
@@ -167,7 +170,7 @@ class StatsScreen extends Component {
     }
     async makeRequest(sortExpression, compID, phaseID, noOfRows) {
         let playerList = []
-        await axios.post('http://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData', { "startIndex": 0, "maximumRows": noOfRows, "sortExpressions": sortExpression, "filterExpressions": [], "compID": compID, "phaseID": phaseID, "playerSearchByName": "" }).then(function (response) {
+        await axios.post("https://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData", { "startIndex": 0, "maximumRows": noOfRows, "sortExpressions": sortExpression, "filterExpressions": [], "compID": compID, "phaseID": phaseID, "playerSearchByName": "" }).then(function (response) {
             for (let i = 0; i < response.data.d.length; i++) {
                 playerList.push(this.extractNameAndStats(response.data.d[i]))
             }
@@ -181,24 +184,24 @@ class StatsScreen extends Component {
         let nameListW = []
         let rawDataPlayersM = []
         let rawDataPlayersW = []
-        let numberOfPlayersM = 100
-        let numberOfPlayersW = 100
+        let numberOfPlayersM = 20
+        let numberOfPlayersW = 20
         try {
             numberOfPlayersM = JSON.parse(await AsyncStorage.getItem("numberOfPlayersM"))
             numberOfPlayersW = JSON.parse(await AsyncStorage.getItem("numberOfPlayersW"))
         } catch (error) {
             console.warn(error)
         }
-        await axios.post('http://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData', { "startIndex": 0, "maximumRows": parseInt(numberOfPlayersM), "sortExpressions": "PointsTot_ForAllPlayerStats DESC", "filterExpressions": [], "compID": "174", "phaseID": "266", "playerSearchByName": "" }).then(function (response) {
-            rawDataPlayersM = response.data.d
-            for (let i = 0; i < response.data.d.length; i++) {
-                playerListM.push(this.extractData(response.data.d[i]))
-                nameListM.push(formatName(response.data.d[i].Name, response.data.d[i].Surname))
-            }
-            this.setState({ allPlayersM: playerListM, nameListM: nameListM, rawDataPlayersM: rawDataPlayersM })
-        }.bind(this));
-        await axios.post('http://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData', { "startIndex": 0, "maximumRows": parseInt(numberOfPlayersW), "sortExpressions": "PointsTot_ForAllPlayerStats DESC", "filterExpressions": [], "compID": "175", "phaseID": "247", "playerSearchByName": "" }).then(function (response) {
-            rawDataPlayersW = response.data.d
+        await axios.post("https://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData", { "startIndex": 0, "maximumRows": parseInt(numberOfPlayersM), "sortExpressions": "PointsTot_ForAllPlayerStats DESC", "filterExpressions": [], "compID": compIdMen, "phaseID": "0", "playerSearchByName": "" }).then(function (response) {
+        rawDataPlayersM = response.data.d
+        for (let i = 0; i < response.data.d.length; i++) {
+            playerListM.push(this.extractData(response.data.d[i]))
+            nameListM.push(formatName(response.data.d[i].Name, response.data.d[i].Surname))
+        }
+        this.setState({ allPlayersM: playerListM, nameListM: nameListM, rawDataPlayersM: rawDataPlayersM })
+    }.bind(this));
+    await axios.post("https://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData", { "startIndex": 0, "maximumRows": parseInt(numberOfPlayersW), "sortExpressions": "PointsTot_ForAllPlayerStats DESC", "filterExpressions": [], "compID": compIdWomen, "phaseID": "0", "playerSearchByName": "" }).then(function (response) {
+        rawDataPlayersW = response.data.d
             for (let i = 0; i < response.data.d.length; i++) {
                 playerListW.push(this.extractData(response.data.d[i]))
                 nameListW.push(formatName(response.data.d[i].Name, response.data.d[i].Surname))
@@ -417,12 +420,12 @@ class StatsScreen extends Component {
                 <Card.Title>{title}</Card.Title>
                 <Card.Divider />
                 {
-                    this.state.[category].map((player, index) => {
+                    this.state.category.map((player, index) => {
                         return (
                             <View key={index} style={{ marginTop: 10 }}>
                                 <View style={{ flexDirection: 'row' }}>
                                     <Text style={{ marginRight: 'auto' }}>{index + 1}. {player.name} ({player.team}) </Text>
-                                    <Text style={{ marginLeft: 'auto', fontWeight: 'bold' }}>{player.[pointName]}  </Text>
+                                    <Text style={{ marginLeft: 'auto', fontWeight: 'bold' }}>{player.pointName}  </Text>
                                     <Text>{pointNameDescription}</Text>
                                 </View>
                             </View>
