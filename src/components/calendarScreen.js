@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, ActivityIndicator, StyleSheet, Image, ScrollView, Button, RefreshControl, Text, Dimensions  } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Image, ScrollView, Button, RefreshControl, Text, Dimensions } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'react-native-axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,6 +11,9 @@ const keyForMatchesMen = 'matchesMen'
 const keyForMatchesWomen = 'matchesWomen'
 
 const windowWidth = Dimensions.get('window').width;
+
+const urlWomenMatches = 'https://svbf-web.dataproject.com/CompetitionMatches.aspx?ID=263&PID=350'
+const urlMenMatches = 'https://svbf-web.dataproject.com/CompetitionMatches.aspx?ID=264&PID=351'
 
 
 class Calendar extends Component {
@@ -58,7 +61,7 @@ class Calendar extends Component {
         this.getMatches()
     }
     async getMatches() {
-        await axios.get('http://svbf-web.dataproject.com/CompetitionMatches.aspx?ID=174&PID=266')
+        await axios.get(urlMenMatches)
             .then(function (response) {
                 const matches = this.extractMatches(response.data)
                 try {
@@ -70,7 +73,7 @@ class Calendar extends Component {
                     this.setState({ matches: matches })
                 this.setState({ matchesM: matches })
             }.bind(this));
-        await axios.get('http://svbf-web.dataproject.com/CompetitionMatches.aspx?ID=175&PID=247')
+        await axios.get(urlWomenMatches)
             .then(function (response) {
                 const matchesW = this.extractMatches(response.data)
                 try {
@@ -144,72 +147,50 @@ class Calendar extends Component {
 
     getTeamFromLogo(logoID) {
         switch (logoID) {
-            case '1117':
+            case '1578':
                 return 'Engelholm VBS'
-                break;
-            case '1120':
+            case '1581':
                 return 'IKSU Volleyboll'
-                break;
-            case '1127':
+            case '1588':
                 return 'Värnamo VBA'
-                break;
-            case '1119':
+            case '1580':
                 return 'Hylte/Halmstad '
-                break;
-            case '1281':
+            case '1592':
                 return 'Hylte/Halmstad'
-                break;
-            case '1123':
-                return 'Lunds VK '
-                break;
-            case '1282':
+            case '1593':
                 return 'Lunds VK'
-                break;
-            case '1124':
+            case '1584':
+                return 'Lunds VK '
+            case '1585':
                 return 'Örebro Volley'
-                break;
-            case '1125':
-                return 'RIG Falköping '
-                break;
-            case '1284':
+            case '1595':
                 return 'RIG Falköping'
-                break;
-            case '1121':
+            case '1586':
+                return 'RIG Falköping '
+            case '1582':
                 return 'Lindesberg Volley'
-                break;
-            case '1126':
-                return 'Sollentuna VK '
-                break;
-            case '1286':
+            case '1597':
                 return 'Sollentuna VK'
-                break;
-            case '1122':
+            case '1587':
+                return 'Sollentuna VK '
+            case '1583':
                 return 'Linköping VC'
-                break;
-            case '1118':
+            case '1579':
                 return 'Gislaved VK'
-                break;
-            case '1278':
+            case '1589':
                 return 'Falkenberg VBK'
-                break;
-            case '1279':
+            case '1590':
                 return 'Floby VK'
-                break;
-            case '1280':
+            case '1591':
                 return 'Habo WK'
-                break;
-            case '1283':
+            case '1594':
                 return 'Örkelljung VK'
-                break;
-            case '1285':
+            case '1596':
                 return 'Södertälje VK'
-                break;
-            case '1287':
+            case '1598':
                 return 'Uppsala VBS'
-                break;
-            case '1288':
+            case '1599':
                 return 'Vingåkers VK'
-                break;
             default:
                 return ''
         }
@@ -224,12 +205,11 @@ class Calendar extends Component {
         }
         return index
     }
-    renderSpecificTeam() {
+    renderSpecificTeam(chosenTeam) {
         if (this.state.chosenLeague != 'Women') {
-
             let matchesOfTeam = []
             this.state.matchesM.forEach(match => {
-                if (match.homeTeam == this.state.chosenTeam || match.guestTeam == this.state.chosenTeam)
+                if (match.homeTeam == chosenTeam || match.guestTeam == chosenTeam)
                     matchesOfTeam.push(match)
             });
             this.scrollToIndex(0)
@@ -238,7 +218,7 @@ class Calendar extends Component {
         } else {
             let matchesOfTeam = []
             this.state.matchesW.forEach(match => {
-                if (match.homeTeam == this.state.chosenTeam || match.guestTeam == this.state.chosenTeam)
+                if (match.homeTeam == chosenTeam || match.guestTeam == chosenTeam)
                     matchesOfTeam.push(match)
             });
             this.scrollToIndex(0)
@@ -256,7 +236,7 @@ class Calendar extends Component {
     async refreshPage() {
         this.setState({ refreshing: true })
         await this.getMatches()
-        this.renderSpecificTeam()
+        this.renderSpecificTeam(this.state.chosenTeam)
         this.setState({ refreshing: false })
     }
     renderCards() {
@@ -296,11 +276,11 @@ class Calendar extends Component {
                     <Picker
                         enabled={!this.state.isLoading}
                         selectedValue={this.state.chosenTeam}
-                        style={{ height: 50, width: windowWidth/3.2 }}
+                        style={{ height: 50, width: windowWidth / 3.2 }}
                         onValueChange={(itemValue, itemIndex) => {
                             this.setState({ chosenTeam: itemValue })
-                            if (this.state.chosenTeam != 'All Teams')
-                                this.renderSpecificTeam()
+                            if (itemValue != 'All Teams')
+                                this.renderSpecificTeam(itemValue)
                         }}>
                         {this.state.listOfTeams.map((team, i) => {
                             return (
@@ -317,7 +297,7 @@ class Calendar extends Component {
                     <Picker
                         enabled={!this.state.isLoading}
                         selectedValue={this.state.chosenLeague}
-                        style={{ height: 50, width: windowWidth/3.2 }}
+                        style={{ height: 50, width: windowWidth / 3.2 }}
                         onValueChange={(itemValue, itemIndex) => {
                             if (this.state.chosenTeam != 'Men')
                                 this.changeLeague(itemValue)
@@ -327,7 +307,7 @@ class Calendar extends Component {
 
                     </Picker>
                 </View>
-                <View style={{ marginRight: 15, width: windowWidth/5 }}>
+                <View style={{ marginRight: 15, width: windowWidth / 5 }}>
                     <Button
                         onPress={() => this.scrollToIndex(this.getTodayScrollIndex())}
                         title="Today"

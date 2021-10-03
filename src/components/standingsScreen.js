@@ -7,6 +7,9 @@ import { Picker } from '@react-native-picker/picker';
 import pageStyles from '../style/basicStyle';
 const colWidth = 55
 
+const urlWomenStandings = 'https://svbf-web.dataproject.com/CompetitionStandings.aspx?ID=263&PID=350'
+const urlMenStandings ='https://svbf-web.dataproject.com/CompetitionStandings.aspx?ID=264&PID=351'
+
 class StandingsScreen extends Component {
     constructor(props) {
         super(props);
@@ -33,13 +36,13 @@ class StandingsScreen extends Component {
     async componentDidMount() {
         let teams
         let teamsW
-        await axios.get('http://svbf-web.dataproject.com/CompetitionStandings.aspx?ID=174&PID=266')
+        await axios.get(urlMenStandings)
             .then(function (response) {
                 teams = this.extractStandings(response.data)
                 this.createTableData(teams, 'Men')
             }.bind(this));
 
-        await axios.get('http://svbf-web.dataproject.com/CompetitionStandings.aspx?ID=175&PID=247')
+        await axios.get(urlWomenStandings)
             .then(function (response) {
                 teamsW = this.extractStandings(response.data)
                 this.createTableData(teamsW, 'Women')
