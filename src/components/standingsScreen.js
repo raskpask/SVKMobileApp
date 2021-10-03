@@ -15,7 +15,7 @@ class StandingsScreen extends Component {
         super(props);
         this.state = {
             tableheader: ['Points', 'Matches', 'Set', 'Points', 'Results', 'Quotas'],
-            widthHeader: [65, 190, 100, 100, 210, 120],
+            widthHeader: [65, 180, 100, 100, 210, 120],
             tableHead: ['', 'Played', 'Won', 'Lost', 'Won', 'Lost', 'Won', 'Lost', '3-0', '3-1', '3-2', '2-3', '1-3', '0-3', 'Set', 'Point'],
             widthMain: [65, 60, 60, 60, 50, 50, 50, 50, 35, 35, 35, 35, 35, 35, 60, 60],
             tableData: [],
@@ -123,7 +123,7 @@ class StandingsScreen extends Component {
                 <View>
                     <TableWrapper style={{ flexDirection: 'row' }}>
                         <Table borderStyle={{ borderWidth: 1, borderColor: '#f1f8ff' }} >
-                            <Row data={['Team']} widthArr={[colWidth]} textStyle={pageStyles.tableText} style={{ height: 32.5 }} />
+                            <Row data={['Team']} widthArr={[colWidth]} textStyle={pageStyles.tableText} style={{ height: 22.5 }} />
                             <Row data={['']} widthArr={[colWidth]} textStyle={pageStyles.tableText} />
                             <Col
                                 data={this.state.logoRow}
