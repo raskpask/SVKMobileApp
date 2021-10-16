@@ -200,8 +200,11 @@ class StatsScreen extends Component {
         }
         this.setState({ allPlayersM: playerListM, nameListM: nameListM, rawDataPlayersM: rawDataPlayersM })
     }.bind(this));
+    console.log(numberOfPlayersW)
+    console.log(compIdWomen)
     await axios.post("https://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData", { "startIndex": 0, "maximumRows": parseInt(numberOfPlayersW), "sortExpressions": "PointsTot_ForAllPlayerStats DESC", "filterExpressions": [], "compID": compIdWomen, "phaseID": "0", "playerSearchByName": "" }).then(function (response) {
         rawDataPlayersW = response.data.d
+        console.log(rawDataPlayersW)
             for (let i = 0; i < response.data.d.length; i++) {
                 playerListW.push(this.extractData(response.data.d[i]))
                 nameListW.push(formatName(response.data.d[i].Name, response.data.d[i].Surname))
@@ -420,12 +423,12 @@ class StatsScreen extends Component {
                 <Card.Title>{title}</Card.Title>
                 <Card.Divider />
                 {
-                    this.state.category.map((player, index) => {
+                    this.state.[category].map((player, index) => {
                         return (
                             <View key={index} style={{ marginTop: 10 }}>
                                 <View style={{ flexDirection: 'row' }}>
                                     <Text style={{ marginRight: 'auto' }}>{index + 1}. {player.name} ({player.team}) </Text>
-                                    <Text style={{ marginLeft: 'auto', fontWeight: 'bold' }}>{player.pointName}  </Text>
+                                    <Text style={{ marginLeft: 'auto', fontWeight: 'bold' }}>{player.[pointName]}  </Text>
                                     <Text>{pointNameDescription}</Text>
                                 </View>
                             </View>
@@ -511,6 +514,7 @@ class StatsScreen extends Component {
         this.state.filteredPlayers.map((rowData) => (
             nameList.push(formatName(rowData.name.split(' ')[0], rowData.name.split(' ')[1]))
         ))
+        console.log(nameList)
         return (
             <ScrollView style={styles.container} stickyHeaderIndices={[3]} ref={(ref) => this.myScroll = ref}>
                 {this.renderPickLeague()}
