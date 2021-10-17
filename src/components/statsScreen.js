@@ -192,19 +192,18 @@ class StatsScreen extends Component {
         } catch (error) {
             console.warn(error)
         }
-        await axios.post("https://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData", { "startIndex": 0, "maximumRows": parseInt(numberOfPlayersM), "sortExpressions": "PointsTot_ForAllPlayerStats DESC", "filterExpressions": [], "compID": compIdMen, "phaseID": "0", "playerSearchByName": "" }).then(function (response) {
-        rawDataPlayersM = response.data.d
-        for (let i = 0; i < response.data.d.length; i++) {
-            playerListM.push(this.extractData(response.data.d[i]))
-            nameListM.push(formatName(response.data.d[i].Name, response.data.d[i].Surname))
-        }
-        this.setState({ allPlayersM: playerListM, nameListM: nameListM, rawDataPlayersM: rawDataPlayersM })
-    }.bind(this));
-    console.log(numberOfPlayersW)
-    console.log(compIdWomen)
-    await axios.post("https://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData", { "startIndex": 0, "maximumRows": parseInt(numberOfPlayersW), "sortExpressions": "PointsTot_ForAllPlayerStats DESC", "filterExpressions": [], "compID": compIdWomen, "phaseID": "0", "playerSearchByName": "" }).then(function (response) {
-        rawDataPlayersW = response.data.d
-        console.log(rawDataPlayersW)
+        await axios.post("https://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData", { "startIndex": 0, "maximumRows": numberOfPlayersM, "sortExpressions": "PointsTot_ForAllPlayerStats DESC", "filterExpressions": [], "compID": compIdMen, "phaseID": "0", "playerSearchByName": "" }).then(function (response) {
+            rawDataPlayersM = response.data.d
+            for (let i = 0; i < response.data.d.length; i++) {
+                playerListM.push(this.extractData(response.data.d[i]))
+                nameListM.push(formatName(response.data.d[i].Name, response.data.d[i].Surname))
+            }
+            this.setState({ allPlayersM: playerListM, nameListM: nameListM, rawDataPlayersM: rawDataPlayersM })
+        }.bind(this));
+        console.log(numberOfPlayersW)
+        console.log(compIdWomen)
+        await axios.post("https://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData", { "startIndex": 0, "maximumRows": numberOfPlayersW, "sortExpressions": "PointsTot_ForAllPlayerStats DESC", "filterExpressions": [], "compID": compIdWomen, "phaseID": "0", "playerSearchByName": "" }).then(function (response) {
+            rawDataPlayersW = response.data.d
             for (let i = 0; i < response.data.d.length; i++) {
                 playerListW.push(this.extractData(response.data.d[i]))
                 nameListW.push(formatName(response.data.d[i].Name, response.data.d[i].Surname))
@@ -224,6 +223,7 @@ class StatsScreen extends Component {
         } else {
             this.setState({ filteredPlayers: playerListW.slice(0, 30), filteredNameList: nameListW.slice(0, 30), rawDataPlayers: rawDataPlayersW })
         }
+        console.log(filteredPlayers)
     }
     extractNameAndStats(data) {
         return {
@@ -394,10 +394,10 @@ class StatsScreen extends Component {
             }
             this.setState({ sortOrderDescending: true, lastSortedByID: index })
         }
-        if(this.state.isAllPlayersLoaded)
+        if (this.state.isAllPlayersLoaded)
             return newList
-        else 
-            return newList.splice(0,30)
+        else
+            return newList.splice(0, 30)
     }
     changeLeague(league) {
         if (!this.state.isLoading) {
@@ -514,7 +514,6 @@ class StatsScreen extends Component {
         this.state.filteredPlayers.map((rowData) => (
             nameList.push(formatName(rowData.name.split(' ')[0], rowData.name.split(' ')[1]))
         ))
-        console.log(nameList)
         return (
             <ScrollView style={styles.container} stickyHeaderIndices={[3]} ref={(ref) => this.myScroll = ref}>
                 {this.renderPickLeague()}

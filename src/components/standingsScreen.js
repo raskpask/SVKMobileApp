@@ -8,7 +8,7 @@ import pageStyles from '../style/basicStyle';
 const colWidth = 55
 
 const urlWomenStandings = 'https://svbf-web.dataproject.com/CompetitionStandings.aspx?ID=263&PID=350'
-const urlMenStandings ='https://svbf-web.dataproject.com/CompetitionStandings.aspx?ID=264&PID=351'
+const urlMenStandings = 'https://svbf-web.dataproject.com/CompetitionStandings.aspx?ID=264&PID=351'
 
 class StandingsScreen extends Component {
     constructor(props) {
@@ -47,7 +47,7 @@ class StandingsScreen extends Component {
                 teamsW = this.extractStandings(response.data)
                 this.createTableData(teamsW, 'Women')
             }.bind(this));
-        this.setState({isLoading: false})
+        this.setState({ isLoading: false })
     }
     createTableData(teams, league) {
         let logoRow = []
@@ -106,8 +106,8 @@ class StandingsScreen extends Component {
             lost23: teamInfo.split('<span id="Final23">')[1].split('</span>')[0],
             lost13: teamInfo.split('<span id="Final13">')[1].split('</span>')[0],
             lost03: teamInfo.split('<span id="Final03">')[1].split('</span>')[0],
-            setQuota: teamInfo.split('<span id="QuotSet"')[1].split('>')[1].split('</span>')[0],
-            pointQuota: teamInfo.split('<span id="QuotPoints">')[1].split('</span>')[0],
+            setQuota: teamInfo.split('<span id="QuotSet"')[1].split('>')[1].split('<')[0],
+            pointQuota: teamInfo.split('<span id="QuotPoints">')[1].split('<')[0],
         }
         return team
     }
@@ -161,9 +161,11 @@ class StandingsScreen extends Component {
                     <ActivityIndicator size="large" color='lightgrey' style={{ margin: 10 }} /> :
                     this.renderStandings()
                 }
+                <View>
+
                 <Picker
                     selectedValue={this.state.activeLeaguage}
-                    style={{ bottom: 0, marginTop: 40 }}
+                    style={{ bottom: 0, marginTop: 40, position: 'relative' }}
                     onValueChange={(itemValue, itemIndex) => {
                         this.setState({ activeLeaguage: itemValue })
                         this.changeLeage(itemValue)
@@ -171,8 +173,8 @@ class StandingsScreen extends Component {
 
                     <Picker.Item label={'Men'} value={'Men'} />
                     <Picker.Item label={'Women'} value={'Women'} />
-
                 </Picker>
+                        </View>
             </View>
         )
     }
