@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'react-native-axios';
 import { Table, Row, Col, TableWrapper } from 'react-native-table-component';
-import { StyleSheet, View, Image, ActivityIndicator, ScrollView } from 'react-native';
+import { StyleSheet, View, Image, ActivityIndicator, ScrollView, Platform } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
 import pageStyles from '../style/basicStyle';
@@ -156,26 +156,22 @@ class StandingsScreen extends Component {
     }
     render() {
         return (
-            <View style={styles.container}>
+            <ScrollView style={styles.container}>
                 {this.state.isLoading ?
                     <ActivityIndicator size="large" color='lightgrey' style={{ margin: 10 }} /> :
                     this.renderStandings()
                 }
-                <View>
-
                 <Picker
                     selectedValue={this.state.activeLeaguage}
-                    style={{ bottom: 0, marginTop: 40, position: 'relative' }}
+                    style={pickerStyle}
                     onValueChange={(itemValue, itemIndex) => {
                         this.setState({ activeLeaguage: itemValue })
                         this.changeLeage(itemValue)
                     }}>
-
                     <Picker.Item label={'Men'} value={'Men'} />
                     <Picker.Item label={'Women'} value={'Women'} />
                 </Picker>
-                        </View>
-            </View>
+            </ScrollView>
         )
     }
 }
@@ -185,5 +181,9 @@ const styles = StyleSheet.create({
     text: { margin: 6 },
     dataWrapper: { marginTop: -1 },
     row: { height: 41 }
+});
+const pickerStyle = StyleSheet.create({
+    bottom: 0,
+    marginTop: Platform.OS === 'ios' ? -87 : 40
 });
 export default StandingsScreen;

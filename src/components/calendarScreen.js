@@ -276,7 +276,7 @@ class Calendar extends Component {
                     <Picker
                         enabled={!this.state.isLoading}
                         selectedValue={this.state.chosenTeam}
-                        style={{ height: 50, width: windowWidth / 3.2 }}
+                        style={{marginTop: Platform.OS === 'ios' ? -100 : 0, height: 50, width: windowWidth / 3.2 }}
                         onValueChange={(itemValue, itemIndex) => {
                             this.setState({ chosenTeam: itemValue })
                             if (itemValue != 'All Teams')
@@ -297,7 +297,7 @@ class Calendar extends Component {
                     <Picker
                         enabled={!this.state.isLoading}
                         selectedValue={this.state.chosenLeague}
-                        style={{ height: 50, width: windowWidth / 3.2 }}
+                        style={{ marginTop: Platform.OS === 'ios' ? -100 : 0, height: 50, width: windowWidth / 3.2 }}
                         onValueChange={(itemValue, itemIndex) => {
                             if (this.state.chosenTeam != 'Men')
                                 this.changeLeague(itemValue)
@@ -345,7 +345,6 @@ const styles = StyleSheet.create({
         paddingTop: 30
     }
 });
-
 
 // Standard color of page
 const buttonColor = '#0095ff'

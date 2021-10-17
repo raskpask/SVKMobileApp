@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, StyleSheet, TextInput, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, StyleSheet, TextInput, Dimensions, TouchableOpacity, Platform } from 'react-native';
 import axios from 'react-native-axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Table, Row, Col, TableWrapper } from 'react-native-table-component';
@@ -200,8 +200,6 @@ class StatsScreen extends Component {
             }
             this.setState({ allPlayersM: playerListM, nameListM: nameListM, rawDataPlayersM: rawDataPlayersM })
         }.bind(this));
-        console.log(numberOfPlayersW)
-        console.log(compIdWomen)
         await axios.post("https://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData", { "startIndex": 0, "maximumRows": numberOfPlayersW, "sortExpressions": "PointsTot_ForAllPlayerStats DESC", "filterExpressions": [], "compID": compIdWomen, "phaseID": "0", "playerSearchByName": "" }).then(function (response) {
             rawDataPlayersW = response.data.d
             for (let i = 0; i < response.data.d.length; i++) {
@@ -227,7 +225,7 @@ class StatsScreen extends Component {
     }
     extractNameAndStats(data) {
         return {
-            name: data.Name + ' ' + data.Surname,
+            name: formatName(data.Name,data.Surname),
             team: data.Team,
             totalPoints: data.PointsTot_ForAllPlayerStats,
             totalKills: data.SpikeWin,
@@ -440,7 +438,7 @@ class StatsScreen extends Component {
     }
     renderTop() {
         return (
-            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} pagingEnabled={true}>
+            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} pagingEnabled={true} style={{ marginTop: Platform.OS === 'ios' ? 87 : 0 }}>
                 <View style={{ width: windowWidth }}>
                     {this.renderTopContent('Most points', 'topTotalPoints', 'totalPoints', 'points')}
                 </View>
@@ -475,7 +473,7 @@ class StatsScreen extends Component {
                     <Picker
                         enabled={!this.state.isLoading}
                         selectedValue={this.state.chosenTeam}
-                        style={{ height: 30, width: windowWidth / 2.5, margin: 15, marginTop: 0 }}
+                        style={{ height: 30, width: windowWidth / 2.5, margin: Platform.OS === 'ios' ? 0 : 15, marginTop: Platform.OS === 'ios' ? -87 : 0 }}
                         onValueChange={(itemValue, itemIndex) => {
                             if (this.state.chosenTeam !== itemValue)
                                 this.newSearch(itemValue, true)
@@ -496,17 +494,17 @@ class StatsScreen extends Component {
     }
     renderPickLeague() {
         return (
-            <Picker
-                enabled={!this.state.isLoading}
-                selectedValue={this.state.chosenLeague}
-                style={{ height: 50 }}
-                onValueChange={(itemValue) => {
-                    this.changeLeague(itemValue)
-                }}>
+                <Picker
+                    enabled={!this.state.isLoading}
+                    selectedValue={this.state.chosenLeague}
+                    style={{ height: 50, marginTop: Platform.OS === 'ios' ? -87 : 0 }}
+                    onValueChange={(itemValue) => {
+                        this.changeLeague(itemValue)
+                    }}>
 
-                <Picker.Item label={'Men'} value={'Men'} />
-                <Picker.Item label={'Women'} value={'Women'} />
-            </Picker>
+                    <Picker.Item label={'Men'} value={'Men'} />
+                    <Picker.Item label={'Women'} value={'Women'} />
+                </Picker>
         )
     }
     render() {
