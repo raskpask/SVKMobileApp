@@ -4,6 +4,8 @@ import { Picker } from '@react-native-picker/picker';
 import axios from 'react-native-axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // import Dimensions from 'dime'
+import { GetTeamFromLogo } from '../model/teamHelper';
+import { GetListOfTeams } from '../data/listOfTeams';
 
 import MatchCard from './matchCard';
 
@@ -25,9 +27,9 @@ class Calendar extends Component {
             matches: [[]],
             matchesM: [[]],
             matchesW: [[]],
-            listOfTeams: ['All Teams', 'Sollentuna VK', 'Falkenberg VBK', 'Habo WK', 'Lunds VK', 'Örkelljung VK', 'RIG Falköping', 'Södertälje VK', 'Uppsala VBS', 'Vingåkers VK', 'Hylte/Halmstad', 'Floby VK'],
-            listOfTeamsM: ['All Teams', 'Sollentuna VK', 'Falkenberg VBK', 'Habo WK', 'Lunds VK', 'Örkelljung VK', 'RIG Falköping', 'Södertälje VK', 'Uppsala VBS', 'Vingåkers VK', 'Hylte/Halmstad', 'Floby VK'],
-            listOfTeamsW: ['All Teams', 'Sollentuna VK ', 'Engelholm VBS', 'Örebro Volley', 'Lunds VK ', 'Värnamo VBA', 'RIG Falköping ', 'Gislaved VK', 'Linköping VC', 'IKSU Volleyboll', 'Lindesberg Volley', 'Hylte/Halmstad '],
+            listOfTeams: ['All Teams'],
+            listOfTeamsM: [],
+            listOfTeamsW: [],
             chosenTeam: 'All Teams',
             chosenLeague: 'League',
             refreshButtonColor: buttonColor,
@@ -43,6 +45,11 @@ class Calendar extends Component {
         }
     }
     async componentDidMount() {
+        this.setState({
+            listOfTeams: GetListOfTeams('Men',true),
+            listOfTeamsM: GetListOfTeams('Men',true),
+            listOfTeamsW: GetListOfTeams('Women',true)
+        })
         try {
             const matchesM = JSON.parse(await AsyncStorage.getItem(keyForMatchesMen))
             const matchesW = JSON.parse(await AsyncStorage.getItem(keyForMatchesWomen))
@@ -122,8 +129,8 @@ class Calendar extends Component {
 
         const homeLogo = matchString.split('Home" class="Calendar_DIV_TeamLogo DIV_TeamLogo_Box" style="background-image:url(&quot;')[1].split('&quot;')[0]
         const guestLogo = matchString.split('Guest" class="Calendar_DIV_TeamLogo DIV_TeamLogo_Box" style="background-image:url(&quot;')[1].split('&quot;')[0]
-        const homeTeam = this.getTeamFromLogo(homeLogo.split('_')[1].split('.')[0])
-        const guestTeam = this.getTeamFromLogo(guestLogo.split('_')[1].split('.')[0])
+        const homeTeam = GetTeamFromLogo(homeLogo.split('_')[1].split('.')[0])
+        const guestTeam = GetTeamFromLogo(guestLogo.split('_')[1].split('.')[0])
         const matchData = {
             homeSets: matchString.split('WonSetHome" value="')[1].split('"')[0],
             guestSets: matchString.split('WonSetGuest" value="')[1].split('"')[0],
@@ -143,57 +150,6 @@ class Calendar extends Component {
             ref2: matchString.split('Arbitro2">')[1].split('</span>')[0],
         }
         return matchData
-    }
-
-    getTeamFromLogo(logoID) {
-        switch (logoID) {
-            case '1578':
-                return 'Engelholm VBS'
-            case '1581':
-                return 'IKSU Volleyboll'
-            case '1588':
-                return 'Värnamo VBA'
-            case '1580':
-                return 'Hylte/Halmstad '
-            case '1592':
-                return 'Hylte/Halmstad'
-            case '1593':
-                return 'Lunds VK'
-            case '1584':
-                return 'Lunds VK '
-            case '1585':
-                return 'Örebro Volley'
-            case '1595':
-                return 'RIG Falköping'
-            case '1586':
-                return 'RIG Falköping '
-            case '1582':
-                return 'Lindesberg Volley'
-            case '1597':
-                return 'Sollentuna VK'
-            case '1587':
-                return 'Sollentuna VK '
-            case '1583':
-                return 'Linköping VC'
-            case '1579':
-                return 'Gislaved VK'
-            case '1589':
-                return 'Falkenberg VBK'
-            case '1590':
-                return 'Floby VK'
-            case '1591':
-                return 'Habo WK'
-            case '1594':
-                return 'Örkelljung VK'
-            case '1596':
-                return 'Södertälje VK'
-            case '1598':
-                return 'Uppsala VBS'
-            case '1599':
-                return 'Vingåkers VK'
-            default:
-                return ''
-        }
     }
     getTodayScrollIndex() {
         let index = 0
@@ -276,7 +232,7 @@ class Calendar extends Component {
                     <Picker
                         enabled={!this.state.isLoading}
                         selectedValue={this.state.chosenTeam}
-                        style={{marginTop: Platform.OS === 'ios' ? -100 : 0, height: 50, width: windowWidth / 3.2 }}
+                        style={{ marginTop: Platform.OS === 'ios' ? -100 : 0, height: 50, width: windowWidth / 3.2 }}
                         onValueChange={(itemValue, itemIndex) => {
                             this.setState({ chosenTeam: itemValue })
                             if (itemValue != 'All Teams')

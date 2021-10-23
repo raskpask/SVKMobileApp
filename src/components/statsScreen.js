@@ -221,7 +221,6 @@ class StatsScreen extends Component {
         } else {
             this.setState({ filteredPlayers: playerListW.slice(0, 30), filteredNameList: nameListW.slice(0, 30), rawDataPlayers: rawDataPlayersW })
         }
-        console.log(filteredPlayers)
     }
     extractNameAndStats(data) {
         return {

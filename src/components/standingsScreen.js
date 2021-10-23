@@ -88,7 +88,6 @@ class StandingsScreen extends Component {
     }
     extrcatTeam(teamInfo) {
         //Logo address, name, pontis, played, wins,lost, setWin,setLost PointsWin, pointsLost, 3-0,3-1,3-2,2-3,1-3,0-1, SetQuota, PointQuota
-        console.log(teamInfo)
         const team = {
             logoUrl: teamInfo.split('&quot;')[1].split('&quot;')[0],
             name: teamInfo.split('<span id="TeamName"')[1].split('>')[1].split('<')[0],

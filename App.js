@@ -7,6 +7,7 @@ import HomeStackScreen from './src/stackScreens/homeStackScreen';
 import CalendarStackScreen from './src/stackScreens/calendarStackScreen';
 import StandingsStackScreen from './src/stackScreens/standingsStackScreen';
 import StatsStackScreen from './src/stackScreens/statsStackScreen';
+import SettingsStackScreen from './src/stackScreens/settingsStackScreen';
 
 import RunAtStartup from './src/model/startup';
 
@@ -50,6 +51,15 @@ export default function App() {
           options={{
             tabBarIcon: ({ color, size }) => (
               <Icon name="podium" color={color} size={size} />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Settings"
+          component={SettingsStackScreen}
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <Icon name="cog" color={color} size={size} />
             ),
           }}
         />
