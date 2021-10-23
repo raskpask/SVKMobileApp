@@ -15,12 +15,7 @@ class SettingsScreen extends Component {
             showMen: true,
             showWomen: true,
             standardTeam: 'None',
-            allTeams: [
-                'None',
-                'Sollentuna',
-                'Vingåker',
-                'Södertälje'
-            ]
+            allTeams: ['None']
         }
     }
     async componentDidMount() {

@@ -14,7 +14,7 @@ const dateNow = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2,
 const timeNow = now.getHours() + ":" + now.getMinutes()
 
 const urlWomen = 'https://svbf-web.dataproject.com/CompetitionHome.aspx?ID=263'
-const urlMen ='https://svbf-web.dataproject.com/CompetitionHome.aspx?ID=264'
+const urlMen = 'https://svbf-web.dataproject.com/CompetitionHome.aspx?ID=264'
 
 class Home extends Component {
     constructor(props) {
@@ -30,7 +30,6 @@ class Home extends Component {
             loading: true,
             isMatchToday: false,
             liveBackgroundColor: 'white'
-
         };
     }
     async componentDidMount() {
@@ -89,11 +88,11 @@ class Home extends Component {
         }
         let currentMatches = currentMatchesW.concat(currentMatchesM).sort((a, b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)).sort((a, b) => (a.date > b.date) ? 1 : ((b.date > a.date) ? -1 : 0))
         let matchesToday = []
-        let matcherOtherDAys =[]
+        let matcherOtherDAys = []
         currentMatches.forEach(match => {
-            if(match.date === dateNow)
+            if (match.date === dateNow)
                 matchesToday.push(match)
-            else 
+            else
                 matcherOtherDAys.push(match)
         })
         currentMatches = matchesToday.concat(matcherOtherDAys)
@@ -167,8 +166,7 @@ class Home extends Component {
     }
     async refreshPage() {
         this.setState({ refreshing: true })
-        await this.getMatches()
-        this.renderSpecificTeam()
+        await this.getCurrentMatches()
         this.setState({ refreshing: false })
     }
     renderLiveStreamComponent(isTop) {
@@ -198,12 +196,6 @@ class Home extends Component {
         return (
             <ScrollView
                 style={{ height: 375, borderWidth: 0 }}
-                refreshControl={
-                    <RefreshControl
-                        onRefresh={() => this.refreshPage()}
-                        refreshing={this.state.refreshing}
-                    />
-                }
                 ref={(ref) => this.myScroll = ref}
             >
                 {
@@ -245,7 +237,13 @@ class Home extends Component {
     }
     render() {
         return (
-            <ScrollView>
+            <ScrollView
+            refreshControl={
+                <RefreshControl
+                    onRefresh={() => this.refreshPage()}
+                    refreshing={this.state.refreshing}
+                />
+            }>
                 {this.renderLiveStreamComponent(true)}
                 <Text style={{ fontSize: 30, textAlign: 'center', marginTop: 20, marginBottom: 10 }}>Matches</Text>
                 {this.renderCurrentGames()}
