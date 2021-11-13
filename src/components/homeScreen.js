@@ -1,14 +1,13 @@
 import React, { Component } from 'react';
 import axios from 'react-native-axios';
-import { Text, View, TouchableOpacity, ImageBackground, RefreshControl } from 'react-native';
+import { Text, View, TouchableOpacity, ImageBackground, RefreshControl, ActivityIndicator } from 'react-native';
 import { Card } from 'react-native-elements'
 import { ScrollView } from 'react-native-gesture-handler';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import MatchCard from './matchCard';
-import BaggerWar from './baggerWar';
-const keyCurrentMatches = 'currentMatches'
+import { GetKey } from '../model/storageKeys';
 const now = new Date()
 const dateNow = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0')
 const timeNow = now.getHours() + ":" + now.getMinutes()
@@ -27,16 +26,19 @@ class Home extends Component {
             league: '',
             news: [],
             refreshing: false,
-            loading: true,
+            isLoading: true,
             isMatchToday: false,
-            liveBackgroundColor: 'white'
+            liveBackgroundColor: 'white',
+            settings: {}
         };
     }
     async componentDidMount() {
         try {
-            const matches = JSON.parse(await AsyncStorage.getItem(keyCurrentMatches))
+            this.setState({ settings: JSON.parse(await AsyncStorage.getItem(GetKey('settings'))) })
+            const matchesM = JSON.parse(await AsyncStorage.getItem(GetKey('currentMatchesHomeM')))
+            const matchesW = JSON.parse(await AsyncStorage.getItem(GetKey('currentMatchesHomeW')))
+            const matches = this.concatMatches(matchesW, matchesM)
             if (matches !== null) {
-
                 this.setState({ currentMatches: matches })
             }
             this.getNews()
@@ -44,6 +46,14 @@ class Home extends Component {
             console.warn(error)
         }
         this.getCurrentMatches()
+    }
+    async componentDidUpdate(){
+        if(!this.state.isLoading && this.props.settingsChanged){
+            console.log("Uppdaterar lista")
+            await this.getCurrentMatches()
+            console.log(this.props)
+            this.props.setSettingsChangedHome(false)
+        }
     }
     componentWillUnmount() {
         clearInterval(this.interval);
@@ -86,20 +96,29 @@ class Home extends Component {
         if (this.state.isMatchToday) {
             this.interval = setInterval(() => this.setState({ liveBackgroundColor: this.state.liveBackgroundColor === 'white' ? 'yellow' : 'white' }), 1000);
         }
-        let currentMatches = currentMatchesW.concat(currentMatchesM).sort((a, b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)).sort((a, b) => (a.date > b.date) ? 1 : ((b.date > a.date) ? -1 : 0))
+        const currentMatches = this.concatMatches(currentMatchesW, currentMatchesM)
+        AsyncStorage.setItem(GetKey('currentMatchesHomeM'), JSON.stringify(currentMatchesM))
+        AsyncStorage.setItem(GetKey('currentMatchesHomeW'), JSON.stringify(currentMatchesW))
+        this.setState({ isLoading: false, currentMatches: currentMatches })
+    }
+    concatMatches(currentMatchesW, currentMatchesM) {
+        let currentMatches = []
         let matchesToday = []
         let matcherOtherDAys = []
+        if (this.state.settings.showMen && this.state.settings.showWomen) {
+            currentMatches = currentMatchesW.concat(currentMatchesM).sort((a, b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)).sort((a, b) => (a.date > b.date) ? 1 : ((b.date > a.date) ? -1 : 0))
+        } else if (this.state.settings.showWomen) {
+            currentMatches = currentMatchesW.sort((a, b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)).sort((a, b) => (a.date > b.date) ? 1 : ((b.date > a.date) ? -1 : 0))
+        } else if (this.state.settings.showMen) {
+            currentMatches = currentMatchesM.sort((a, b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)).sort((a, b) => (a.date > b.date) ? 1 : ((b.date > a.date) ? -1 : 0))
+        }
         currentMatches.forEach(match => {
             if (match.date === dateNow)
                 matchesToday.push(match)
             else
                 matcherOtherDAys.push(match)
         })
-        currentMatches = matchesToday.concat(matcherOtherDAys)
-        AsyncStorage.setItem(keyCurrentMatches, JSON.stringify(currentMatches))
-        this.setState({ loading: false, currentMatches: currentMatches })
-
-
+        return matchesToday.concat(matcherOtherDAys)
     }
     extractCurrentMatches(data, gender) {
         const listOfGames = data.split('"DIV_Match_Main"')
@@ -195,8 +214,8 @@ class Home extends Component {
     renderCurrentGames() {
         return (
             <ScrollView
-                style={{ height: 375, borderWidth: 0 }}
                 ref={(ref) => this.myScroll = ref}
+                style={{ height: 375, borderWidth: 0 }}
             >
                 {
                     this.state.currentMatches.map((match, i) => {
@@ -238,15 +257,20 @@ class Home extends Component {
     render() {
         return (
             <ScrollView
-            refreshControl={
-                <RefreshControl
-                    onRefresh={() => this.refreshPage()}
-                    refreshing={this.state.refreshing}
-                />
-            }>
+                refreshControl={
+                    <RefreshControl
+                        onRefresh={() => this.refreshPage()}
+                        refreshing={this.state.refreshing}
+                    />
+                }
+                ref={(ref) => this.myScroll = ref}
+                >
                 {this.renderLiveStreamComponent(true)}
                 <Text style={{ fontSize: 30, textAlign: 'center', marginTop: 20, marginBottom: 10 }}>Matches</Text>
-                {this.renderCurrentGames()}
+                {this.state.isLoading ?
+                    <ActivityIndicator size="large" color='lightgrey' style={{ margin: 10 }} /> :
+                    this.renderCurrentGames()
+                }
                 <Text style={{ fontSize: 30, textAlign: 'center', marginTop: 20, marginBottom: 10 }}>News</Text>
                 {this.renderNews()}
                 {this.renderLiveStreamComponent(false)}

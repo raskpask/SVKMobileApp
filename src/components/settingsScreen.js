@@ -4,8 +4,7 @@ import { Picker } from '@react-native-picker/picker';
 import CheckBox from '@react-native-community/checkbox';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GetListOfTeams } from '../data/listOfTeams';
-
-const settingsKey = "settingsKey"
+import { GetKey } from '../model/storageKeys';
 
 class SettingsScreen extends Component {
     constructor(props) {
@@ -22,7 +21,7 @@ class SettingsScreen extends Component {
         listOfTeams = GetListOfTeams();
         this.setState({allTeams: listOfTeams})
         try {
-            settings = JSON.parse(await AsyncStorage.getItem(settingsKey))
+            settings = JSON.parse(await AsyncStorage.getItem(GetKey('settings')))
             if(settings)
                 this.setState({ league: settings.league, showMen: settings.showMen, showWomen: settings.showWomen, standardTeam: settings.standardTeam })
         } catch (e) {
@@ -37,7 +36,7 @@ class SettingsScreen extends Component {
             standardTeam: this.state.standardTeam
         }
         try {
-            AsyncStorage.setItem(settingsKey, JSON.stringify(settings))
+            AsyncStorage.setItem(GetKey('settings'), JSON.stringify(settings))
         } catch (e) {
             console.warn(e)
         }
@@ -46,8 +45,7 @@ class SettingsScreen extends Component {
     render() {
         return (
             <ScrollView >
-                <Text>Settings</Text>
-                <Text>Välj liga som ska vara standard</Text>
+                <Text>Choose standard league</Text>
                 <Picker
                     selectedValue={this.state.league}
                     style={pickerStyle}
@@ -57,19 +55,19 @@ class SettingsScreen extends Component {
                     <Picker.Item label={'Men'} value={'Men'} />
                     <Picker.Item label={'Women'} value={'Women'} />
                 </Picker>
-                <Text>Visa endast herrar</Text>
+                <Text>Show men</Text>
                 <CheckBox
                     disabled={false}
                     value={this.state.showMen}
                     onValueChange={(value) => this.setState({ showMen: value })}
                 />
-                <Text>Visa endast damer</Text>
+                <Text>Show women</Text>
                 <CheckBox
                     disabled={false}
                     value={this.state.showWomen}
                     onValueChange={(value) => this.setState({ showWomen: value })}
                 />
-                <Text>Välj standardlag</Text>
+                <Text>Pick home team</Text>
                 <Picker
                     selectedValue={this.state.standardTeam}
                     style={pickerStyle}
@@ -88,6 +86,6 @@ class SettingsScreen extends Component {
 }
 const pickerStyle = StyleSheet.create({
     bottom: 0,
-    marginTop: Platform.OS === 'ios' ? -87 : 40
+    marginTop: Platform.OS === 'ios' ? -47 : 0
 });
 export default SettingsScreen;
