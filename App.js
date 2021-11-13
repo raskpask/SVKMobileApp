@@ -2,10 +2,12 @@ import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { Provider } from "react-redux";
 
-import RunAtStartup from './src/model/startup';
+import RunAtStartup from './src/model/startup/startup';
 const HomeStack = createStackNavigator();
 import { createStackNavigator } from '@react-navigation/stack';
+import store from "./js/store";
 
 import HomeScreen from './src/components/homeScreen';
 import CalendarScreen from './src/components/calendarScreen';
@@ -22,74 +24,76 @@ class App extends React.Component {
     this.state = {
       settingsChangedHome: false
     };
-}
+  }
 
   render() {
     return (
-      <NavigationContainer>
-        <Tab.Navigator>
-          <Tab.Screen
-            name="Home"
-            children={() => 
-            <HomeStack.Navigator>
-              <HomeStack.Screen name="Home" children={() => <HomeScreen />} />
-            </HomeStack.Navigator>}
-            options={{
-              tabBarIcon: ({ color, size }) => (
-                <Icon name="home" color={color} size={size} />
-              ),
-            }}
-          />
-          <Tab.Screen
-            name="Calendar"
-            children={() => 
-            <HomeStack.Navigator>
-              <HomeStack.Screen name="Calendar" children={() => <CalendarScreen/>} />
-            </HomeStack.Navigator>}
-            options={{
-              tabBarIcon: ({ color, size }) => (
-                <Icon name="calendar" color={color} size={size} />
-              ),
-            }}
-          />
-          <Tab.Screen
-            name="Stats"
-            children={() => 
-            <HomeStack.Navigator>
-              <HomeStack.Screen name="Stats" children={() => <StatsScreen/>} />
-            </HomeStack.Navigator>}
-            options={{
-              tabBarIcon: ({ color, size }) => (
-                <Icon name="volleyball" color={color} size={size} />
-              ),
-            }}
-          />
-          <Tab.Screen
-            name="Standings"
-            children={() => 
-            <HomeStack.Navigator>
-              <HomeStack.Screen name="Standings" children={() => <StandingsScreen/>} />
-            </HomeStack.Navigator>}
-            options={{
-              tabBarIcon: ({ color, size }) => (
-                <Icon name="podium" color={color} size={size} />
-              ),
-            }}
-          />
-          <Tab.Screen
-            name="Settings"
-            children={() => 
-            <HomeStack.Navigator>
-              <HomeStack.Screen name="Settings" children={() => <SettingsScreen/>} />
-            </HomeStack.Navigator>}
-            options={{
-              tabBarIcon: ({ color, size }) => (
-                <Icon name="cog" color={color} size={size} />
-              ),
-            }}
-          />
-        </Tab.Navigator>
-      </NavigationContainer>
+      <Provider store={store}>
+        <NavigationContainer>
+          <Tab.Navigator>
+            <Tab.Screen
+              name="Home"
+              children={() =>
+                <HomeStack.Navigator>
+                  <HomeStack.Screen name="Home" children={() => <HomeScreen />} />
+                </HomeStack.Navigator>}
+              options={{
+                tabBarIcon: ({ color, size }) => (
+                  <Icon name="home" color={color} size={size} />
+                ),
+              }}
+            />
+            <Tab.Screen
+              name="Calendar"
+              children={() =>
+                <HomeStack.Navigator>
+                  <HomeStack.Screen name="Calendar" children={() => <CalendarScreen />} />
+                </HomeStack.Navigator>}
+              options={{
+                tabBarIcon: ({ color, size }) => (
+                  <Icon name="calendar" color={color} size={size} />
+                ),
+              }}
+            />
+            <Tab.Screen
+              name="Stats"
+              children={() =>
+                <HomeStack.Navigator>
+                  <HomeStack.Screen name="Stats" children={() => <StatsScreen />} />
+                </HomeStack.Navigator>}
+              options={{
+                tabBarIcon: ({ color, size }) => (
+                  <Icon name="volleyball" color={color} size={size} />
+                ),
+              }}
+            />
+            <Tab.Screen
+              name="Standings"
+              children={() =>
+                <HomeStack.Navigator>
+                  <HomeStack.Screen name="Standings" children={() => <StandingsScreen />} />
+                </HomeStack.Navigator>}
+              options={{
+                tabBarIcon: ({ color, size }) => (
+                  <Icon name="podium" color={color} size={size} />
+                ),
+              }}
+            />
+            <Tab.Screen
+              name="Settings"
+              children={() =>
+                <HomeStack.Navigator>
+                  <HomeStack.Screen name="Settings" children={() => <SettingsScreen />} />
+                </HomeStack.Navigator>}
+              options={{
+                tabBarIcon: ({ color, size }) => (
+                  <Icon name="cog" color={color} size={size} />
+                ),
+              }}
+            />
+          </Tab.Navigator>
+        </NavigationContainer>
+      </Provider>
     );
   }
 }

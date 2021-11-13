@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'react-native-axios';
-import { GetKey } from './storageKeys';
-export default function RunAtStartup() {
+
+export function findNumberOfPlayers(){
     date = new Date()
     if(date.getMonth() > 8 || date.getMonth() < 5){
         findNumberOfPlayersW(100)
@@ -10,10 +10,7 @@ export default function RunAtStartup() {
         findNumberOfPlayersW(20)
         findNumberOfPlayersM(20)
     }
-    setStandardSettings()
 }
-
-
 function findNumberOfPlayersM(numberOfPlayers) {
     axios.post("https://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData", { "startIndex": 0, "maximumRows": numberOfPlayers, "sortExpressions": "PointsTot_ForAllPlayerStats DESC", "filterExpressions": [], "compID": "264", "phaseID": "0", "playerSearchByName": "" })
     .then((res) => {
@@ -47,21 +44,4 @@ function findNumberOfPlayersW(numberOfPlayers) {
         }).catch(() => {
             AsyncStorage.setItem("numberOfPlayersW", JSON.stringify(numberOfPlayers - 1))
         });
-}
-async function setStandardSettings(){
-    try {
-        settings = JSON.parse(await AsyncStorage.getItem(GetKey('settings')))
-        if(!settings){
-            settings = {
-                league: 'Men',
-                showMen: true,
-                showWomen: true,
-                standardTeam: 'None'
-            }
-            AsyncStorage.setItem(GetKey('settings'), JSON.stringify(settings))
-        }
-
-    } catch (e) {
-        console.warn(e)
-    }
 }

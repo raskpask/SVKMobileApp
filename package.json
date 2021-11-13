@@ -26,6 +26,7 @@
     "react-native-gesture-handler": "^1.10.3",
     "react-native-screens": "^3.7.2",
     "react-native-table-component": "^1.2.1",
-    "react-native-webview": "^11.2.3"
+    "react-native-webview": "^11.2.3",
+    "react-redux": "^7.2.6"
   }
 }
