@@ -8,6 +8,8 @@ import { GetTeamFromLogo } from '../model/teamHelper';
 import { GetListOfTeams } from '../data/listOfTeams';
 
 import MatchCard from './matchCard';
+import { GetKey } from '../model/storageKeys';
+import { ThemeConsumer } from 'react-native-elements';
 
 const keyForMatchesMen = 'matchesMen'
 const keyForMatchesWomen = 'matchesWomen'
@@ -35,6 +37,7 @@ class Calendar extends Component {
             refreshButtonColor: buttonColor,
             refreshing: false,
             isLoading: true,
+            settings: {}
         };
     }
     scrollToIndex(index) {
@@ -45,17 +48,22 @@ class Calendar extends Component {
         }
     }
     async componentDidMount() {
+        this.setState({ settings: JSON.parse(await AsyncStorage.getItem(GetKey('settings'))) })
+        if (this.state.settings.league === 'Men') {
+            this.setState({ listOfTeams: GetListOfTeams('Men', true) })
+        } else {
+            this.setState({ listOfTeams: GetListOfTeams('Women', true) })
+        }
         this.setState({
-            listOfTeams: GetListOfTeams('Men',true),
-            listOfTeamsM: GetListOfTeams('Men',true),
-            listOfTeamsW: GetListOfTeams('Women',true)
+            listOfTeamsM: GetListOfTeams('Men', true),
+            listOfTeamsW: GetListOfTeams('Women', true)
         })
         try {
             const matchesM = JSON.parse(await AsyncStorage.getItem(keyForMatchesMen))
             const matchesW = JSON.parse(await AsyncStorage.getItem(keyForMatchesWomen))
 
             if (matchesM != null && matchesW != null) {
-                if (this.state.chosenLeague == 'Men' || this.state.chosenLeague == 'League') {
+                if (this.state.settings.league === 'Men' || this.state.chosenLeague == 'League') {
                     this.setState({ matches: matchesM })
                 } else {
                     this.setState({ matches: matchesW })
@@ -65,7 +73,14 @@ class Calendar extends Component {
         } catch (e) {
             console.warn(e)
         }
-        this.getMatches()
+        await this.getMatches()
+        const teamName = this.state.settings.standardTeam.split('(')[0].trim()
+        if(teamName != null){
+            this.renderSpecificTeam(teamName)
+            this.setState({chosenTeam: teamName})
+            console.log(this.state.chosenTeam)
+            console.log(teamName)
+        }
     }
     async getMatches() {
         await axios.get(urlMenMatches)
@@ -76,7 +91,7 @@ class Calendar extends Component {
                 } catch (e) {
                     console.warn(e)
                 }
-                if (this.state.chosenLeague != 'Women')
+                if (this.state.chosenLeague != 'Women' || this.state.settings.league == 'Men')
                     this.setState({ matches: matches })
                 this.setState({ matchesM: matches })
             }.bind(this));
@@ -95,9 +110,6 @@ class Calendar extends Component {
 
 
         this.setState({ isLoading: false })
-
-
-
     }
     extractMatches(data) {
         let matches = []

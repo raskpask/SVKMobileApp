@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { ScrollView, Text, StyleSheet } from 'react-native';
+import { ScrollView, Text, StyleSheet, Switch } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import CheckBox from '@react-native-community/checkbox';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -19,10 +19,10 @@ class SettingsScreen extends Component {
     }
     async componentDidMount() {
         listOfTeams = GetListOfTeams();
-        this.setState({allTeams: listOfTeams})
+        this.setState({ allTeams: listOfTeams })
         try {
             settings = JSON.parse(await AsyncStorage.getItem(GetKey('settings')))
-            if(settings)
+            if (settings)
                 this.setState({ league: settings.league, showMen: settings.showMen, showWomen: settings.showWomen, standardTeam: settings.standardTeam })
         } catch (e) {
             console.warn(e)
@@ -56,16 +56,14 @@ class SettingsScreen extends Component {
                     <Picker.Item label={'Women'} value={'Women'} />
                 </Picker>
                 <Text>Show men</Text>
-                <CheckBox
-                    disabled={false}
-                    value={this.state.showMen}
+                <Switch
                     onValueChange={(value) => this.setState({ showMen: value })}
+                    value={this.state.showMen}
                 />
                 <Text>Show women</Text>
-                <CheckBox
-                    disabled={false}
-                    value={this.state.showWomen}
+                <Switch
                     onValueChange={(value) => this.setState({ showWomen: value })}
+                    value={this.state.showWomen}
                 />
                 <Text>Pick home team</Text>
                 <Picker

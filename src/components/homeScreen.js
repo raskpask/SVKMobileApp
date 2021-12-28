@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'react-native-axios';
 import { Text, View, TouchableOpacity, ImageBackground, RefreshControl, ActivityIndicator } from 'react-native';
-import { Card } from 'react-native-elements'
+import { Card, ThemeConsumer } from 'react-native-elements'
 import { ScrollView } from 'react-native-gesture-handler';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -37,21 +37,19 @@ class Home extends Component {
             this.setState({ settings: JSON.parse(await AsyncStorage.getItem(GetKey('settings'))) })
             const matchesM = JSON.parse(await AsyncStorage.getItem(GetKey('currentMatchesHomeM')))
             const matchesW = JSON.parse(await AsyncStorage.getItem(GetKey('currentMatchesHomeW')))
-            const matches = this.concatMatches(matchesW, matchesM)
-            if (matches !== null) {
-                this.setState({ currentMatches: matches })
+            if (matchesM !== null || matchesW !== null) {
+                this.setMatches(matchesM, matchesW)
             }
             this.getNews()
-        } catch (error) {
+        }
+        catch (error) {
             console.warn(error)
         }
         this.getCurrentMatches()
     }
-    async componentDidUpdate(){
-        if(!this.state.isLoading && this.props.settingsChanged){
-            console.log("Uppdaterar lista")
+    async componentDidUpdate() {
+        if (!this.state.isLoading && this.props.settingsChanged) {
             await this.getCurrentMatches()
-            console.log(this.props)
             this.props.setSettingsChangedHome(false)
         }
     }
@@ -80,6 +78,16 @@ class Home extends Component {
             image: newsString.split('background-image:url')[1].split('&quot;')[1].split('&quot;')[0].split(' ').join('%20'),
         }
     }
+    setMatches(matchesM, matchesW){
+        if (this.state.settings.showWomen && !this.state.settings.showMen) {
+            this.setState({ currentMatches: matchesW })
+        } else if (!this.state.settings.showWomen && this.state.settings.showMen) {
+            this.setState({ currentMatches: matchesM })
+        } else {
+            const matches = this.concatMatches(matchesW, matchesM)
+            this.setState({ currentMatches: matches })
+        }
+    }
     async getCurrentMatches() {
         let currentMatchesM = []
         let currentMatchesW = []
@@ -96,10 +104,12 @@ class Home extends Component {
         if (this.state.isMatchToday) {
             this.interval = setInterval(() => this.setState({ liveBackgroundColor: this.state.liveBackgroundColor === 'white' ? 'yellow' : 'white' }), 1000);
         }
-        const currentMatches = this.concatMatches(currentMatchesW, currentMatchesM)
         AsyncStorage.setItem(GetKey('currentMatchesHomeM'), JSON.stringify(currentMatchesM))
         AsyncStorage.setItem(GetKey('currentMatchesHomeW'), JSON.stringify(currentMatchesW))
-        this.setState({ isLoading: false, currentMatches: currentMatches })
+        if (currentMatchesM !== null || currentMatchesW !== null) {
+            this.setMatches(currentMatchesM, currentMatchesW)
+        }
+        this.setState({ isLoading: false })
     }
     concatMatches(currentMatchesW, currentMatchesM) {
         let currentMatches = []
@@ -264,7 +274,7 @@ class Home extends Component {
                     />
                 }
                 ref={(ref) => this.myScroll = ref}
-                >
+            >
                 {this.renderLiveStreamComponent(true)}
                 <Text style={{ fontSize: 30, textAlign: 'center', marginTop: 20, marginBottom: 10 }}>Matches</Text>
                 {this.state.isLoading ?
