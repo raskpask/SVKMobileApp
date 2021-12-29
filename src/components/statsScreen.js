@@ -9,6 +9,7 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 import { formatName } from '../model/formatName';
 import { ExtractNameAndStats, ExtractData, ExtractTotalrow } from '../model/webScraping/stats';
+import { GetKey } from '../model/storageKeys';
 
 const allStatsKeyM = 'allStatsM'
 const allStatsKeyW = 'allStatsW'
@@ -108,16 +109,19 @@ class StatsScreen extends Component {
             searchText: "",
             chosenTeam: "All teams",
             listOfTeams: ['All teams', 'Sollentuna', 'Vingåker', 'Lund', 'Södertelge', 'Hylte Halmstad', 'Floby', 'Habo', 'Örkelljunga', 'Uppsala', 'RIG Falköping', 'Falkenberg'],
+            settings: {}
         }
     }
     async componentDidMount() {
+        const settings = JSON.parse(await AsyncStorage.getItem(GetKey('settings')))
+        this.setState({settings: settings, chosenLeague: settings.league})
         let playerListM = []
         let playerListW = []
         let nameListM = []
         let nameListW = []
         let tops = {}
         try {
-            if (this.state.chosenLeague !== 'Women') {
+            if (settings.league !== 'Women') {
                 tops = JSON.parse(await AsyncStorage.getItem(topKeyM))
                 this.setState({ topTotalPoints: tops.points, topTotalKills: tops.kills, topTotalBlocks: tops.blocks, topTotalAces: tops.aces })
             } else {

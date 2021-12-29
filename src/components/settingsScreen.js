@@ -45,16 +45,6 @@ class SettingsScreen extends Component {
     render() {
         return (
             <ScrollView >
-                <Text>Choose standard league</Text>
-                <Picker
-                    selectedValue={this.state.league}
-                    style={pickerStyle}
-                    onValueChange={(itemValue, itemIndex) => {
-                        this.setState({ league: itemValue })
-                    }}>
-                    <Picker.Item label={'Men'} value={'Men'} />
-                    <Picker.Item label={'Women'} value={'Women'} />
-                </Picker>
                 <Text>Show men</Text>
                 <Switch
                     onValueChange={(value) => this.setState({ showMen: value })}
@@ -69,8 +59,12 @@ class SettingsScreen extends Component {
                 <Picker
                     selectedValue={this.state.standardTeam}
                     style={pickerStyle}
-                    onValueChange={(itemValue, itemIndex) => {
+                    onValueChange={(itemValue) => {
                         this.setState({ standardTeam: itemValue })
+                        if(itemValue.split('(M)').length > 1)
+                            this.setState({league: 'Men'})
+                        else
+                            this.setState({league: 'Women'})
                     }}>
                     {this.state.allTeams.map((value, index) => {
                         return (

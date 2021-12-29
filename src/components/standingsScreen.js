@@ -3,11 +3,13 @@ import axios from 'react-native-axios';
 import { Table, Row, Col, TableWrapper } from 'react-native-table-component';
 import { StyleSheet, View, Image, ActivityIndicator, ScrollView, Platform } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import pageStyles from '../style/basicStyle';
 const colWidth = 55
 
 import { CreateTableDataStandings, ExtractStandings } from '../model/webScraping/standings';
+import { GetKey } from '../model/storageKeys';
 
 const urlWomenStandings = 'https://svbf-web.dataproject.com/CompetitionStandings.aspx?ID=263&PID=350'
 const urlMenStandings = 'https://svbf-web.dataproject.com/CompetitionStandings.aspx?ID=264&PID=351'
@@ -31,34 +33,40 @@ class StandingsScreen extends Component {
             team: [],
             teamRanking: 0,
             popupTeamData: [],
-            activeLeaguage: 'Men',
-            isLoading: true
+            chosenLeague: 'Men',
+            isLoading: true,
+            settings: {}
         }
     }
     async componentDidMount() {
+        const settings = JSON.parse(await AsyncStorage.getItem(GetKey('settings')))
+        this.setState({settings: settings, chosenLeague: settings.league})
         let teams
         let teamsW
         await axios.get(urlMenStandings)
             .then(function (response) {
                 teams = ExtractStandings(response.data)
-                this.createTableData(teams, 'Men')
+                this.createTableData(teams, 'Men', settings.league)
             }.bind(this));
 
         await axios.get(urlWomenStandings)
             .then(function (response) {
                 teamsW = ExtractStandings(response.data)
-                this.createTableData(teamsW, 'Women')
+                this.createTableData(teamsW, 'Women',settings.league)
             }.bind(this));
         this.setState({ isLoading: false })
     }
-    createTableData(teams, league) {
+    createTableData(teams, league, chosenLeague) {
         let rowAndData = CreateTableDataStandings(teams)
         let logoRow = rowAndData[0]
         let data = rowAndData[1]
         if (league == 'Men')
-            this.setState({ logoRow: logoRow, logoRowM: logoRow, tableData: data, tableDataM: data })
+            this.setState({ logoRowM: logoRow,  tableDataM: data })
         else
             this.setState({ logoRowW: logoRow, tableDataW: data })
+        if(chosenLeague === league)
+            this.setState({logoRow: logoRow, tableData: data})
+
     }
     changeLeage(league) {
         if (league == 'Men') {
@@ -111,10 +119,10 @@ class StandingsScreen extends Component {
                     this.renderStandings()
                 }
                 <Picker
-                    selectedValue={this.state.activeLeaguage}
+                    selectedValue={this.state.chosenLeague}
                     style={pickerStyle}
                     onValueChange={(itemValue, itemIndex) => {
-                        this.setState({ activeLeaguage: itemValue })
+                        this.setState({ chosenLeague: itemValue })
                         this.changeLeage(itemValue)
                     }}>
                     <Picker.Item label={'Men'} value={'Men'} />

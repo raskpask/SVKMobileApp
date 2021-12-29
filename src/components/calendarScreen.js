@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, ActivityIndicator, StyleSheet, ScrollView, Button, RefreshControl, Dimensions } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, ScrollView, Button, RefreshControl, Dimensions, SegmentedControlIOSComponent } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'react-native-axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -9,7 +9,6 @@ import { GetListOfTeams } from '../data/listOfTeams';
 
 import MatchCard from './matchCard';
 import { GetKey } from '../model/storageKeys';
-import { ThemeConsumer } from 'react-native-elements';
 
 const keyForMatchesMen = 'matchesMen'
 const keyForMatchesWomen = 'matchesWomen'
@@ -48,7 +47,11 @@ class Calendar extends Component {
         }
     }
     async componentDidMount() {
-        this.setState({ settings: JSON.parse(await AsyncStorage.getItem(GetKey('settings'))) })
+        const settings = JSON.parse(await AsyncStorage.getItem(GetKey('settings')))
+        const team = settings.standardTeam.split('(M').length > 1 ? settings.standardTeam.split('(')[0].trim() : settings.standardTeam.split('(')[0]
+        this.setState({ chosenTeam: team })
+        this.setState({ chosenLeague: settings.league })
+        this.setState({ settings: settings })
         if (this.state.settings.league === 'Men') {
             this.setState({ listOfTeams: GetListOfTeams('Men', true) })
         } else {
@@ -62,8 +65,8 @@ class Calendar extends Component {
             const matchesM = JSON.parse(await AsyncStorage.getItem(keyForMatchesMen))
             const matchesW = JSON.parse(await AsyncStorage.getItem(keyForMatchesWomen))
 
-            if (matchesM != null && matchesW != null) {
-                if (this.state.settings.league === 'Men' || this.state.chosenLeague == 'League') {
+            if (matchesM != null || matchesW != null) {
+                if (settings.league === 'Men') {
                     this.setState({ matches: matchesM })
                 } else {
                     this.setState({ matches: matchesW })
@@ -74,12 +77,9 @@ class Calendar extends Component {
             console.warn(e)
         }
         await this.getMatches()
-        const teamName = this.state.settings.standardTeam.split('(')[0].trim()
-        if(teamName != null){
-            this.renderSpecificTeam(teamName)
-            this.setState({chosenTeam: teamName})
-            console.log(this.state.chosenTeam)
-            console.log(teamName)
+        if (team != null) {
+            this.renderSpecificTeam(team)
+            this.setState({ chosenTeam: team })
         }
     }
     async getMatches() {
@@ -177,7 +177,7 @@ class Calendar extends Component {
         if (this.state.chosenLeague != 'Women') {
             let matchesOfTeam = []
             this.state.matchesM.forEach(match => {
-                if (match.homeTeam == chosenTeam || match.guestTeam == chosenTeam)
+                if (match.homeTeam == chosenTeam || match.guestTeam == chosenTeam || chosenTeam == 'All Teams')
                     matchesOfTeam.push(match)
             });
             this.scrollToIndex(0)
@@ -186,7 +186,7 @@ class Calendar extends Component {
         } else {
             let matchesOfTeam = []
             this.state.matchesW.forEach(match => {
-                if (match.homeTeam == chosenTeam || match.guestTeam == chosenTeam)
+                if (match.homeTeam == chosenTeam || match.guestTeam == chosenTeam || chosenTeam == 'All Teams')
                     matchesOfTeam.push(match)
             });
             this.scrollToIndex(0)
@@ -245,10 +245,9 @@ class Calendar extends Component {
                         enabled={!this.state.isLoading}
                         selectedValue={this.state.chosenTeam}
                         style={{ marginTop: Platform.OS === 'ios' ? -100 : 0, height: 50, width: windowWidth / 3.2 }}
-                        onValueChange={(itemValue, itemIndex) => {
+                        onValueChange={(itemValue) => {
                             this.setState({ chosenTeam: itemValue })
-                            if (itemValue != 'All Teams')
-                                this.renderSpecificTeam(itemValue)
+                            this.renderSpecificTeam(itemValue)
                         }}>
                         {this.state.listOfTeams.map((team, i) => {
                             return (
