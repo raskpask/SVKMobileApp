@@ -113,6 +113,15 @@ class StatsScreen extends Component {
         }
     }
     async componentDidMount() {
+        this.props.onRef(this)
+        await this.setContent()
+        this.setTop()
+        this.setData()
+    }
+    componentWillUnmount() {
+        this.props.onRef(undefined)
+    }
+    async setContent(){
         const settings = JSON.parse(await AsyncStorage.getItem(GetKey('settings')))
         this.setState({settings: settings, chosenLeague: settings.league})
         let playerListM = []
@@ -144,8 +153,6 @@ class StatsScreen extends Component {
             }
         }
         this.setState({ isLoading: false })
-        this.setTop()
-        this.setData()
     }
     async setTop() {
         const playerListTotalPointsM = await this.makeRequest('PointsTot_ForAllPlayerStats DESC', compIdMen, '0', 10)

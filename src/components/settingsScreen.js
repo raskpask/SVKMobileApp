@@ -5,6 +5,7 @@ import CheckBox from '@react-native-community/checkbox';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GetListOfTeams } from '../data/listOfTeams';
 import { GetKey } from '../model/storageKeys';
+import { Button } from 'react-native';
 
 class SettingsScreen extends Component {
     constructor(props) {
@@ -72,6 +73,7 @@ class SettingsScreen extends Component {
                         )
                     })}
                 </Picker>
+                <Button title="Spara" onPress={() => this.props.restartApp()}/>
             </ScrollView>
         )
     }

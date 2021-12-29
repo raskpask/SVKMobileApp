@@ -40,13 +40,23 @@ class Calendar extends Component {
         };
     }
     scrollToIndex(index) {
-        try {
-            this.myScroll.scrollTo({ x: 0, y: 89.125 * index, animated: true })
-        } catch (error) {
-            console.warn(error)
+        if(this.myScroll !== undefined){
+            try {
+                this.myScroll.scrollTo({ x: 0, y: 89.125 * index, animated: true })
+            } catch (error) {
+                console.warn(error)
+            }
         }
     }
     async componentDidMount() {
+        this.props.onRef(this)
+        await this.setContent()
+        await this.getMatches()
+    }
+    componentWillUnmount() {
+        this.props.onRef(undefined)
+    }
+    async setContent(){
         const settings = JSON.parse(await AsyncStorage.getItem(GetKey('settings')))
         const team = settings.standardTeam.split('(M').length > 1 ? settings.standardTeam.split('(')[0].trim() : settings.standardTeam.split('(')[0]
         this.setState({ chosenTeam: team })
@@ -76,7 +86,6 @@ class Calendar extends Component {
         } catch (e) {
             console.warn(e)
         }
-        await this.getMatches()
         if (team != null) {
             this.renderSpecificTeam(team)
             this.setState({ chosenTeam: team })

@@ -39,6 +39,13 @@ class StandingsScreen extends Component {
         }
     }
     async componentDidMount() {
+        this.props.onRef(this)
+        await this.setContent()
+    }
+    componentWillUnmount() {
+        this.props.onRef(undefined)
+    }
+    async setContent(){
         const settings = JSON.parse(await AsyncStorage.getItem(GetKey('settings')))
         this.setState({settings: settings, chosenLeague: settings.league})
         let teams
