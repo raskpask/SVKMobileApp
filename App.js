@@ -24,7 +24,6 @@ class App extends React.Component {
 
   restartApp() {
     homeScreen.updateSettings()
-    console.log(calendarScreen)
     if (Object.keys(calendarScreen).length !== 0)
       calendarScreen.setContent()
     if (Object.keys(statsScreen).length !== 0)

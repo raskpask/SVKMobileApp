@@ -85,9 +85,9 @@ class Home extends Component {
         }
     }
     setMatches(matchesM, matchesW){
-        if (this.state.settings.showWomen && !this.state.settings.showMen) {
+        if (this.state.settings !== null && this.state.settings.showWomen && !this.state.settings.showMen) {
             this.setState({ currentMatches: matchesW })
-        } else if (!this.state.settings.showWomen && this.state.settings.showMen) {
+        } else if (this.state.settings !== null && !this.state.settings.showWomen && this.state.settings.showMen) {
             this.setState({ currentMatches: matchesM })
         } else {
             const matches = this.concatMatches(matchesW, matchesM)
@@ -121,11 +121,11 @@ class Home extends Component {
         let currentMatches = []
         let matchesToday = []
         let matcherOtherDAys = []
-        if (this.state.settings.showMen && this.state.settings.showWomen) {
+        if (this.state.settings !== null && this.state.settings.showMen && this.state.settings.showWomen) {
             currentMatches = currentMatchesW.concat(currentMatchesM).sort((a, b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)).sort((a, b) => (a.date > b.date) ? 1 : ((b.date > a.date) ? -1 : 0))
-        } else if (this.state.settings.showWomen) {
+        } else if (this.state.settings !== null && this.state.settings.showWomen) {
             currentMatches = currentMatchesW.sort((a, b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)).sort((a, b) => (a.date > b.date) ? 1 : ((b.date > a.date) ? -1 : 0))
-        } else if (this.state.settings.showMen) {
+        } else if (this.state.settings !== null && this.state.settings.showMen) {
             currentMatches = currentMatchesM.sort((a, b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)).sort((a, b) => (a.date > b.date) ? 1 : ((b.date > a.date) ? -1 : 0))
         }
         currentMatches.forEach(match => {

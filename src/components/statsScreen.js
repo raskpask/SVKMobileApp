@@ -132,10 +132,12 @@ class StatsScreen extends Component {
         try {
             if (settings.league !== 'Women') {
                 tops = JSON.parse(await AsyncStorage.getItem(topKeyM))
-                this.setState({ topTotalPoints: tops.points, topTotalKills: tops.kills, topTotalBlocks: tops.blocks, topTotalAces: tops.aces })
+                if(tops !== null)
+                    this.setState({ topTotalPoints: tops.points, topTotalKills: tops.kills, topTotalBlocks: tops.blocks, topTotalAces: tops.aces })
             } else {
                 tops = JSON.parse(await AsyncStorage.getItem(topKeyW))
-                this.setState({ topTotalPoints: tops.points, topTotalKills: tops.kills, topTotalBlocks: tops.blocks, topTotalAces: tops.aces })
+                if(tops !== null)
+                    this.setState({ topTotalPoints: tops.points, topTotalKills: tops.kills, topTotalBlocks: tops.blocks, topTotalAces: tops.aces })
             }
             playerListM = JSON.parse(await AsyncStorage.getItem(allStatsKeyM))
             nameListM = JSON.parse(await AsyncStorage.getItem(allNamesKeyM))
@@ -347,12 +349,12 @@ class StatsScreen extends Component {
                 <Card.Title>{title}</Card.Title>
                 <Card.Divider />
                 {
-                    this.state.[category].map((player, index) => {
+                    this.state.category.map((player, index) => {
                         return (
                             <View key={index} style={{ marginTop: 10 }}>
                                 <View style={{ flexDirection: 'row' }}>
                                     <Text style={{ marginRight: 'auto' }}>{index + 1}. {player.name} ({player.team}) </Text>
-                                    <Text style={{ marginLeft: 'auto', fontWeight: 'bold' }}>{player.[pointName]}  </Text>
+                                    <Text style={{ marginLeft: 'auto', fontWeight: 'bold' }}>{player.pointName}  </Text>
                                     <Text>{pointNameDescription}</Text>
                                 </View>
                             </View>
