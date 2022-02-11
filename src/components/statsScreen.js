@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, StyleSheet, TextInput, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, StyleSheet, TextInput, Dimensions, TouchableOpacity, Platform } from 'react-native';
 import axios from 'react-native-axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Table, Row, Col, TableWrapper } from 'react-native-table-component';
@@ -8,6 +8,8 @@ import { Picker } from '@react-native-picker/picker';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 import { formatName } from '../model/formatName';
+import { ExtractNameAndStats, ExtractData, ExtractTotalrow } from '../model/webScraping/stats';
+import { GetKey } from '../model/storageKeys';
 
 const allStatsKeyM = 'allStatsM'
 const allStatsKeyW = 'allStatsW'
@@ -25,6 +27,9 @@ const widthHeader = [140, 225, 370, 400, 320, 205]
 const tableheader = ['', 'Total', 'Serve', 'Reception', 'Attack', 'Block']
 const listOfTeamsMen = ['All teams', 'Sollentuna', 'Vingåker', 'Lund', 'Södertelge', 'Hylte Halmstad', 'Floby', 'Habo', 'Örkelljunga', 'Uppsala', 'RIG Falköping', 'Falkenberg']
 const listOfTeamsWomen = ['All teams', 'Sollentuna', 'Värnamo', 'Lund', 'Gislaved', 'Hylte Halmstad', 'Linköpings VC', 'Lindesberg', 'Örebro', 'Engelholm', 'RIG Falköping', 'IKSU']
+
+const compIdMen = '264'
+const compIdWomen = '263'
 
 class StatsScreen extends Component {
     constructor(props) {
@@ -104,21 +109,32 @@ class StatsScreen extends Component {
             searchText: "",
             chosenTeam: "All teams",
             listOfTeams: ['All teams', 'Sollentuna', 'Vingåker', 'Lund', 'Södertelge', 'Hylte Halmstad', 'Floby', 'Habo', 'Örkelljunga', 'Uppsala', 'RIG Falköping', 'Falkenberg'],
+            settings: {}
         }
     }
     async componentDidMount() {
+        await this.setContent()
+        this.setTop()
+        this.setData()
+    }
+
+    async setContent(){
+        const settings = JSON.parse(await AsyncStorage.getItem(GetKey('settings')))
+        this.setState({settings: settings, chosenLeague: settings.league})
         let playerListM = []
         let playerListW = []
         let nameListM = []
         let nameListW = []
         let tops = {}
         try {
-            if (this.state.chosenLeague !== 'Women') {
+            if (settings.league !== 'Women') {
                 tops = JSON.parse(await AsyncStorage.getItem(topKeyM))
-                this.setState({ topTotalPoints: tops.points, topTotalKills: tops.kills, topTotalBlocks: tops.blocks, topTotalAces: tops.aces })
+                if(tops !== null)
+                    this.setState({ topTotalPoints: tops.points, topTotalKills: tops.kills, topTotalBlocks: tops.blocks, topTotalAces: tops.aces })
             } else {
                 tops = JSON.parse(await AsyncStorage.getItem(topKeyW))
-                this.setState({ topTotalPoints: tops.points, topTotalKills: tops.kills, topTotalBlocks: tops.blocks, topTotalAces: tops.aces })
+                if(tops !== null)
+                    this.setState({ topTotalPoints: tops.points, topTotalKills: tops.kills, topTotalBlocks: tops.blocks, topTotalAces: tops.aces })
             }
             playerListM = JSON.parse(await AsyncStorage.getItem(allStatsKeyM))
             nameListM = JSON.parse(await AsyncStorage.getItem(allNamesKeyM))
@@ -127,7 +143,7 @@ class StatsScreen extends Component {
         } catch (e) {
             console.warn(e)
         }
-        if (playerListM !== undefined || nameListM !== undefined || playerListW !== undefined || nameListW !== undefined) {
+        if (playerListM !== undefined && nameListM !== undefined && playerListM !== null && playerListW !== undefined && nameListW !== undefined) {
             this.setState({ allPlayersM: playerListM, nameListM: nameListM, allPlayersW: playerListW, nameListW: nameListW })
             if (this.state.chosenLeague !== 'Women') {
                 this.setState({ filteredPlayers: playerListM.slice(0, 30), filteredNameList: nameListM.slice(0, 30), allPlayers: playerListM, nameList: nameListM })
@@ -136,19 +152,17 @@ class StatsScreen extends Component {
             }
         }
         this.setState({ isLoading: false })
-        this.setTop()
-        this.setData()
     }
     async setTop() {
-        const playerListTotalPointsM = await this.makeRequest('PointsTot_ForAllPlayerStats DESC', '174', '266', 10)
-        const playerListTotalAcesM = await this.makeRequest('ServeWin DESC', '174', '266', 10)
-        const playerListTotalKillsM = await this.makeRequest('SpikeWin DESC', '174', '266', 10)
-        const playerListTotalBlocksM = await this.makeRequest('BlockWin DESC', '174', '266', 10)
+        const playerListTotalPointsM = await this.makeRequest('PointsTot_ForAllPlayerStats DESC', compIdMen, '0', 10)
+        const playerListTotalAcesM = await this.makeRequest('ServeWin DESC', compIdMen, '0', 10)
+        const playerListTotalKillsM = await this.makeRequest('SpikeWin DESC', compIdMen, '0', 10)
+        const playerListTotalBlocksM = await this.makeRequest('BlockWin DESC', compIdMen, '0', 10)
 
-        const playerListTotalPointsW = await this.makeRequest('PointsTot_ForAllPlayerStats DESC', '175', '247', 10)
-        const playerListTotalAcesW = await this.makeRequest('ServeWin DESC', '175', '247', 10)
-        const playerListTotalKillsW = await this.makeRequest('SpikeWin DESC', '175', '247', 10)
-        const playerListTotalBlocksW = await this.makeRequest('BlockWin DESC', '175', '247', 10)
+        const playerListTotalPointsW = await this.makeRequest('PointsTot_ForAllPlayerStats DESC', compIdWomen, '0', 10)
+        const playerListTotalAcesW = await this.makeRequest('ServeWin DESC', compIdWomen, '0', 10)
+        const playerListTotalKillsW = await this.makeRequest('SpikeWin DESC', compIdWomen, '0', 10)
+        const playerListTotalBlocksW = await this.makeRequest('BlockWin DESC', compIdWomen, '0', 10)
         try {
             AsyncStorage.setItem(topKeyM, JSON.stringify({ points: playerListTotalPointsM, aces: playerListTotalAcesM, kills: playerListTotalKillsM, blocks: playerListTotalBlocksM }))
             AsyncStorage.setItem(topKeyW, JSON.stringify({ points: playerListTotalPointsW, aces: playerListTotalAcesW, kills: playerListTotalKillsW, blocks: playerListTotalBlocksW }))
@@ -167,9 +181,9 @@ class StatsScreen extends Component {
     }
     async makeRequest(sortExpression, compID, phaseID, noOfRows) {
         let playerList = []
-        await axios.post('http://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData', { "startIndex": 0, "maximumRows": noOfRows, "sortExpressions": sortExpression, "filterExpressions": [], "compID": compID, "phaseID": phaseID, "playerSearchByName": "" }).then(function (response) {
+        await axios.post("https://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData", { "startIndex": 0, "maximumRows": noOfRows, "sortExpressions": sortExpression, "filterExpressions": [], "compID": compID, "phaseID": phaseID, "playerSearchByName": "" }).then(function (response) {
             for (let i = 0; i < response.data.d.length; i++) {
-                playerList.push(this.extractNameAndStats(response.data.d[i]))
+                playerList.push(ExtractNameAndStats(response.data.d[i]))
             }
         }.bind(this));
         return playerList
@@ -181,26 +195,26 @@ class StatsScreen extends Component {
         let nameListW = []
         let rawDataPlayersM = []
         let rawDataPlayersW = []
-        let numberOfPlayersM = 100
-        let numberOfPlayersW = 100
+        let numberOfPlayersM = 20
+        let numberOfPlayersW = 20
         try {
             numberOfPlayersM = JSON.parse(await AsyncStorage.getItem("numberOfPlayersM"))
             numberOfPlayersW = JSON.parse(await AsyncStorage.getItem("numberOfPlayersW"))
         } catch (error) {
             console.warn(error)
         }
-        await axios.post('http://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData', { "startIndex": 0, "maximumRows": parseInt(numberOfPlayersM), "sortExpressions": "PointsTot_ForAllPlayerStats DESC", "filterExpressions": [], "compID": "174", "phaseID": "266", "playerSearchByName": "" }).then(function (response) {
+        await axios.post("https://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData", { "startIndex": 0, "maximumRows": numberOfPlayersM, "sortExpressions": "PointsTot_ForAllPlayerStats DESC", "filterExpressions": [], "compID": compIdMen, "phaseID": "0", "playerSearchByName": "" }).then(function (response) {
             rawDataPlayersM = response.data.d
             for (let i = 0; i < response.data.d.length; i++) {
-                playerListM.push(this.extractData(response.data.d[i]))
+                playerListM.push(ExtractData(response.data.d[i]))
                 nameListM.push(formatName(response.data.d[i].Name, response.data.d[i].Surname))
             }
             this.setState({ allPlayersM: playerListM, nameListM: nameListM, rawDataPlayersM: rawDataPlayersM })
         }.bind(this));
-        await axios.post('http://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData', { "startIndex": 0, "maximumRows": parseInt(numberOfPlayersW), "sortExpressions": "PointsTot_ForAllPlayerStats DESC", "filterExpressions": [], "compID": "175", "phaseID": "247", "playerSearchByName": "" }).then(function (response) {
+        await axios.post("https://svbf-web.dataproject.com/Statistics_AllPlayers.aspx/GetData", { "startIndex": 0, "maximumRows": numberOfPlayersW, "sortExpressions": "PointsTot_ForAllPlayerStats DESC", "filterExpressions": [], "compID": compIdWomen, "phaseID": "0", "playerSearchByName": "" }).then(function (response) {
             rawDataPlayersW = response.data.d
             for (let i = 0; i < response.data.d.length; i++) {
-                playerListW.push(this.extractData(response.data.d[i]))
+                playerListW.push(ExtractData(response.data.d[i]))
                 nameListW.push(formatName(response.data.d[i].Name, response.data.d[i].Surname))
             }
             this.setState({ allPlayersW: playerListW, nameListW: nameListW, rawDataPlayersW: rawDataPlayersW })
@@ -219,60 +233,7 @@ class StatsScreen extends Component {
             this.setState({ filteredPlayers: playerListW.slice(0, 30), filteredNameList: nameListW.slice(0, 30), rawDataPlayers: rawDataPlayersW })
         }
     }
-    extractNameAndStats(data) {
-        return {
-            name: data.Name + ' ' + data.Surname,
-            team: data.Team,
-            totalPoints: data.PointsTot_ForAllPlayerStats,
-            totalKills: data.SpikeWin,
-            totalBlocks: data.BlockWin,
-            totalAces: data.ServeWin,
-        }
-    }
-    extractData(data) {
-        const totalServ = data.ServeErr + data.ServeWin + data.ServeMinus + data.ServePlus + data.ServeHP + data.ServeEx
-        const totalRec = data.RecErr + data.RecWin + data.RecMinus + data.RecPlus + data.RecHP + data.RecEx
-        const totalAtt = data.SpikeErr + data.SpikeWin + data.SpikeMinus + data.SpikePlus + data.SpikeHP + data.SpikeEx
-        const totalBlock = data.BlockErr + data.BlockWin + data.BlockMinus + data.BlockPlus + data.BlockHP + data.BlockEx
-        return {
-            name: data.Name + ' ' + data.Surname,
-            data: [
-                data.Number,
-                data.Team.split(' ')[0],
-                data.PlayedMatches,
-                data.PlayedSets,
-                data.PointsTot_ForAllPlayerStats,
-                data.Points,
-                data.PointsW_P,
-                totalServ,
-                data.ServeErr,
-                data.ServeEx,
-                data.ServeMinus,
-                data.ServePlus,
-                data.ServeHP,
-                data.ServeWin,
-                totalServ > 20 ? Math.round((data.ServeWin * 2 + data.ServePlus + data.ServeHP * 2 - data.ServeMinus - data.ServeErr * 2) / totalServ * 100) + ' %' : '-',
-                totalRec,
-                data.RecErr,
-                data.RecHP,
-                data.RecMinus,
-                data.RecEx,
-                (data.RecPlus + data.RecWin) / totalRec * 100 ? Math.round((data.RecPlus + data.RecWin) / totalRec * 100) + ' %' : '-',
-                (data.RecWin) / totalRec * 100 ? Math.round((data.RecWin) / totalRec * 100) + ' %' : '-',
-                totalRec > 20 ? Math.round((data.RecWin * 2 + data.RecPlus - data.RecMinus - data.RecErr * 2 - data.RecHP * 2) / totalRec * 100) + ' %' : '-',
-                totalAtt,
-                data.SpikeErr,
-                data.SpikeHP,
-                data.SpikeWin,
-                Math.round((data.SpikeWin) / totalAtt * 100) ? Math.round((data.SpikeWin) / totalAtt * 100) + ' %' : '-',
-                Math.round((data.SpikeWin - data.SpikeErr - data.SpikeHP) / totalAtt * 100) ? Math.round((data.SpikeWin - data.SpikeErr - data.SpikeHP) / totalAtt * 100) + ' %' : '-',
-                totalBlock,
-                data.BlockErr,
-                Math.round((data.BlockWin) / totalBlock * 100) ? Math.round((data.BlockWin) / totalBlock * 100) + ' %' : '-',
-                data.BlockWin,
-            ]
-        }
-    }
+    
     newSearch(text, isTeam) {
         if (isTeam) {
             if (this.state.chosenTeam !== text) {
@@ -320,40 +281,8 @@ class StatsScreen extends Component {
         this.extractTotalrow(playerList, nameList)
     }
     extractTotalrow(playerList, nameList) {
-        let totPoints = 0, bp = 0, wl = 0, serTot = 0, serErr = 0, serMedium = 0, serMinus = 0, serPlus = 0, serOVP = 0, serAce = 0, recTot = 0, recErr = 0, recOVP = 0, recMed = 0, recMin = 0, recPos = 0, recPerf = 0, attTot = 0, attErr = 0, attBlo = 0, attPerf = 0, bloTot = 0, bloErr = 0, bloPerf = 0
-        playerList.map((player, i) => {
-            totPoints += player.data[4]
-            bp += player.data[5]
-            wl += player.data[6]
-            serTot += player.data[7]
-            serErr += player.data[8]
-            serMedium += player.data[9]
-            serMinus += player.data[10]
-            serPlus += player.data[11]
-            serOVP += player.data[12]
-            serAce += player.data[13]
-            recTot += player.data[15]
-            recErr += player.data[16]
-            recOVP += player.data[17]
-            recMin += player.data[18]
-            recMed += player.data[19]
-            recPos += player.data[20] === '-' ? 0 : Math.round(parseInt(player.data[20].split(' ')[0]) / 100 * player.data[15])
-            recPerf += player.data[21] === '-' ? 0 : Math.round(parseInt(player.data[21].split(' ')[0]) / 100 * player.data[15])
-            attTot += player.data[23]
-            attErr += player.data[24]
-            attBlo += player.data[25]
-            attPerf += player.data[26]
-            bloTot += player.data[29]
-            bloErr += player.data[30]
-            bloPerf += player.data[32]
-        })
-        const totalRow = ['-', '-', '-', '-', totPoints, bp, wl, serTot, serErr, serMedium, serMinus, serPlus, serOVP, serAce, (serTot > 20) ? Math.round((serAce * 2 + serOVP * 2 + serPlus - serMinus - serErr * 2) / serTot * 100) + ' %' : '-',
-            recTot, recErr, recOVP, recMin, recMed, Math.round(recPos / recTot * 100) + ' %', Math.round(recPerf / recTot * 100) + ' %', (recTot > 20) ? Math.round((recPerf + recPos - recMin - recOVP * 2 - recErr * 2) / recTot * 100) + ' %' : '-',
-            attTot, attErr, attBlo, attPerf, Math.round(attPerf / attTot * 100) + ' %', Math.round((attPerf - attBlo - attErr) / attTot * 100) + ' %',
-            bloTot, bloErr, Math.round(bloPerf / bloTot * 100) + ' %', bloPerf
-        ]
         nameList[nameList.length] = 'Total'
-        this.setState({ totalRow: totalRow, filteredNameList: nameList })
+        this.setState({ totalRow: ExtractTotalrow(playerList), filteredNameList: nameList })
     }
     loadAllPlayers() {
         this.setState({ isAllPlayersLoaded: true, filteredPlayers: this.state.allPlayers, filteredNameList: this.state.nameList })
@@ -388,10 +317,10 @@ class StatsScreen extends Component {
             }
             this.setState({ sortOrderDescending: true, lastSortedByID: index })
         }
-        if(this.state.isAllPlayersLoaded)
+        if (this.state.isAllPlayersLoaded)
             return newList
-        else 
-            return newList.splice(0,30)
+        else
+            return newList.splice(0, 30)
     }
     changeLeague(league) {
         if (!this.state.isLoading) {
@@ -417,12 +346,12 @@ class StatsScreen extends Component {
                 <Card.Title>{title}</Card.Title>
                 <Card.Divider />
                 {
-                    this.state.[category].map((player, index) => {
+                    this.state[category].map((player, index) => {
                         return (
                             <View key={index} style={{ marginTop: 10 }}>
                                 <View style={{ flexDirection: 'row' }}>
                                     <Text style={{ marginRight: 'auto' }}>{index + 1}. {player.name} ({player.team}) </Text>
-                                    <Text style={{ marginLeft: 'auto', fontWeight: 'bold' }}>{player.[pointName]}  </Text>
+                                    <Text style={{ marginLeft: 'auto', fontWeight: 'bold' }}>{player[pointName]}  </Text>
                                     <Text>{pointNameDescription}</Text>
                                 </View>
                             </View>
@@ -434,7 +363,7 @@ class StatsScreen extends Component {
     }
     renderTop() {
         return (
-            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} pagingEnabled={true}>
+            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} pagingEnabled={true} style={{ marginTop: Platform.OS === 'ios' ? 87 : 0 }}>
                 <View style={{ width: windowWidth }}>
                     {this.renderTopContent('Most points', 'topTotalPoints', 'totalPoints', 'points')}
                 </View>
@@ -469,7 +398,7 @@ class StatsScreen extends Component {
                     <Picker
                         enabled={!this.state.isLoading}
                         selectedValue={this.state.chosenTeam}
-                        style={{ height: 30, width: windowWidth / 2.5, margin: 15, marginTop: 0 }}
+                        style={{ height: 30, width: windowWidth / 2.5, margin: Platform.OS === 'ios' ? 0 : 15, marginTop: Platform.OS === 'ios' ? -87 : 0 }}
                         onValueChange={(itemValue, itemIndex) => {
                             if (this.state.chosenTeam !== itemValue)
                                 this.newSearch(itemValue, true)
@@ -493,7 +422,7 @@ class StatsScreen extends Component {
             <Picker
                 enabled={!this.state.isLoading}
                 selectedValue={this.state.chosenLeague}
-                style={{ height: 50 }}
+                style={{ height: 50, marginTop: Platform.OS === 'ios' ? -87 : 0 }}
                 onValueChange={(itemValue) => {
                     this.changeLeague(itemValue)
                 }}>

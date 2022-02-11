@@ -1,17 +1,19 @@
 import React, { Component } from 'react';
 import axios from 'react-native-axios';
-import { Text, View, TouchableOpacity, ImageBackground, RefreshControl } from 'react-native';
-import { Card } from 'react-native-elements'
+import { Text, View, TouchableOpacity, ImageBackground, RefreshControl, ActivityIndicator } from 'react-native';
+import { Card, ThemeConsumer } from 'react-native-elements'
 import { ScrollView } from 'react-native-gesture-handler';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import MatchCard from './matchCard';
-import BaggerWar from './baggerWar';
-const keyCurrentMatches = 'currentMatches'
+import { GetKey } from '../model/storageKeys';
 const now = new Date()
 const dateNow = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0')
 const timeNow = now.getHours() + ":" + now.getMinutes()
+
+const urlWomen = 'https://svbf-web.dataproject.com/CompetitionHome.aspx?ID=263'
+const urlMen = 'https://svbf-web.dataproject.com/CompetitionHome.aspx?ID=264'
 
 class Home extends Component {
     constructor(props) {
@@ -24,27 +26,39 @@ class Home extends Component {
             league: '',
             news: [],
             refreshing: false,
-            loading: true,
+            isLoading: true,
             isMatchToday: false,
-            liveBackgroundColor: 'white'
-
+            liveBackgroundColor: 'white',
+            settings: {}
         };
     }
     async componentDidMount() {
         try {
-            const matches = JSON.parse(await AsyncStorage.getItem(keyCurrentMatches))
-            if (matches !== null) {
-
-                this.setState({ currentMatches: matches })
-            }
+            this.setState({ settings: JSON.parse(await AsyncStorage.getItem(GetKey('settings'))) })
+            this.setSavedMatches()
             this.getNews()
-        } catch (error) {
+        }
+        catch (error) {
             console.warn(error)
         }
         this.getCurrentMatches()
     }
+    async componentDidUpdate() {
+        await this.getCurrentMatches()
+    }
     componentWillUnmount() {
         clearInterval(this.interval);
+    }
+    async updateSettings(){
+        this.setState({ settings: JSON.parse(await AsyncStorage.getItem(GetKey('settings'))) })
+        this.setSavedMatches()
+    }
+    async setSavedMatches(){
+        const matchesM = JSON.parse(await AsyncStorage.getItem(GetKey('currentMatchesHomeM')))
+        const matchesW = JSON.parse(await AsyncStorage.getItem(GetKey('currentMatchesHomeW')))
+        if (matchesM !== null || matchesW !== null) {
+            this.setMatches(matchesM, matchesW)
+        }  
     }
     getNews() {
         axios.get('http://svbf-web.dataproject.com/MainHome.aspx')
@@ -68,14 +82,24 @@ class Home extends Component {
             image: newsString.split('background-image:url')[1].split('&quot;')[1].split('&quot;')[0].split(' ').join('%20'),
         }
     }
+    setMatches(matchesM, matchesW){
+        if (this.state.settings !== null && this.state.settings.showWomen && !this.state.settings.showMen) {
+            this.setState({ currentMatches: matchesW })
+        } else if (this.state.settings !== null && !this.state.settings.showWomen && this.state.settings.showMen) {
+            this.setState({ currentMatches: matchesM })
+        } else {
+            const matches = this.concatMatches(matchesW, matchesM)
+            this.setState({ currentMatches: matches })
+        }
+    }
     async getCurrentMatches() {
         let currentMatchesM = []
         let currentMatchesW = []
-        await axios.get('http://svbf-web.dataproject.com/CompetitionHome.aspx?ID=174')
+        await axios.get(urlMen)
             .then(function (response) {
                 currentMatchesM = this.extractCurrentMatches(response.data, 'men')
             }.bind(this));
-        await axios.get('http://svbf-web.dataproject.com/CompetitionHome.aspx?ID=175')
+        await axios.get(urlWomen)
             .then(function (response) {
                 currentMatchesW = this.extractCurrentMatches(response.data, 'women')
                 this.setState({ currentMatchesW: currentMatchesW })
@@ -84,20 +108,31 @@ class Home extends Component {
         if (this.state.isMatchToday) {
             this.interval = setInterval(() => this.setState({ liveBackgroundColor: this.state.liveBackgroundColor === 'white' ? 'yellow' : 'white' }), 1000);
         }
-        let currentMatches = currentMatchesW.concat(currentMatchesM).sort((a, b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)).sort((a, b) => (a.date > b.date) ? 1 : ((b.date > a.date) ? -1 : 0))
+        AsyncStorage.setItem(GetKey('currentMatchesHomeM'), JSON.stringify(currentMatchesM))
+        AsyncStorage.setItem(GetKey('currentMatchesHomeW'), JSON.stringify(currentMatchesW))
+        if (currentMatchesM !== null || currentMatchesW !== null) {
+            this.setMatches(currentMatchesM, currentMatchesW)
+        }
+        this.setState({ isLoading: false })
+    }
+    concatMatches(currentMatchesW, currentMatchesM) {
+        let currentMatches = []
         let matchesToday = []
-        let matcherOtherDAys =[]
+        let matcherOtherDAys = []
+        if (this.state.settings !== null && this.state.settings.showMen && this.state.settings.showWomen) {
+            currentMatches = currentMatchesW.concat(currentMatchesM).sort((a, b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)).sort((a, b) => (a.date > b.date) ? 1 : ((b.date > a.date) ? -1 : 0))
+        } else if (this.state.settings !== null && this.state.settings.showWomen) {
+            currentMatches = currentMatchesW.sort((a, b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)).sort((a, b) => (a.date > b.date) ? 1 : ((b.date > a.date) ? -1 : 0))
+        } else if (this.state.settings !== null && this.state.settings.showMen) {
+            currentMatches = currentMatchesM.sort((a, b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)).sort((a, b) => (a.date > b.date) ? 1 : ((b.date > a.date) ? -1 : 0))
+        }
         currentMatches.forEach(match => {
-            if(match.date === dateNow)
+            if (match.date === dateNow)
                 matchesToday.push(match)
-            else 
+            else
                 matcherOtherDAys.push(match)
         })
-        currentMatches = matchesToday.concat(matcherOtherDAys)
-        AsyncStorage.setItem(keyCurrentMatches, JSON.stringify(currentMatches))
-        this.setState({ loading: false, currentMatches: currentMatches })
-
-
+        return matchesToday.concat(matcherOtherDAys)
     }
     extractCurrentMatches(data, gender) {
         const listOfGames = data.split('"DIV_Match_Main"')
@@ -164,8 +199,7 @@ class Home extends Component {
     }
     async refreshPage() {
         this.setState({ refreshing: true })
-        await this.getMatches()
-        this.renderSpecificTeam()
+        await this.getCurrentMatches()
         this.setState({ refreshing: false })
     }
     renderLiveStreamComponent(isTop) {
@@ -194,14 +228,8 @@ class Home extends Component {
     renderCurrentGames() {
         return (
             <ScrollView
-                style={{ height: 375, borderWidth: 0 }}
-                refreshControl={
-                    <RefreshControl
-                        onRefresh={() => this.refreshPage()}
-                        refreshing={this.state.refreshing}
-                    />
-                }
                 ref={(ref) => this.myScroll = ref}
+                style={{ height: 375, borderWidth: 0 }}
             >
                 {
                     this.state.currentMatches.map((match, i) => {
@@ -242,12 +270,21 @@ class Home extends Component {
     }
     render() {
         return (
-            <ScrollView>
+            <ScrollView
+                refreshControl={
+                    <RefreshControl
+                        onRefresh={() => this.refreshPage()}
+                        refreshing={this.state.refreshing}
+                    />
+                }
+                ref={(ref) => this.myScroll = ref}
+            >
                 {this.renderLiveStreamComponent(true)}
                 <Text style={{ fontSize: 30, textAlign: 'center', marginTop: 20, marginBottom: 10 }}>Matches</Text>
-                {this.renderCurrentGames()}
-                <Text style={{ fontSize: 30, textAlign: 'center', marginTop: 20, marginBottom: 10 }}>Bagger Bagger stats</Text>
-                <BaggerWar/>
+                {this.state.isLoading ?
+                    <ActivityIndicator size="large" color='lightgrey' style={{ margin: 10 }} /> :
+                    this.renderCurrentGames()
+                }
                 <Text style={{ fontSize: 30, textAlign: 'center', marginTop: 20, marginBottom: 10 }}>News</Text>
                 {this.renderNews()}
                 {this.renderLiveStreamComponent(false)}

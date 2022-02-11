@@ -1,20 +1,21 @@
 import React, { Component } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import StatsScreen from '../components/statsScreen';
+import HomeScreen from '../components/homeScreen';
+import SettingsScreen from '../components/settingsScreen';
 
 const StatsStack = createStackNavigator();
 
-class StatsStackScreen extends Component {
+class SettingsStackScreen extends Component {
     render() {
         return (
             <StatsStack.Navigator
                 screenOptions={{
                     headerShown: false
                 }}>
-                <StatsStack.Screen name="StatsScreen" component={StatsScreen} />
+                <StatsStack.Screen name="SettingsScreen" component={SettingsScreen} />
             </StatsStack.Navigator>
         )
     }
 }
-export default StatsStackScreen;
+export default SettingsStackScreen;
