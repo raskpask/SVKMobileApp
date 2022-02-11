@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { ScrollView, Text, StyleSheet, Switch, Alert } from 'react-native';
+import { ScrollView, Text, StyleSheet, Switch } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import CheckBox from '@react-native-community/checkbox';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -15,7 +15,7 @@ class SettingsScreen extends Component {
             showMen: true,
             showWomen: true,
             standardTeam: 'None',
-            allTeams: ['None'],
+            allTeams: ['None']
         }
     }
     async componentDidMount() {

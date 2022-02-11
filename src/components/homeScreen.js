@@ -33,6 +33,7 @@ class Home extends Component {
         };
     }
     async componentDidMount() {
+        this.props.onRef(this)
         try {
             this.setState({ settings: JSON.parse(await AsyncStorage.getItem(GetKey('settings'))) })
             this.setSavedMatches()
@@ -48,6 +49,18 @@ class Home extends Component {
     }
     componentWillUnmount() {
         clearInterval(this.interval);
+        this.props.onRef(undefined)
+    }
+    async updateSettings(){
+        this.setState({ settings: JSON.parse(await AsyncStorage.getItem(GetKey('settings'))) })
+        this.setSavedMatches()
+    }
+    async setSavedMatches(){
+        const matchesM = JSON.parse(await AsyncStorage.getItem(GetKey('currentMatchesHomeM')))
+        const matchesW = JSON.parse(await AsyncStorage.getItem(GetKey('currentMatchesHomeW')))
+        if (matchesM !== null || matchesW !== null) {
+            this.setMatches(matchesM, matchesW)
+        }  
     }
     async updateSettings(){
         this.setState({ settings: JSON.parse(await AsyncStorage.getItem(GetKey('settings'))) })

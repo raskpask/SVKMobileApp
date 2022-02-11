@@ -117,7 +117,6 @@ class StatsScreen extends Component {
         this.setTop()
         this.setData()
     }
-
     async setContent(){
         const settings = JSON.parse(await AsyncStorage.getItem(GetKey('settings')))
         this.setState({settings: settings, chosenLeague: settings.league})
