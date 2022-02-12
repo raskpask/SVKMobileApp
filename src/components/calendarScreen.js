@@ -49,20 +49,10 @@ class Calendar extends Component {
         }
     }
     async componentDidMount() {
-<<<<<<< HEAD
         await this.setContent()
         await this.getMatches()
     }
 
-=======
-        this.props.onRef(this)
-        await this.setContent()
-        await this.getMatches()
-    }
-    componentWillUnmount() {
-        this.props.onRef(undefined)
-    }
->>>>>>> 7d57316d380bf1d4860ccb7f5395168a8611fbf5
     async setContent(){
         const settings = JSON.parse(await AsyncStorage.getItem(GetKey('settings')))
         const team = settings.standardTeam.split('(M').length > 1 ? settings.standardTeam.split('(')[0].trim() : settings.standardTeam.split('(')[0]
