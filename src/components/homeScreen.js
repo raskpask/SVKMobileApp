@@ -33,7 +33,6 @@ class Home extends Component {
         };
     }
     async componentDidMount() {
-        this.props.onRef(this)
         try {
             this.setState({ settings: JSON.parse(await AsyncStorage.getItem(GetKey('settings'))) })
             this.setSavedMatches()
@@ -49,7 +48,6 @@ class Home extends Component {
     }
     componentWillUnmount() {
         clearInterval(this.interval);
-        this.props.onRef(undefined)
     }
     async updateSettings(){
         this.setState({ settings: JSON.parse(await AsyncStorage.getItem(GetKey('settings'))) })

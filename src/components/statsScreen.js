@@ -7,9 +7,10 @@ import { Card } from 'react-native-elements'
 import { Picker } from '@react-native-picker/picker';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
-import { formatName } from '../model/formatName';
+import { FormatName } from '../model/formatName';
 import { ExtractNameAndStats, ExtractData, ExtractTotalrow } from '../model/webScraping/stats';
 import { GetKey } from '../model/storageKeys';
+import { GetTableHead } from '../model/statsTableHead';
 
 const allStatsKeyM = 'allStatsM'
 const allStatsKeyW = 'allStatsW'
@@ -34,41 +35,7 @@ const compIdWomen = '263'
 class StatsScreen extends Component {
     constructor(props) {
         super(props);
-        this.tableHead = [
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(0) }) }}><Text style={{ textAlign: 'center' }}>Nr</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(1) }) }}><Text style={{ textAlign: 'center' }}>Team</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(2) }) }}><Text style={{ textAlign: 'center' }}>Mts</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(3) }) }}><Text style={{ textAlign: 'center' }}>Set</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(4) }) }}><Text style={{ textAlign: 'center' }}>Pts</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(5) }) }}><Text style={{ textAlign: 'center' }}>BP</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(6) }) }}><Text style={{ textAlign: 'center' }}>W-L</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(7) }) }}><Text style={{ textAlign: 'center' }}>Tot</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(8) }) }}><Text style={{ textAlign: 'center' }}>Err</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(9) }) }}><Text style={{ textAlign: 'center' }}>!</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(10) }) }}><Text style={{ textAlign: 'center' }}>-</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(11) }) }}><Text style={{ textAlign: 'center' }}>+</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(12) }) }}><Text style={{ textAlign: 'center' }}>OVP</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(13) }) }}><Text style={{ textAlign: 'center' }}>Ace</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(14) }) }}><Text style={{ textAlign: 'center' }}>Eff %</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(15) }) }}><Text style={{ textAlign: 'center' }}>Tot</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(16) }) }}><Text style={{ textAlign: 'center' }}>Err</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(17) }) }}><Text style={{ textAlign: 'center' }}>OVP</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(18) }) }}><Text style={{ textAlign: 'center' }}>-</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(19) }) }}><Text style={{ textAlign: 'center' }}>!</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(20) }) }}><Text style={{ textAlign: 'center' }}>Pos %</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(21) }) }}><Text style={{ textAlign: 'center' }}>Perf %</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(22) }) }}><Text style={{ textAlign: 'center' }}>Eff %</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(23) }) }}><Text style={{ textAlign: 'center' }}>Tot</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(24) }) }}><Text style={{ textAlign: 'center' }}>Err</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(25) }) }}><Text style={{ textAlign: 'center' }}>Block</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(26) }) }}><Text style={{ textAlign: 'center' }}>Perf</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(27) }) }}><Text style={{ textAlign: 'center' }}>Perf %</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(28) }) }}><Text style={{ textAlign: 'center' }}>Eff %</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(29) }) }}><Text style={{ textAlign: 'center' }}>Tot</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(30) }) }}><Text style={{ textAlign: 'center' }}>Err</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(31) }) }}><Text style={{ textAlign: 'center' }}>Perf %</Text></TouchableOpacity>,
-            <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(32) }) }}><Text style={{ textAlign: 'center' }}>Points</Text></TouchableOpacity>
-        ]
+        this.tableHead = GetTableHead()
         this.state = {
             isAllPlayersLoaded: false,
             isLoading: true,
@@ -83,6 +50,7 @@ class StatsScreen extends Component {
             filteredPlayers: [],
             filteredNameList: [],
             allPlayers: [],
+            nameList: [],
 
             rawDataPlayersM: [],
             rawDataPlayersW: [],
@@ -117,9 +85,9 @@ class StatsScreen extends Component {
         this.setTop()
         this.setData()
     }
-    async setContent(){
+    async setContent() {
         const settings = JSON.parse(await AsyncStorage.getItem(GetKey('settings')))
-        this.setState({settings: settings, chosenLeague: settings.league})
+        this.setState({ settings: settings, chosenLeague: settings.league })
         let playerListM = []
         let playerListW = []
         let nameListM = []
@@ -128,11 +96,11 @@ class StatsScreen extends Component {
         try {
             if (settings.league !== 'Women') {
                 tops = JSON.parse(await AsyncStorage.getItem(topKeyM))
-                if(tops !== null)
+                if (tops !== null)
                     this.setState({ topTotalPoints: tops.points, topTotalKills: tops.kills, topTotalBlocks: tops.blocks, topTotalAces: tops.aces })
             } else {
                 tops = JSON.parse(await AsyncStorage.getItem(topKeyW))
-                if(tops !== null)
+                if (tops !== null)
                     this.setState({ topTotalPoints: tops.points, topTotalKills: tops.kills, topTotalBlocks: tops.blocks, topTotalAces: tops.aces })
             }
             playerListM = JSON.parse(await AsyncStorage.getItem(allStatsKeyM))
@@ -153,15 +121,24 @@ class StatsScreen extends Component {
         this.setState({ isLoading: false })
     }
     async setTop() {
-        const playerListTotalPointsM = await this.makeRequest('PointsTot_ForAllPlayerStats DESC', compIdMen, '0', 10)
-        const playerListTotalAcesM = await this.makeRequest('ServeWin DESC', compIdMen, '0', 10)
-        const playerListTotalKillsM = await this.makeRequest('SpikeWin DESC', compIdMen, '0', 10)
-        const playerListTotalBlocksM = await this.makeRequest('BlockWin DESC', compIdMen, '0', 10)
-
-        const playerListTotalPointsW = await this.makeRequest('PointsTot_ForAllPlayerStats DESC', compIdWomen, '0', 10)
-        const playerListTotalAcesW = await this.makeRequest('ServeWin DESC', compIdWomen, '0', 10)
-        const playerListTotalKillsW = await this.makeRequest('SpikeWin DESC', compIdWomen, '0', 10)
-        const playerListTotalBlocksW = await this.makeRequest('BlockWin DESC', compIdWomen, '0', 10)
+        let [playerListTotalPointsM,
+            playerListTotalAcesM,
+            playerListTotalKillsM,
+            playerListTotalBlocksM,
+            playerListTotalPointsW,
+            playerListTotalAcesW,
+            playerListTotalKillsW,
+            playerListTotalBlocksW
+        ] = await Promise.all([
+            this.makeRequest('PointsTot_ForAllPlayerStats DESC', compIdMen, '0', 10),
+            this.makeRequest('ServeWin DESC', compIdMen, '0', 10),
+            this.makeRequest('SpikeWin DESC', compIdMen, '0', 10),
+            this.makeRequest('BlockWin DESC', compIdMen, '0', 10),
+            this.makeRequest('PointsTot_ForAllPlayerStats DESC', compIdWomen, '0', 10),
+            this.makeRequest('ServeWin DESC', compIdWomen, '0', 10),
+            this.makeRequest('SpikeWin DESC', compIdWomen, '0', 10),
+            this.makeRequest('BlockWin DESC', compIdWomen, '0', 10)
+        ]);
         try {
             AsyncStorage.setItem(topKeyM, JSON.stringify({ points: playerListTotalPointsM, aces: playerListTotalAcesM, kills: playerListTotalKillsM, blocks: playerListTotalBlocksM }))
             AsyncStorage.setItem(topKeyW, JSON.stringify({ points: playerListTotalPointsW, aces: playerListTotalAcesW, kills: playerListTotalKillsW, blocks: playerListTotalBlocksW }))
@@ -206,7 +183,7 @@ class StatsScreen extends Component {
             rawDataPlayersM = response.data.d
             for (let i = 0; i < response.data.d.length; i++) {
                 playerListM.push(ExtractData(response.data.d[i]))
-                nameListM.push(formatName(response.data.d[i].Name, response.data.d[i].Surname))
+                nameListM.push(FormatName(response.data.d[i].Name, response.data.d[i].Surname))
             }
             this.setState({ allPlayersM: playerListM, nameListM: nameListM, rawDataPlayersM: rawDataPlayersM })
         }.bind(this));
@@ -214,7 +191,7 @@ class StatsScreen extends Component {
             rawDataPlayersW = response.data.d
             for (let i = 0; i < response.data.d.length; i++) {
                 playerListW.push(ExtractData(response.data.d[i]))
-                nameListW.push(formatName(response.data.d[i].Name, response.data.d[i].Surname))
+                nameListW.push(FormatName(response.data.d[i].Name, response.data.d[i].Surname))
             }
             this.setState({ allPlayersW: playerListW, nameListW: nameListW, rawDataPlayersW: rawDataPlayersW })
         }.bind(this));
@@ -232,12 +209,10 @@ class StatsScreen extends Component {
             this.setState({ filteredPlayers: playerListW.slice(0, 30), filteredNameList: nameListW.slice(0, 30), rawDataPlayers: rawDataPlayersW })
         }
     }
-    
+
     newSearch(text, isTeam) {
         if (isTeam) {
-            if (this.state.chosenTeam !== text) {
-                this.setState({ chosenTeam: text })
-            }
+            this.setState({ chosenTeam: text })
         } else {
             this.setState({ searchText: text })
         }
@@ -255,29 +230,32 @@ class StatsScreen extends Component {
         }
         let nameList = []
         let playerList = []
-        if (this.state.chosenTeam !== text) {
-            this.state.rawDataPlayers.map((player, i) => {
-                if (player.Team.trim() == text.trim()) {
-                    playerList.push(this.state.allPlayers[i])
-                    nameList.push(this.state.nameList[i])
-                }
-            })
-        }
-        this.setState({ filteredNameList: nameList, filteredPlayers: playerList })
-        this.extractTotalrow(playerList, nameList)
-    }
-    filterPlayers(text) {
-        let nameList = []
-        let playerList = []
-        this.state.rawDataPlayers.map((player, i) => {
-            const playerSearchString = player.Name.toLowerCase() + ' ' + player.Surname.toLowerCase()
-            if (playerSearchString.includes(text.toLowerCase())) {
-                playerList.push(this.state.allPlayers[i])
-                nameList.push(this.state.nameList[i])
+        this.state.allPlayers.map((player, i) => {
+            if (text.trim().includes(player.data[1].trim())) {
+                playerList.push(player)
+                nameList.push(player.name)
             }
         })
         this.setState({ filteredNameList: nameList, filteredPlayers: playerList })
         this.extractTotalrow(playerList, nameList)
+    }
+    filterPlayers(text) {
+        if (text !== '') {
+            let nameList = []
+            let playerList = []
+            this.state.allPlayers.map((player, i) => {
+                const playerSearchString = player.name.toLowerCase()
+                if (playerSearchString.includes(text.toLowerCase())) {
+                    playerList.push(this.state.allPlayers[i])
+                    nameList.push(this.state.nameList[i])
+                }
+            })
+            this.setState({ filteredNameList: nameList, filteredPlayers: playerList })
+            this.extractTotalrow(playerList, nameList)
+        } else {
+            this.filterPlayersByTeam(this.state.chosenTeam)
+        }
+
     }
     extractTotalrow(playerList, nameList) {
         nameList[nameList.length] = 'Total'
@@ -324,7 +302,7 @@ class StatsScreen extends Component {
     changeLeague(league) {
         if (!this.state.isLoading) {
             this.setState({ chosenLeague: league, isLoading: true, searchText: '', chosenTeam: 'All teams' })
-            if (league != 'Women') {
+            if (league !== 'Women') {
                 this.setState({
                     filteredPlayers: this.state.allPlayersM.slice(0, 30), filteredNameList: this.state.nameListM.slice(0, 30), rawDataPlayers: this.state.rawDataPlayersM,
                     isLoading: false, allPlayers: this.state.allPlayersM, nameList: this.state.nameListM, listOfTeams: listOfTeamsMen, topTotalPoints: this.state.topTotalPointsM,
@@ -434,7 +412,7 @@ class StatsScreen extends Component {
     render() {
         let nameList = []
         this.state.filteredPlayers.map((rowData) => (
-            nameList.push(formatName(rowData.name.split(' ')[0], rowData.name.split(' ')[1]))
+            nameList.push(FormatName(rowData.name.split(' ')[0], rowData.name.split(' ')[1]))
         ))
         return (
             <ScrollView style={styles.container} stickyHeaderIndices={[3]} ref={(ref) => this.myScroll = ref}>

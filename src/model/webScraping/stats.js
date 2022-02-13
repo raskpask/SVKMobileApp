@@ -1,7 +1,7 @@
-import { formatName } from '../formatName'
+import { FormatName } from '../formatName'
 export function ExtractNameAndStats(data) {
     return {
-        name: formatName(data.Name, data.Surname),
+        name: FormatName(data.Name, data.Surname),
         team: data.Team,
         totalPoints: data.PointsTot_ForAllPlayerStats,
         totalKills: data.SpikeWin,

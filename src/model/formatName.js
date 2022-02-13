@@ -1,4 +1,4 @@
-export function formatName(name, surname) {
+export function FormatName(name, surname) {
     const maxNameLength = 15
     let newName = name + ' ' + surname
     if (newName.length > maxNameLength) {

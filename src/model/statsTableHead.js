@@ -1,0 +1,38 @@
+import { TouchableOpacity, Text } from 'react-native';
+export function GetTableHead() {
+    return ([
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(0) }) }}><Text style={{ textAlign: 'center' }}>Nr</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(1) }) }}><Text style={{ textAlign: 'center' }}>Team</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(2) }) }}><Text style={{ textAlign: 'center' }}>Mts</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(3) }) }}><Text style={{ textAlign: 'center' }}>Set</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(4) }) }}><Text style={{ textAlign: 'center' }}>Pts</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(5) }) }}><Text style={{ textAlign: 'center' }}>BP</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(6) }) }}><Text style={{ textAlign: 'center' }}>W-L</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(7) }) }}><Text style={{ textAlign: 'center' }}>Tot</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(8) }) }}><Text style={{ textAlign: 'center' }}>Err</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(9) }) }}><Text style={{ textAlign: 'center' }}>!</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(10) }) }}><Text style={{ textAlign: 'center' }}>-</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(11) }) }}><Text style={{ textAlign: 'center' }}>+</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(12) }) }}><Text style={{ textAlign: 'center' }}>OVP</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(13) }) }}><Text style={{ textAlign: 'center' }}>Ace</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(14) }) }}><Text style={{ textAlign: 'center' }}>Eff %</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(15) }) }}><Text style={{ textAlign: 'center' }}>Tot</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(16) }) }}><Text style={{ textAlign: 'center' }}>Err</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(17) }) }}><Text style={{ textAlign: 'center' }}>OVP</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(18) }) }}><Text style={{ textAlign: 'center' }}>-</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(19) }) }}><Text style={{ textAlign: 'center' }}>!</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(20) }) }}><Text style={{ textAlign: 'center' }}>Pos %</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(21) }) }}><Text style={{ textAlign: 'center' }}>Perf %</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(22) }) }}><Text style={{ textAlign: 'center' }}>Eff %</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(23) }) }}><Text style={{ textAlign: 'center' }}>Tot</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(24) }) }}><Text style={{ textAlign: 'center' }}>Err</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(25) }) }}><Text style={{ textAlign: 'center' }}>Block</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(26) }) }}><Text style={{ textAlign: 'center' }}>Perf</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(27) }) }}><Text style={{ textAlign: 'center' }}>Perf %</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(28) }) }}><Text style={{ textAlign: 'center' }}>Eff %</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(29) }) }}><Text style={{ textAlign: 'center' }}>Tot</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(30) }) }}><Text style={{ textAlign: 'center' }}>Err</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(31) }) }}><Text style={{ textAlign: 'center' }}>Perf %</Text></TouchableOpacity>,
+        <TouchableOpacity onPress={() => { this.setState({ filteredPlayers: this.sortList(32) }) }}><Text style={{ textAlign: 'center' }}>Points</Text></TouchableOpacity>
+    ])
+}

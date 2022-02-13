@@ -41,34 +41,41 @@ class StandingsScreen extends Component {
     async componentDidMount() {
         await this.setContent()
     }
-    async setContent(){
+    async setContent() {
         const settings = JSON.parse(await AsyncStorage.getItem(GetKey('settings')))
-        this.setState({settings: settings, chosenLeague: settings.league})
-        let teams
-        let teamsW
+        this.setState({ settings: settings, chosenLeague: settings.league })
+        const standingsTeamM = JSON.parse(await AsyncStorage.getItem(GetKey('standingsMen')))
+        const standingsTeamW = JSON.parse(await AsyncStorage.getItem(GetKey('standingsWomen')))
+        if (settings.league === 'Men' && standingsTeamM != null || settings.league === 'Women' && standingsTeamW != null) {
+            this.createTableData(standingsTeamM, 'Men', settings.league)
+            this.createTableData(standingsTeamW, 'Women', settings.league)
+            this.setState({ isLoading: false })
+        }
+
         await axios.get(urlMenStandings)
             .then(function (response) {
-                teams = ExtractStandings(response.data)
+                const teams = ExtractStandings(response.data)
+                AsyncStorage.setItem(GetKey('standingsMen'), JSON.stringify(teams))
                 this.createTableData(teams, 'Men', settings.league)
             }.bind(this));
 
         await axios.get(urlWomenStandings)
             .then(function (response) {
-                teamsW = ExtractStandings(response.data)
-                this.createTableData(teamsW, 'Women',settings.league)
+                const teams = ExtractStandings(response.data)
+                AsyncStorage.setItem(GetKey('standingsWomen'), JSON.stringify(teams))
+                this.createTableData(teams, 'Women', settings.league)
             }.bind(this));
-        this.setState({ isLoading: false })
     }
     createTableData(teams, league, chosenLeague) {
         let rowAndData = CreateTableDataStandings(teams)
         let logoRow = rowAndData[0]
         let data = rowAndData[1]
         if (league == 'Men')
-            this.setState({ logoRowM: logoRow,  tableDataM: data })
+            this.setState({ logoRowM: logoRow, tableDataM: data })
         else
             this.setState({ logoRowW: logoRow, tableDataW: data })
-        if(chosenLeague === league)
-            this.setState({logoRow: logoRow, tableData: data})
+        if (chosenLeague === league)
+            this.setState({ logoRow: logoRow, tableData: data })
 
     }
     changeLeage(league) {
