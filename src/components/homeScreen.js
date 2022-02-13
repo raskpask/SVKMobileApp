@@ -1,13 +1,15 @@
 import React, { Component } from 'react';
 import axios from 'react-native-axios';
 import { Text, View, TouchableOpacity, ImageBackground, RefreshControl, ActivityIndicator } from 'react-native';
-import { Card, ThemeConsumer } from 'react-native-elements'
+import { Card } from 'react-native-elements'
 import { ScrollView } from 'react-native-gesture-handler';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import MatchCard from './matchCard';
 import { GetKey } from '../model/storageKeys';
+import { ExtractCurrentMatches, ExtractNews, ConcatMatches } from '../model/webScraping/home';
+
 const now = new Date()
 const dateNow = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0')
 const timeNow = now.getHours() + ":" + now.getMinutes()
@@ -34,85 +36,54 @@ class Home extends Component {
     }
     async componentDidMount() {
         try {
-            this.setState({ settings: JSON.parse(await AsyncStorage.getItem(GetKey('settings'))) })
+            const settings = JSON.parse(await AsyncStorage.getItem(GetKey('settings')))
+            this.setState({ settings: settings })
             this.setSavedMatches()
             this.getNews()
         }
         catch (error) {
             console.warn(error)
         }
-        this.getCurrentMatches()
-    }
-    async componentDidUpdate() {
-        await this.getCurrentMatches()
+        this.getCurrentMatches(settings)
     }
     componentWillUnmount() {
         clearInterval(this.interval);
     }
-    async updateSettings(){
-        this.setState({ settings: JSON.parse(await AsyncStorage.getItem(GetKey('settings'))) })
-        this.setSavedMatches()
-    }
-    async setSavedMatches(){
+    async setSavedMatches() {
         const matchesM = JSON.parse(await AsyncStorage.getItem(GetKey('currentMatchesHomeM')))
         const matchesW = JSON.parse(await AsyncStorage.getItem(GetKey('currentMatchesHomeW')))
         if (matchesM !== null || matchesW !== null) {
             this.setMatches(matchesM, matchesW)
-        }  
-    }
-    async updateSettings(){
-        this.setState({ settings: JSON.parse(await AsyncStorage.getItem(GetKey('settings'))) })
-        this.setSavedMatches()
-    }
-    async setSavedMatches(){
-        const matchesM = JSON.parse(await AsyncStorage.getItem(GetKey('currentMatchesHomeM')))
-        const matchesW = JSON.parse(await AsyncStorage.getItem(GetKey('currentMatchesHomeW')))
-        if (matchesM !== null || matchesW !== null) {
-            this.setMatches(matchesM, matchesW)
-        }  
+        }
     }
     getNews() {
         axios.get('http://svbf-web.dataproject.com/MainHome.aspx')
             .then(function (response) {
-                const news = this.extractNews(response.data)
+                const news = ExtractNews(response.data)
                 this.setState({ news: news })
             }.bind(this));
     }
-    extractNews(data) {
-        let listOfNews = []
-        const listOfNewsString = data.split('"Content_Main_RP_Competitions_sm_HyperLink')
-        for (let i = 1; i < listOfNewsString.length - 1; i++) {
-            listOfNews.push(this.extractSingleNews(listOfNewsString[i]))
-        }
-        return listOfNews
-    }
-    extractSingleNews(newsString) {
-        return {
-            title: newsString.split('TileTitle')[1].split('>')[1].split('<')[0].split('  ').join('').split('\n').join(''),
-            newsLink: 'http://svbf-web.dataproject.com/' + newsString.split('href=')[1].split('"')[1].split('&amp;')[0],
-            image: newsString.split('background-image:url')[1].split('&quot;')[1].split('&quot;')[0].split(' ').join('%20'),
-        }
-    }
-    setMatches(matchesM, matchesW){
+
+    setMatches(matchesM, matchesW) {
         if (this.state.settings !== null && this.state.settings.showWomen && !this.state.settings.showMen) {
             this.setState({ currentMatches: matchesW })
         } else if (this.state.settings !== null && !this.state.settings.showWomen && this.state.settings.showMen) {
             this.setState({ currentMatches: matchesM })
         } else {
-            const matches = this.concatMatches(matchesW, matchesM)
+            const matches = ConcatMatches(matchesW, matchesM, this.state.settings)
             this.setState({ currentMatches: matches })
         }
     }
-    async getCurrentMatches() {
+    async getCurrentMatches(settings) {
         let currentMatchesM = []
         let currentMatchesW = []
         await axios.get(urlMen)
             .then(function (response) {
-                currentMatchesM = this.extractCurrentMatches(response.data, 'men')
+                currentMatchesM = ExtractCurrentMatches(response.data, 'men')
             }.bind(this));
         await axios.get(urlWomen)
             .then(function (response) {
-                currentMatchesW = this.extractCurrentMatches(response.data, 'women')
+                currentMatchesW = ExtractCurrentMatches(response.data, 'women')
                 this.setState({ currentMatchesW: currentMatchesW })
             }.bind(this));
 
@@ -126,91 +97,10 @@ class Home extends Component {
         }
         this.setState({ isLoading: false })
     }
-    concatMatches(currentMatchesW, currentMatchesM) {
-        let currentMatches = []
-        let matchesToday = []
-        let matcherOtherDAys = []
-        if (this.state.settings !== null && this.state.settings.showMen && this.state.settings.showWomen) {
-            currentMatches = currentMatchesW.concat(currentMatchesM).sort((a, b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)).sort((a, b) => (a.date > b.date) ? 1 : ((b.date > a.date) ? -1 : 0))
-        } else if (this.state.settings !== null && this.state.settings.showWomen) {
-            currentMatches = currentMatchesW.sort((a, b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)).sort((a, b) => (a.date > b.date) ? 1 : ((b.date > a.date) ? -1 : 0))
-        } else if (this.state.settings !== null && this.state.settings.showMen) {
-            currentMatches = currentMatchesM.sort((a, b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)).sort((a, b) => (a.date > b.date) ? 1 : ((b.date > a.date) ? -1 : 0))
-        }
-        currentMatches.forEach(match => {
-            if (match.date === dateNow)
-                matchesToday.push(match)
-            else
-                matcherOtherDAys.push(match)
-        })
-        return matchesToday.concat(matcherOtherDAys)
-    }
-    extractCurrentMatches(data, gender) {
-        const listOfGames = data.split('"DIV_Match_Main"')
-        let matches = []
-        for (let i = 1; i < listOfGames.length; i++) {
-            matches.push(this.extractOneMatch(listOfGames[i], gender))
-        }
-        return matches
-    }
-    extractOneMatch(matchString, gender) {
-        let date
-        let time
-        if (matchString.split('"LB_DataOra"').length < 2) {
-            time = matchString.split('"LB_Ora_Today"')[1].split('>')[1].split('<')[0]
-            date = new Date().toISOString().slice(0, 10)
-            const currentTime = new Date()
-            const minutes = currentTime.getMinutes()
-            if (time < currentTime.getHours() + ':' + (minutes > 5 ? minutes - 5 : minutes) && time > currentTime.getHours() - 3 + ':' + minutes) {
-                this.setState({ isMatchToday: true })
-            }
-        } else {
-            const dateAndTime = matchString.split('"LB_DataOra"')[1].split('>')[1].split('<')[0]
-            date = dateAndTime.split(' - ')[0]
-            time = dateAndTime.split(' - ')[1]
-        }
-        let streamLink
-        if (matchString.split('"DIV_Stream"')[1]?.length == undefined) {
-            streamLink = undefined
-        } else {
-            streamLink = 'http://svbf-web.dataproject.com/' + matchString.split('"DIV_Stream"')[1].split('&quot;')[1].split('&quot;')
-        }
-        let statsLink = ''
-        const statsLinkList = matchString.split('window.location=&#39;')[1].split('&#39;;')[0].split('amp;')
-        if (statsLink != undefined && statsLink != null) {
-            statsLink = 'http://svbf-web.dataproject.com/'
-            statsLinkList.forEach(element => {
-                statsLink += element;
-            });
-        }
-        let livescoreLink = matchString.split('onclick="window.open(')[1]?.split('&#39;')[1].split('&#39;')[0]
-        if (livescoreLink !== undefined) {
-            livescoreLink = 'http://svbf-web.dataproject.com' + livescoreLink;
-        }
-        const matchData = {
-            gender: gender,
-            date: date,
-            time: time,
-            streamLink: streamLink,
-            statsLink: statsLink,
-            homeLogo: matchString.split('"IMG_Home"')[1].split('src="')[1].split('"')[0],
-            guestLogo: matchString.split('"IMG_Guest"')[1].split('src="')[1].split('"')[0],
-            homeTeam: matchString.split('"Label1"')[1].split('>')[1].split('<')[0],
-            guestTeam: matchString.split('"Label2"')[1].split('>')[1].split('<')[0],
-            homeSets: matchString.split('"Label3"')[1]?.split('>')[1].split('<')[0] ?? 0,
-            guestSets: matchString.split('"Label4"')[1]?.split('>')[1].split('<')[0] ?? 0,
-            set1: matchString.split('"Label5"')[1]?.split('>')[1].split('<')[0],
-            set2: matchString.split('"Label7"')[1]?.split('>')[1].split('<')[0],
-            set3: matchString.split('"Label9"')[1]?.split('>')[1].split('<')[0],
-            set4: matchString.split('"Label11"')[1]?.split('>')[1].split('<')[0],
-            set5: matchString.split('"Label13"')[1]?.split('>')[1].split('<')[0],
-            livescoreLink: livescoreLink,
-        }
-        return (matchData)
-    }
+
     async refreshPage() {
         this.setState({ refreshing: true })
-        await this.getCurrentMatches()
+        await this.getCurrentMatches(this.state.settings)
         this.setState({ refreshing: false })
     }
     renderLiveStreamComponent(isTop) {
