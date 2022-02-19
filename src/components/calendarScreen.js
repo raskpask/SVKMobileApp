@@ -92,8 +92,6 @@ class Calendar extends Component {
                 } catch (e) {
                     console.warn(e)
                 }
-                if (this.state.chosenLeague != 'Women' || this.state.settings.league == 'Men')
-                    this.setState({ matches: matches })
                 this.setState({ matchesM: matches })
             }.bind(this));
         await axios.get(urlWomenMatches)
@@ -104,8 +102,6 @@ class Calendar extends Component {
                 } catch (e) {
                     console.warn(e)
                 }
-                if (this.state.chosenLeague == 'Women')
-                    this.setState({ matches: matchesW })
                 this.setState({ matchesW: matchesW })
             }.bind(this));
         this.setState({ isLoading: false })
