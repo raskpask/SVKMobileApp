@@ -80,10 +80,28 @@ class Home extends Component {
         await axios.get(urlMen)
             .then(function (response) {
                 currentMatchesM = ExtractCurrentMatches(response.data, 'men')
+                if (response.data.split('"LB_DataOra"').length < 2) {
+                    time = response.data.split('"LB_Ora_Today"')[1].split('>')[1].split('<')[0]
+                    date = new Date().toISOString().slice(0, 10)
+                    const currentTime = new Date()
+                    const minutes = currentTime.getMinutes()
+                    if (time < currentTime.getHours() + ':' + (minutes > 5 ? minutes - 5 : minutes) && time > currentTime.getHours() - 3 + ':' + minutes) {
+                        this.setState({ isMatchToday: true })
+                    }
+                }
             }.bind(this));
         await axios.get(urlWomen)
             .then(function (response) {
                 currentMatchesW = ExtractCurrentMatches(response.data, 'women')
+                if (response.data.split('"LB_DataOra"').length < 2) {
+                    time = response.data.split('"LB_Ora_Today"')[1].split('>')[1].split('<')[0]
+                    date = new Date().toISOString().slice(0, 10)
+                    const currentTime = new Date()
+                    const minutes = currentTime.getMinutes()
+                    if (time < currentTime.getHours() + ':' + (minutes > 5 ? minutes - 5 : minutes) && time > currentTime.getHours() - 3 + ':' + minutes) {
+                        this.setState({ isMatchToday: true })
+                    }
+                }
                 this.setState({ currentMatchesW: currentMatchesW })
             }.bind(this));
 

@@ -7,11 +7,6 @@ export function ExtractOneMatch(matchString, gender) {
     if (matchString.split('"LB_DataOra"').length < 2) {
         time = matchString.split('"LB_Ora_Today"')[1].split('>')[1].split('<')[0]
         date = new Date().toISOString().slice(0, 10)
-        const currentTime = new Date()
-        const minutes = currentTime.getMinutes()
-        if (time < currentTime.getHours() + ':' + (minutes > 5 ? minutes - 5 : minutes) && time > currentTime.getHours() - 3 + ':' + minutes) {
-            this.setState({ isMatchToday: true })
-        }
     } else {
         const dateAndTime = matchString.split('"LB_DataOra"')[1].split('>')[1].split('<')[0]
         date = dateAndTime.split(' - ')[0]
