@@ -11,6 +11,7 @@ import { FormatName } from '../model/formatName';
 import { ExtractNameAndStats, ExtractData, ExtractTotalrow } from '../model/webScraping/stats';
 import { GetKey } from '../model/storageKeys';
 import { GetTableHead } from '../model/statsTableHead';
+import BestTeam from './bestTeam';
 
 const allStatsKeyM = 'allStatsM'
 const allStatsKeyW = 'allStatsW'
@@ -22,6 +23,7 @@ const colWidth = 150
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 import pageStyles from '../style/basicStyle';
+import { GetDreamTeamSeason } from '../model/dreamTeam';
 
 const widthMainHead = [40, 100, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 55, 45, 45, 45, 45, 45, 55, 55, 65, 55, 40, 55, 45, 60, 65, 45, 45, 60, 55]
 const widthHeader = [140, 225, 370, 400, 320, 205]
@@ -119,6 +121,7 @@ class StatsScreen extends Component {
             }
         }
         this.setState({ isLoading: false })
+        GetDreamTeamSeason(playerListM)
     }
     async setTop() {
         let [playerListTotalPointsM,
@@ -342,6 +345,12 @@ class StatsScreen extends Component {
         return (
             <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} pagingEnabled={true} style={{ marginTop: Platform.OS === 'ios' ? 87 : 0 }}>
                 <View style={{ width: windowWidth }}>
+                    <BestTeam name='In form team' />
+                </View>
+                <View style={{ width: windowWidth }}>
+                    <BestTeam name='Team of the season' />
+                </View>
+                <View style={{ width: windowWidth }}>
                     {this.renderTopContent('Most points', 'topTotalPoints', 'totalPoints', 'points')}
                 </View>
                 <View style={{ width: windowWidth }}>
@@ -416,7 +425,6 @@ class StatsScreen extends Component {
         ))
         return (
             <ScrollView style={styles.container} stickyHeaderIndices={[3]} ref={(ref) => this.myScroll = ref}>
-                {this.renderPickLeague()}
                 {this.renderTop()}
                 {this.renderSearch()}
                 <TableWrapper style={{ flexDirection: 'row', backgroundColor: 'white' }}>
@@ -484,6 +492,7 @@ class StatsScreen extends Component {
                             </TouchableOpacity>
                     }
                 </View>
+                {this.renderPickLeague()}
             </ScrollView >
         )
     }
